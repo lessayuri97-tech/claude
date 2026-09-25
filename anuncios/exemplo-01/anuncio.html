@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<title>Anúncio Harness Anti-Puxão</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f172a;
+    --cream: #fff6ec;
+    --orange: #ff7a1a;
+    --orange-dark: #e0600a;
+    --red: #ff4d4d;
+    --green: #16a34a;
+    --ink: #1f2937;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #000; overflow: hidden; }
+  body { font-family: 'Montserrat', sans-serif; }
+  #stage {
+    position: absolute; left: 0; top: 0;
+    width: 1080px; height: 1920px;
+    background: var(--navy);
+    overflow: hidden;
+    transform-origin: 0 0;
+  }
+  .layer { position: absolute; inset: 0; }
+  #cream { background: var(--cream); }
+  #orange { background: linear-gradient(180deg, #ff8a2e 0%, #ff6a00 100%); }
+  #vignette { box-shadow: inset 0 0 260px 60px rgba(255, 40, 40, .75); }
+  .t {
+    position: absolute; left: 0; right: 0;
+    text-align: center; line-height: 1.02;
+    will-change: transform, opacity;
+  }
+  .xl { font-size: 128px; font-weight: 900; letter-spacing: -2px; }
+  .lg { font-size: 88px; font-weight: 900; letter-spacing: -1px; }
+  .md { font-size: 64px; font-weight: 800; }
+  .sm { font-size: 44px; font-weight: 700; }
+  .white { color: #fff; }
+  .navy { color: var(--navy); }
+  .orange { color: var(--orange); }
+  .red { color: var(--red); }
+  .hl-red { background: var(--red); color: #fff; padding: 0 22px; border-radius: 18px; }
+  .hl-orange { background: var(--orange); color: #fff; padding: 0 22px; border-radius: 18px; }
+
+  .dog { position: absolute; overflow: visible; }
+  #dogMain { left: 90px; top: 820px; width: 900px; height: 630px; transform-origin: 50% 85%; }
+  #dogCta { left: 210px; top: 640px; width: 660px; height: 462px; transform-origin: 50% 85%; }
+
+  .pills { position: absolute; left: 0; right: 0; top: 1500px; display: flex; justify-content: center; gap: 22px; }
+  .pill {
+    font-size: 40px; font-weight: 800; color: #fff;
+    border: 5px solid var(--red); background: rgba(255, 77, 77, .18);
+    padding: 16px 30px; border-radius: 999px;
+  }
+  .caption { position: absolute; left: 0; right: 0; display: flex; justify-content: center; align-items: center; gap: 22px; }
+  .check {
+    width: 76px; height: 76px; border-radius: 50%; background: var(--green);
+    display: grid; place-items: center; flex: none;
+  }
+  .check svg { width: 46px; height: 46px; }
+
+  .list { position: absolute; left: 90px; right: 90px; top: 470px; display: flex; flex-direction: column; gap: 34px; }
+  .row {
+    display: flex; align-items: center; gap: 30px;
+    background: #fff; border-radius: 34px; padding: 30px 36px;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, .10);
+    font-size: 48px; font-weight: 800; color: var(--navy); line-height: 1.12;
+  }
+
+  #badge {
+    position: absolute; left: 700px; top: 560px; width: 290px; height: 290px; border-radius: 50%;
+    background: #fff; color: var(--orange-dark);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+    font-weight: 900; line-height: .95; text-align: center;
+  }
+  #badge b { font-size: 104px; letter-spacing: -3px; }
+  #badge span { font-size: 46px; }
+  #btn {
+    position: absolute; left: 140px; right: 140px; top: 1270px; height: 190px;
+    background: var(--navy); color: #fff; border-radius: 100px;
+    display: flex; align-items: center; justify-content: center; gap: 24px;
+    font-size: 76px; font-weight: 900; letter-spacing: -1px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, .45);
+  }
+  #brand { letter-spacing: 14px; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="layer" id="cream"></div>
+  <div class="layer" id="vignette"></div>
+
+  <!-- Cena 1: gancho -->
+  <div class="t md white" id="s1a" style="top:300px">O teu cão</div>
+  <div class="t xl orange" id="s1b" style="top:400px">PUXA A<br>TRELA?</div>
+
+  <!-- Cena 2: problema -->
+  <div class="t md white" id="s2a" style="top:300px">Cada puxão vai</div>
+  <div class="t lg white" id="s2b" style="top:410px">DIRETO AO<br><span class="hl-red">PESCOÇO</span></div>
+  <div class="pills">
+    <div class="pill" id="p1">Traqueia</div>
+    <div class="pill" id="p2">Garganta</div>
+    <div class="pill" id="p3">Coluna</div>
+  </div>
+
+  <!-- Cena 3: solução -->
+  <div class="t md navy" id="s3a" style="top:260px">A solução:</div>
+  <div class="t xl navy" id="s3b" style="top:360px">HARNESS</div>
+  <div class="t lg" id="s3c" style="top:510px"><span class="hl-orange">ANTI-PUXÃO</span></div>
+  <div class="caption" id="c1" style="top:1480px">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+    <div class="sm navy">A força vai para o <b style="font-weight:900">PEITO</b></div>
+  </div>
+  <div class="caption" id="c2" style="top:1590px">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+    <div class="sm navy">Zero pressão no <b style="font-weight:900">PESCOÇO</b></div>
+  </div>
+
+  <!-- Cena 4: benefícios -->
+  <div class="t lg navy" id="s4a" style="top:230px">PORQUE VAIS<br><span class="orange">ADORAR</span></div>
+  <div class="list">
+    <div class="row" id="r1"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>Protege o pescoço e a traqueia</div>
+    <div class="row" id="r2"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>Menos puxões desde o 1º passeio</div>
+    <div class="row" id="r3"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>Ajustável e fácil de vestir</div>
+    <div class="row" id="r4"><div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>Faixas refletoras para a noite</div>
+  </div>
+
+  <div id="dogMainWrap"></div>
+
+  <!-- Cena 5: chamada à ação -->
+  <div class="layer" id="orange"></div>
+  <div class="t sm white" id="brand" style="top:190px">A TUA MARCA</div>
+  <div class="t lg white" id="s5a" style="top:290px">PASSEIOS<br>SEM PUXÕES</div>
+  <div id="dogCtaWrap"></div>
+  <div id="badge"><b>-20%</b><span>HOJE</span></div>
+  <div id="btn">ENCOMENDA JÁ
+    <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </div>
+  <div class="t sm white" id="s5b" style="top:1530px">Envio grátis · Pagamento seguro</div>
+  <div class="t md white" id="s5c" style="top:1640px">Link na bio ↑</div>
+</div>
+
+<script>
+// ---------- Cão (SVG) ----------
+function dogSVG(id) {
+  return `
+<svg class="dog" id="${id}" viewBox="0 0 600 420">
+  <defs>
+    <radialGradient id="${id}-rg"><stop offset="0" stop-color="#ff2d2d" stop-opacity=".95"/><stop offset=".55" stop-color="#ff2d2d" stop-opacity=".45"/><stop offset="1" stop-color="#ff2d2d" stop-opacity="0"/></radialGradient>
+    <radialGradient id="${id}-gg"><stop offset="0" stop-color="#22c55e" stop-opacity=".75"/><stop offset=".6" stop-color="#22c55e" stop-opacity=".3"/><stop offset="1" stop-color="#22c55e" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="290" cy="392" rx="210" ry="18" fill="#000" opacity=".18"/>
+  <g class="body">
+    <!-- leash (coleira: esticada) -->
+    <path class="leashCollar" d="M410 158 L -160 -70" stroke="#e2e8f0" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- leash (harness: solta) -->
+    <path class="leashHarness" d="M345 128 Q 110 170 -160 -70" stroke="#1f2937" stroke-width="8" stroke-linecap="round" fill="none"/>
+    <!-- far legs -->
+    <g class="legsFar" fill="#c2873d">
+      <rect x="212" y="245" width="30" height="130" rx="14"/>
+      <rect x="352" y="250" width="30" height="125" rx="14"/>
+    </g>
+    <!-- tail -->
+    <path class="tail" d="M128 192 Q 78 150 96 96" stroke="#e0a458" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <!-- body -->
+    <ellipse cx="270" cy="215" rx="152" ry="72" fill="#e0a458"/>
+    <ellipse cx="392" cy="212" rx="74" ry="76" fill="#e0a458"/>
+    <ellipse cx="300" cy="258" rx="110" ry="26" fill="#f2c98a" opacity=".7"/>
+    <polygon points="372,168 440,104 488,160 430,236" fill="#e0a458"/>
+    <!-- near legs -->
+    <g fill="#e0a458">
+      <rect x="170" y="245" width="34" height="135" rx="16"/>
+      <rect x="392" y="250" width="34" height="130" rx="16"/>
+    </g>
+    <g fill="#2b1d14" opacity=".85">
+      <rect x="168" y="368" width="42" height="14" rx="7"/>
+      <rect x="390" y="368" width="42" height="14" rx="7"/>
+    </g>
+    <!-- glows -->
+    <circle class="glowRed" cx="430" cy="168" r="95" fill="url(#${id}-rg)"/>
+    <ellipse class="glowGreen" cx="385" cy="215" rx="120" ry="95" fill="url(#${id}-gg)"/>
+    <!-- head -->
+    <g class="head">
+      <circle cx="468" cy="122" r="60" fill="#e0a458"/>
+      <ellipse cx="524" cy="146" rx="48" ry="30" fill="#f2c98a"/>
+      <ellipse cx="566" cy="136" rx="13" ry="10" fill="#2b1d14"/>
+      <path class="tongue" d="M520 166 q 8 34 24 30 q 12 -4 6 -30 z" fill="#ff6b8a"/>
+      <path d="M512 168 q 18 8 40 -4" stroke="#2b1d14" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <circle cx="486" cy="108" r="8" fill="#2b1d14"/>
+      <circle cx="489" cy="105" r="2.6" fill="#fff"/>
+      <path d="M436 80 Q 400 104 414 170 Q 446 152 458 96 Z" fill="#a86b2a"/>
+    </g>
+    <!-- collar -->
+    <g class="collar">
+      <g transform="translate(432 168) rotate(-38)">
+        <rect x="-15" y="-54" width="30" height="108" rx="12" fill="#2563eb"/>
+        <rect x="-15" y="-54" width="30" height="108" rx="12" fill="none" stroke="#1d4ed8" stroke-width="4"/>
+      </g>
+      <circle cx="410" cy="158" r="10" fill="none" stroke="#9ca3af" stroke-width="6"/>
+    </g>
+    <!-- harness -->
+    <g class="harness" fill="none" stroke-linecap="round">
+      <path class="hs" pathLength="1" d="M352 150 L352 284" stroke="#ff7a1a" stroke-width="32"/>
+      <path class="hs" pathLength="1" d="M362 168 Q 430 172 458 238" stroke="#ff7a1a" stroke-width="28"/>
+      <path class="hs" pathLength="1" d="M300 146 L398 150" stroke="#e0600a" stroke-width="30"/>
+      <path class="hs" pathLength="1" d="M312 146 L386 149" stroke="#fff" stroke-width="5" stroke-dasharray=".08 .05" opacity=".9"/>
+      <circle class="ring" cx="345" cy="128" r="11" stroke="#9ca3af" stroke-width="6"/>
+    </g>
+  </g>
+</svg>`;
+}
+document.getElementById('dogMainWrap').innerHTML = dogSVG('dogMain');
+document.getElementById('dogCtaWrap').innerHTML = dogSVG('dogCta');
+
+// ---------- Utilitários de animação ----------
+const $ = (s) => document.querySelector(s);
+const clamp = (x) => Math.max(0, Math.min(1, x));
+const prog = (t, a, d) => clamp((t - a) / d);
+const eOut = (x) => 1 - Math.pow(1 - x, 3);
+const eInOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eBack = (x) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+
+// entrada em "pop" + saída em fade
+function pop(el, t, tin, tout, opts = {}) {
+  const i = prog(t, tin, opts.din || .45), o = prog(t, tout, .3);
+  const s = i === 0 ? 0 : (opts.from ?? .5) + (1 - (opts.from ?? .5)) * eBack(i);
+  el.style.opacity = Math.min(clamp(i * 3), 1 - o);
+  el.style.transform = `translateY(${(opts.dy || 0) * (1 - eOut(i)) - 40 * eOut(o)}px) scale(${s}) rotate(${opts.rot || 0}deg)`;
+}
+function slide(el, t, tin, tout) {
+  const i = eOut(prog(t, tin, .45)), o = prog(t, tout, .3);
+  el.style.opacity = Math.min(i, 1 - o);
+  el.style.transform = `translateX(${-700 * (1 - i)}px)`;
+}
+
+const D = 16.5; // duração total (s)
+
+function render(t) {
+  // fundos
+  const wipe = eInOut(prog(t, 6.55, .7));
+  $('#cream').style.clipPath = `circle(${wipe * 2300}px at 700px 1200px)`;
+  const ow = eInOut(prog(t, 13.3, .6));
+  $('#orange').style.clipPath = `inset(${(1 - ow) * 100}% 0 0 0)`;
+  const flash = prog(t, 3.25, .25) * (1 - prog(t, 3.6, .7));
+  const pulseV = t > 3.6 && t < 6.6 ? .25 + .15 * Math.sin(t * 9) : 0;
+  $('#vignette').style.opacity = Math.max(flash, pulseV) * (1 - prog(t, 6.4, .3));
+
+  // cena 1
+  pop($('#s1a'), t, .15, 3.0, { dy: 60 });
+  pop($('#s1b'), t, .5, 3.0, { from: .3, rot: t > 1 && t < 3 ? Math.sin(t * 14) * 2 : 0 });
+  // cena 2
+  pop($('#s2a'), t, 3.3, 6.35, { dy: 60 });
+  pop($('#s2b'), t, 3.6, 6.35, { from: .3 });
+  ['#p1', '#p2', '#p3'].forEach((s, k) => pop($(s), t, 4.3 + k * .3, 6.35, { from: .2 }));
+  // cena 3
+  pop($('#s3a'), t, 7.0, 10.4, { dy: 60 });
+  pop($('#s3b'), t, 7.25, 10.4, { from: .3 });
+  pop($('#s3c'), t, 7.55, 10.4, { from: .3, rot: -2 });
+  pop($('#c1'), t, 8.7, 10.4, { dy: 80, from: .8 });
+  pop($('#c2'), t, 9.1, 10.4, { dy: 80, from: .8 });
+  // cena 4
+  pop($('#s4a'), t, 10.65, 13.3, { from: .3 });
+  ['#r1', '#r2', '#r3', '#r4'].forEach((s, k) => slide($(s), t, 11.0 + k * .35, 13.3));
+  // cena 5
+  pop($('#brand'), t, 13.8, 99, { dy: -40, from: .9 });
+  pop($('#s5a'), t, 14.0, 99, { from: .3 });
+  pop($('#badge'), t, 14.55, 99, { from: 0, rot: -12 + (t > 15 ? Math.sin(t * 5) * 3 : 0) });
+  const bi = prog(t, 14.85, .45);
+  $('#btn').style.opacity = clamp(bi * 3);
+  $('#btn').style.transform = `translateY(${120 * (1 - eOut(bi))}px) scale(${bi ? (1 + .05 * Math.max(0, Math.sin((t - 15.3) * 7))) * (.6 + .4 * eBack(bi)) : 0})`;
+  pop($('#s5b'), t, 15.25, 99, { dy: 40, from: .9 });
+  pop($('#s5c'), t, 15.5, 99, { dy: 40, from: .9 });
+
+  // cão principal
+  dog('#dogMain', t, {
+    enter: 0, exit: 13.4,
+    harnessAt: 6.75,
+    pullUntil: 6.6,
+    red: [3.5, 6.5], green: [8.2, 10.6],
+    shrinkAt: 10.55,
+  });
+  // cão da CTA
+  dog('#dogCta', t, { enter: 14.2, exit: 99, harnessAt: 0, pullUntil: -1, red: [-9, -9], green: [-9, -9], popIn: true });
+}
+
+function dog(sel, t, o) {
+  const el = $(sel);
+  const q = (s) => el.querySelectorAll(s);
+  // entrada / saída
+  let tx = 0, ty = 0, sc = 1, op = 1;
+  if (o.popIn) {
+    const i = prog(t, o.enter, .5);
+    sc = i ? .5 + .5 * eBack(i) : 0; op = clamp(i * 3);
+  } else {
+    const i = eOut(prog(t, o.enter, .6));
+    tx = 900 * (1 - i);
+    op = 1 - prog(t, o.exit, .2);
+  }
+  if (o.shrinkAt) {
+    const s = eInOut(prog(t, o.shrinkAt, .5));
+    ty += 400 * s; sc *= 1 - .3 * s;
+  }
+  const pulling = t < o.pullUntil && t > .6;
+  // corpo: a puxar (tremer, inclinado) ou a andar calmo (bob)
+  let rot = 0, bx = 0, by = 0;
+  if (pulling) { rot = -5; bx = Math.sin(t * 38) * 7; by = Math.abs(Math.sin(t * 19)) * -4; }
+  else if (t > (o.pullUntil > 0 ? o.pullUntil : 0)) { by = Math.abs(Math.sin(t * 7)) * -10; rot = Math.sin(t * 7) * 1.2; }
+  el.style.opacity = op;
+  el.style.transform = `translate(${tx + bx}px, ${ty + by}px) scale(${sc}) rotate(${rot}deg)`;
+  q('.tail')[0].setAttribute('transform', `rotate(${Math.sin(t * (pulling ? 10 : 16)) * (pulling ? 6 : 14)} 128 192)`);
+  q('.tongue')[0].style.opacity = pulling ? 1 : .9;
+
+  // coleira vs harness
+  const h = prog(t, o.harnessAt, .8);
+  const hasHarness = t >= o.harnessAt;
+  q('.collar')[0].style.opacity = 1 - prog(t, o.harnessAt - .3, .3);
+  q('.leashCollar')[0].style.opacity = hasHarness ? 0 : 1;
+  q('.leashHarness')[0].style.opacity = hasHarness ? 1 : 0;
+  q('.hs').forEach((p, k) => {
+    const pk = eOut(clamp(h * 1.6 - k * .2));
+    if (!p.dataset.dash) p.dataset.dash = p.getAttribute('stroke-dasharray') || '';
+    if (p.dataset.dash) p.style.opacity = pk;
+    else { p.style.strokeDasharray = '1 1'; p.style.strokeDashoffset = 1 - pk; }
+  });
+  q('.ring')[0].style.opacity = prog(t, o.harnessAt + .5, .3);
+
+  // brilhos de pressão
+  const r = prog(t, o.red[0], .4) * (1 - prog(t, o.red[1], .3));
+  q('.glowRed')[0].style.opacity = r * (.75 + .25 * Math.sin(t * 9));
+  q('.glowRed')[0].setAttribute('r', 95 + 12 * Math.sin(t * 9));
+  const g = prog(t, o.green[0], .5) * (1 - prog(t, o.green[1], .3));
+  q('.glowGreen')[0].style.opacity = g * (.8 + .2 * Math.sin(t * 5));
+}
+
+// ---------- Pré-visualização / captura ----------
+window.render = render;
+window.DURATION = D;
+const capture = new URLSearchParams(location.search).has('capture');
+function fit() {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  const st = $('#stage');
+  st.style.transform = `scale(${s})`;
+  st.style.left = (innerWidth - 1080 * s) / 2 + 'px';
+}
+if (!capture) {
+  fit(); addEventListener('resize', fit);
+  const t0 = performance.now();
+  (function loop(now) { render(((now - t0) / 1000) % (D + 1)); requestAnimationFrame(loop); })(t0);
+} else {
+  render(0);
+}
+</script>
+</body>
+</html>
