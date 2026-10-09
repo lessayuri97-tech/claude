@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" width="1000" height="300">
+  <g transform="translate(12 15)">
+  <defs>
+    <!-- a linha de crescimento nasce no K (rosa) e termina no Y (azul) -->
+    <linearGradient id="linha" x1="14" y1="0" x2="128" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E11D74"/>
+      <stop offset="0.45" stop-color="#9333EA"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+  </defs>
+  <!-- K: haste e perna (Karol) -->
+  <path d="M16 18 V104" fill="none" stroke="#E11D74" stroke-width="13" stroke-linecap="round"/>
+  <path d="M31 57 L58 104" fill="none" stroke="#E11D74" stroke-width="13" stroke-linecap="round"/>
+  <!-- Y: haste (Yuri) -->
+  <path d="M82 62 V104" fill="none" stroke="#0EA5E9" stroke-width="13" stroke-linecap="round"/>
+  <!-- linha de crescimento: braço do K + braços do Y -->
+  <path d="M16 72 L54 22 L82 62 L114 22" fill="none" stroke="url(#linha)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M132 4 L126 38 L102 16 Z" fill="#0EA5E9" stroke="#0EA5E9" stroke-width="5" stroke-linejoin="round"/>
+  </g>
+  <text x="172" y="88" font-family="'Inter Display', Inter, Montserrat, Arial, sans-serif" font-weight="800" font-size="60" letter-spacing="1" fill="#FFFFFF">GROW<tspan fill="#E11D74">K</tspan><tspan fill="#0EA5E9">Y</tspan></text>
+  <text x="174" y="116" font-family="'Inter Display', Inter, Montserrat, Arial, sans-serif" font-weight="500" font-size="12.5" textLength="300" lengthAdjust="spacing" fill="#CBD5E1">MARKETING E SOLUÇÕES EMPRESARIAIS</text>
+</svg>
