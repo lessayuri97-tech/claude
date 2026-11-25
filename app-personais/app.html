@@ -198,6 +198,17 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .dica.tec { border-left: 3px solid var(--fg); }
 
 /* Biblioteca de exercícios */
+.cc-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.cc-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 2px; }
+.cc-tile b { font-family: var(--font-display); font-size: 2.4rem; line-height: 1; }
+.cc-tile span { font-size: .85rem; color: var(--muted); }
+.cc-tile.ok b { color: var(--ok); } .cc-tile.alerta { border-left: 4px solid var(--danger); } .cc-tile.info { border-left: 4px solid var(--fg); }
+.cc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; align-items: start; }
+.cc-p { display: grid; gap: 4px; }
+.cc-l { display: flex; gap: 10px; align-items: center; padding: 8px 4px; border-radius: 10px; color: inherit; text-decoration: none; flex: 1; min-width: 0; }
+.cc-l:hover { background: var(--surface-2); } .cc-l > span:last-child { display: grid; min-width: 0; }
+.cc-rev { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); }
+@media (max-width: 900px) { .cc-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cc-grid { grid-template-columns: 1fr; } }
 .nav-badge { background: var(--fg); color: var(--bg); border-radius: 99px; font-size: .7rem; padding: 1px 7px; margin-left: 4px; font-weight: 700; }
 .rv { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 10px; }
 .rv.novo { border-left: 4px solid var(--fg); }
@@ -445,11 +456,12 @@ body.papel-aluno .aluno-bar { display: none; }
 <body>
 <header class="topbar">
   <div class="wrap">
-    <a class="brand" href="#alunos" aria-label="PT example, início">
+    <a class="brand" href="#central" aria-label="PT example, início">
       <span class="brand-mark" aria-hidden="true"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink);font-size:1.05rem;letter-spacing:.02em">PT</span></span>
       <b>PT example</b><span class="small muted" style="margin-left:-4px">Personal Trainer</span>
     </a>
     <nav class="nav" aria-label="Seções">
+      <a href="#central" data-nav="central">Central</a>
       <a href="#alunos" data-nav="alunos">Alunos</a>
       <a href="#rever" data-nav="rever">Rever <span class="nav-badge" id="badge-rever" hidden></span></a>
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
@@ -460,6 +472,7 @@ body.papel-aluno .aluno-bar { display: none; }
 </header>
 <main class="wrap" id="app"></main>
 <nav class="tabbar" aria-label="Seções">
+  <a href="#central" data-nav="central"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span>Central</span></a>
   <a href="#alunos" data-nav="alunos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c1.9.6 3.1 2.4 3.5 5.2"/></svg><span>Alunos</span></a>
   <a href="#rever" data-nav="rever"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.8"/></svg><span>Rever <span class="nav-badge" id="badge-rever2" hidden></span></span></a>
   <a href="#exercicios" data-nav="exercicios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg><span>Exercícios</span></a>
@@ -518,7 +531,7 @@ function exemplo() {
     item('Elevação lateral', 3, '15', 6, 45),
     item('Prancha', 3, '30s', '', 45, 'Tempo em segundos')
   ]};
-  const sessC = [15, 11, 8, 4, 1].map((d, i) => ({ id: uid(), data: diasAtras(d), treinoId: tC.id, treinoNome: 'Treino A · Full body', rpe: 6 + (i > 2 ? 1 : 0), nota: '',
+  const sessC = [15, 11, 8, 4, 0].map((d, i) => ({ id: uid(), data: diasAtras(d), treinoId: tC.id, treinoNome: 'Treino A · Full body', rpe: 6 + (i > 2 ? 1 : 0), nota: '',
     itens: tC.itens.map(it => { const c = it.carga === '' ? '' : +it.carga + (it.carga > 50 ? i * 5 : Math.floor(i / 2) * 1), r = it.reps.split('-')[0];
       return { exId: it.exId, carga: c, reps: r, feito: !(i === 2 && it === tC.itens[3]), series: Array.from({ length: it.series }, () => ({ carga: c, reps: r })) }; }) }));
   const medC = [[17, 96.8, 31.5, 108], [10, 95.1, 30.9, 106], [2, 93.9, 30.2, 104.5]].map(([d, peso, gordura, cintura]) => ({ id: uid(), data: diasAtras(d), peso, gordura, cintura, quadril: '', braco: '' }));
@@ -671,7 +684,7 @@ function showVideo(exId) {
 const ui = { tab: {}, busca: '', grupo: '', equip: '', video: '', uso: '' };
 function route() {
   migraCatalogo(); migraRever();
-  const h = location.hash.slice(1) || 'alunos';
+  const h = location.hash.slice(1) || 'central';
   const sess = getSessao();
   if (!sess) { renderLogin(); return; }
   document.body.classList.remove('sem-login');
@@ -687,7 +700,8 @@ function route() {
   const nr = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
   ['badge-rever', 'badge-rever2'].forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = !nr; el.textContent = nr; } });
   const app = $('#app');
-  if (view === 'rever') app.innerHTML = viewRever();
+  if (view === 'central') app.innerHTML = viewCentral();
+  else if (view === 'rever') app.innerHTML = viewRever();
   else if (view === 'exercicios') app.innerHTML = viewExercicios();
   else if (view === 'backup') app.innerHTML = viewBackup();
   else if (view === 'aluno' && alunoById(arg)) app.innerHTML = viewAluno(alunoById(arg));
@@ -1007,6 +1021,50 @@ function filtraEx() {
 const chaveBusca = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 const usosEx = id => db.alunos.reduce((s, a) => s + a.treinos.reduce((s2, t) => s2 + t.itens.filter(i => i.exId === id).length, 0), 0);
 const ver = { aluno: '', estado: 'novo', dias: '' };
+const cfgC = () => Object.assign({ diasParado: 3, nSess: 3, pseBaixo: 6, minEx: 2 }, db.config || {});
+const diasEntre = d => Math.round((new Date(hoje() + 'T12:00') - new Date(d + 'T12:00')) / 864e5);
+function sinaisRevisao(a, cfg) {
+  const desde = a.revisaoPlano || '';
+  const ss = a.sessoes.filter(s => s.data > desde).sort((x, y) => x.data.localeCompare(y.data));
+  const noPlano = new Set(a.treinos.flatMap(t => t.itens.map(i => i.exId)));
+  const por = {};
+  ss.forEach(s => s.itens.forEach(i => { if (i.feito && noPlano.has(i.exId)) (por[i.exId] = por[i.exId] || []).push({ c: i.carga === '' ? NaN : +i.carga, r: parseInt(i.reps) }); }));
+  const sobe = v => v.length >= 2 && v.every(x => !isNaN(x)) && v.every((x, k) => k === 0 || x >= v[k - 1]) && v[v.length - 1] > v[0];
+  const motivos = [];
+  Object.keys(por).forEach(id => {
+    const l = por[id].slice(-cfg.nSess); if (l.length < cfg.nSess) return;
+    const ex = exById(id), nome = ex ? ex.nome : 'Exercício', cs = l.map(x => x.c), rs = l.map(x => x.r);
+    if (sobe(cs)) motivos.push({ txt: `${nome}: ${fmtNum(cs[0])} → ${fmtNum(cs[cs.length - 1])} kg em ${l.length} sessões` });
+    else if (sobe(rs)) motivos.push({ txt: `${nome}: reps ${rs[0]} → ${rs[rs.length - 1]} em ${l.length} sessões` });
+  });
+  const ult = ss.slice(-cfg.nSess), geral = [];
+  if (ult.length >= cfg.nSess && ult.every(s => s.rpe !== '' && s.rpe != null && +s.rpe <= cfg.pseBaixo)) geral.push({ txt: `Esforço baixo (PSE até ${cfg.pseBaixo}) nas últimas ${cfg.nSess} sessões` });
+  return { motivos, geral, precisa: motivos.length >= cfg.minEx || geral.length > 0 };
+}
+function viewCentral() {
+  const cfg = cfgC(), h = hoje();
+  const info = db.alunos.map(a => {
+    const ord = a.sessoes.slice().sort((x, y) => y.data.localeCompare(x.data)), u = ord[0];
+    return { a, u, dias: u ? diasEntre(u.data) : null, hoje: ord.filter(s => s.data === h), rev: sinaisRevisao(a, cfg) };
+  });
+  const treinaram = info.filter(x => x.hoje.length), parados = info.filter(x => x.u && x.dias >= cfg.diasParado).sort((x, y) => y.dias - x.dias);
+  const nunca = info.filter(x => !x.u), rever = info.filter(x => x.rev.precisa);
+  const porRever = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
+  const lnk = x => `<a class="cc-l" href="#aluno-${x.a.id}"><span class="avatar-ini" style="width:34px;height:34px;font-size:.85rem" aria-hidden="true">${esc(iniciais(x.a.nome))}</span>`;
+  const painel = (tit, n, cls, corpo, vazio) => `<section class="panel cc-p"><div class="row spread"><h3>${tit}</h3><span class="chip ${cls} num">${n}</span></div>${n ? corpo : `<div class="small muted">${vazio}</div>`}</section>`;
+  const tile = (n, t, cls) => `<div class="cc-tile ${cls || ''}"><b class="num">${n}</b><span>${t}</span></div>`;
+  return `${bannerExemplo()}
+  <div class="page-head"><div><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Central de clientes</h1></div>
+    <div class="row">${porRever ? `<a class="btn primary" href="#rever">${porRever} ${porRever === 1 ? 'treino' : 'treinos'} por rever</a>` : ''}<button class="btn" data-act="limites">Limites</button></div></div>
+  <div class="cc-tiles">${tile(treinaram.length, 'treinaram hoje', 'ok')}${tile(parados.length, `parados há ${cfg.diasParado}+ dias`, parados.length ? 'alerta' : '')}${tile(nunca.length, 'nunca treinaram', nunca.length ? 'alerta' : '')}${tile(rever.length, 'podem precisar de nova revisão do plano', rever.length ? 'info' : '')}</div>
+  <div class="cc-grid">
+    ${painel('Treinaram hoje', treinaram.length, 'ok', treinaram.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join(''), 'Ainda ninguém treinou hoje.')}
+    ${painel(`Parados há ${cfg.diasParado} ou mais dias`, parados.length, 'accent', parados.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">há ${x.dias} dias · último: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})</span></span></a>`).join(''), 'Todos treinaram recentemente.')}
+    ${painel('Nunca treinaram', nunca.length, 'accent', nunca.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.a.treinos.length ? x.a.treinos.length + ' treino(s) no plano' : 'sem plano ainda'}${x.a.inicio ? ' · aluno desde ' + fmtData(x.a.inicio) : ''}</span></span></a>`).join(''), 'Todos já fizeram pelo menos um treino.')}
+    ${painel('Podem precisar de nova revisão do plano', rever.length, 'tec', rever.map(x => `<div class="cc-rev">${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.rev.motivos.concat(x.rev.geral).slice(0, 3).map(m => esc(m.txt)).join(' · ')}</span></span></a>
+      <button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button></div>`).join(''), 'Ninguém com sinais de progressão por agora.')}
+  </div>`;
+}
 function viewRever() {
   const todos = [];
   db.alunos.forEach(a => a.sessoes.forEach(x => todos.push({ a, s: x })));
@@ -1139,6 +1197,15 @@ document.addEventListener('click', ev => {
   const t = a && (b.dataset.treino) && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'close': closeDialog(); break;
+    case 'plano-revisto': a.revisaoPlano = hoje(); save(); rerender(); toast('Plano marcado como revisto'); break;
+    case 'limites': { const c = cfgC(); openDialog(`<form id="f-config" class="dlg" style="padding:0"><div><div class="eyebrow">Central de clientes</div><h2>Limites dos avisos</h2></div>
+      <div class="form-grid">
+      <label class="field">Parado há quantos dias<input type="number" id="cf-dias" min="1" value="${c.diasParado}"></label>
+      <label class="field">Sessões seguidas para ver progressão<input type="number" id="cf-n" min="2" value="${c.nSess}"></label>
+      <label class="field">Exercícios a progredir para sugerir revisão<input type="number" id="cf-min" min="1" value="${c.minEx}"></label>
+      <label class="field">Esforço (PSE) considerado baixo até<input type="number" id="cf-pse" min="0" max="10" value="${c.pseBaixo}"></label></div>
+      <p class="small muted" style="margin:0">Sugere revisão quando carga ou reps subiram em todas as últimas sessões seguidas, ou quando o esforço ficou baixo. "Plano revisto" na ficha ignora as sessões anteriores.</p>
+      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); break; }
     case 'rever-um': { const x = a.sessoes.find(q => q.id === b.dataset.sessao); if (x) { x.revisto = x.revisto === false; save(); rerender(); } break; }
     case 'rever-todos': db.alunos.forEach(al => al.sessoes.forEach(x => { if (x.revisto === false && (!ver.aluno || al.id === ver.aluno)) x.revisto = true; })); save(); rerender(); break;
     case 'ir-sessoes': ui.tab[a.id] = 'sessoes'; break;
@@ -1259,6 +1326,11 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('submit', ev => {
   const f = ev.target;
+  if (f.id === 'f-config') {
+    ev.preventDefault(); const n = (id, d, mn) => Math.max(mn, parseInt($(id).value) || d);
+    db.config = { diasParado: n('#cf-dias', 3, 1), nSess: n('#cf-n', 3, 2), minEx: n('#cf-min', 2, 1), pseBaixo: Math.min(10, n('#cf-pse', 6, 0)) };
+    save(); closeDialog(); rerender(); return;
+  }
   if (f.id === 'f-copiar') {
     ev.preventDefault(); const a = alunoById(f.dataset.id), d = alunoById($('#cp-dest').value); if (!a || !d) return;
     if (f.dataset.treino) d.treinos.push(clonaTreino(a.treinos.find(x => x.id === f.dataset.treino)));
@@ -1432,7 +1504,7 @@ document.addEventListener('submit', async ev => {
   const u = USERS[norm($('#l-user').value)];
   if (!u || u.senha !== $('#l-senha').value) { $('#l-err').textContent = 'Usuário ou senha incorretos.'; return; }
   if (u.papel === 'aluno') { try { await pull(); } catch (e) {} }
-  if (u.papel === 'personal') { setSessao({ papel: 'personal' }); pull(); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'alunos'; }
+  if (u.papel === 'personal') { setSessao({ papel: 'personal' }); pull(); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'central'; }
   else {
     let a = db.alunos.find(x => norm(x.nome) === norm(u.nome));
     if (!a) { a = { id: uid(), nome: u.nome, objetivo: 'Condicionamento', telefone: '', inicio: hoje(), notas: '', treinos: [], sessoes: [], medidas: [] }; db.alunos.push(a); save(); }
