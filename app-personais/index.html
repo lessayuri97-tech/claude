@@ -159,7 +159,7 @@ details.faq p { margin: 0 0 14px; }
     <div class="cta-c" style="margin-top:26px"><button class="btn primary go">Começar o diagnóstico</button></div>
   </div></section>
 </main>
-<div class="foot">Este diagnóstico é uma orientação geral e não substitui avaliação médica. · <a href="produto">Sou personal</a></div>
+<div class="foot">Este diagnóstico é uma orientação geral e não substitui avaliação médica. · <a href="app" style="opacity:.6">Equipe</a></div>
 <script src="config.js"></script>
 <script>
 (() => {
@@ -247,7 +247,7 @@ function resultado() {
     <div class="res"><h3>Alimentação</h3><p>${esc(a.comida)}</p></div>
     ${a.cuidado ? `<div class="res"><h3>Atenção</h3><p>${esc(a.cuidado)}</p></div>` : ''}
     <p>O próximo passo é ter treino e dieta pra SUA rotina, com suporte e acompanhamento na app.</p>
-    ${wa ? `<a class="btn primary" href="${wa}" target="_blank" rel="noopener">Falar com a equipe no WhatsApp</a>` : `<div class="res"><p>Obrigada! Recebemos as suas respostas e o personal vai entrar em contacto consigo pelo número que indicou.</p></div>`}
+    ${wa ? `<a class="btn primary" href="${wa}" target="_blank" rel="noopener">Falar com a equipe no WhatsApp</a>` : `<div class="res"><p>Obrigada! Recebemos as suas respostas e a nossa equipe vai entrar em contacto consigo pelo número que indicou.</p></div>`}
     <div class="row"><button class="btn ghost" id="refaz">Refazer</button><a class="btn ghost" href="app">Abrir a app</a></div>`;
   $('#refaz').onclick = () => { Object.keys(R).forEach(k => delete R[k]); inicio(); };
 }

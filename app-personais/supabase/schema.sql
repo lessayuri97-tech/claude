@@ -159,3 +159,38 @@ alter table public.leads add column if not exists estado text not null default '
 grant update (estado, contactado) on public.leads to authenticated;
 
 -- Fim. Nunca coloque a "service_role key" na app nem no GitHub.
+
+-- =====================================================================
+-- Só a equipe pode criar espaço de personal (sem registo aberto)
+-- Para dar acesso a alguém da equipe: a pessoa cria conta em app?equipe,
+-- e em Authentication > Users copia o UID dela e corre:
+--   insert into public.equipe(user_id) values ('UID-AQUI');
+-- =====================================================================
+create table if not exists public.equipe (user_id uuid primary key references auth.users(id) on delete cascade);
+alter table public.equipe enable row level security;
+revoke all on public.equipe from anon, authenticated;
+create or replace function public.pt_e_equipe() returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from public.equipe where user_id = auth.uid()) $$;
+grant execute on function public.pt_e_equipe() to authenticated;
+
+drop policy if exists espacos_dono on public.espacos;
+drop policy if exists espacos_dono_le on public.espacos;
+drop policy if exists espacos_dono_ins on public.espacos;
+drop policy if exists espacos_dono_upd on public.espacos;
+drop policy if exists espacos_dono_del on public.espacos;
+create policy espacos_dono_le  on public.espacos for select to authenticated using (personal_id = auth.uid());
+create policy espacos_dono_ins on public.espacos for insert to authenticated with check (personal_id = auth.uid() and public.pt_e_equipe());
+create policy espacos_dono_upd on public.espacos for update to authenticated using (personal_id = auth.uid()) with check (personal_id = auth.uid());
+create policy espacos_dono_del on public.espacos for delete to authenticated using (personal_id = auth.uid());
+
+create or replace function public.pt_gravar_aluno(p_id text, p_dados jsonb) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from public.espacos where personal_id = auth.uid()) then
+    raise exception 'sem acesso de equipe';
+  end if;
+  insert into public.alunos_docs(id, personal_id, dados) values (p_id, auth.uid(), p_dados)
+  on conflict (id) do update set dados = excluded.dados
+    where public.alunos_docs.personal_id = auth.uid();
+end $$;

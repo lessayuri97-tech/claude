@@ -2,7 +2,7 @@
 
 Webapp simples para personal trainers acompanharem alunos e planos de treino. Sem avatar, batalhas ou desafios.
 
-- `index.html`: página de apresentação do produto (em `/`).
+- `index.html`: diagnóstico e página de venda aos clientes (em `/`); `produto.html` é interno e não é publicado.
 - `app.html`: a app, pensada para telemóvel (em `/app`). Pode ser instalada no ecrã inicial (manifest + ícones).
 - `vercel.json`: site estático na Vercel, sem build. Publicar com `npx vercel --prod` dentro desta pasta.
 

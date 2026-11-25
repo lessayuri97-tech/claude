@@ -1925,17 +1925,17 @@ function renderLogin() {
       <button class="btn primary" style="justify-content:center">Entrar</button>
       ${SBC ? '<button type="button" class="btn ghost sm" data-act="sb-esqueci" style="justify-content:center">Esqueci a minha senha</button>' : ''}
     </form>
-    <p class="small muted" style="margin:0">${SBC ? 'Recebeu um convite do seu personal? Abra o link que ele lhe enviou.' : 'Recebeu um convite do seu personal? Escreva o utilizador e a senha que ele lhe enviou.'}</p>
-    ${SBC ? `<details class="demo-box"><summary><span class="chip accent">Sou personal e quero criar a minha conta</span></summary>
+    <p class="small muted" style="margin:0">${SBC ? 'Recebeu um convite da equipe Squad? Abra o link que lhe enviaram.' : 'Recebeu um convite do seu personal? Escreva o utilizador e a senha que ele lhe enviou.'}</p>
+    ${SBC && /[?&]equipe\b/.test(location.search) ? `<details class="demo-box" open><summary><span class="chip accent">Equipe: criar acesso</span></summary>
       <form id="f-signup" style="display:grid;gap:10px;margin-top:10px"><label class="field">O seu e-mail<input type="email" id="s-email" autocapitalize="none" required></label>
       <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="s-senha" minlength="6" required></label>
       <div class="login-err" id="s-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar a minha conta</button></form></details>` : ''}
-    <details class="demo-box"><summary><span class="chip accent">Quero só experimentar</span></summary>
+    ${SBC ? '' : `<details class="demo-box"><summary><span class="chip accent">Quero só experimentar</span></summary>
       <div class="small" style="margin-top:8px">Versão de demonstração: toque num acesso de teste para preencher. Os dados ficam só neste aparelho.</div>
       <div class="small muted sync-status"></div>
       <button class="cred btn" type="button" data-fill="personal|personal" style="text-align:left"><span><b>Personal</b><br><code>personal</code> · <code>personal</code></span><span class="small">Usar</span></button>
       <button class="cred btn" type="button" data-fill="Mariana Ribeiro|alunateste" style="text-align:left"><span><b>Aluna</b><br><code>Mariana Ribeiro</code> · <code>alunateste</code></span><span class="small">Usar</span></button>
-    </details></div>`;
+    </details>`}</div>`;
 }
 let sbRec = (location.hash.match(/access_token=([^&]+).*type=recovery/) || [])[1] || '';
 if (sbRec) history.replaceState(null, '', location.pathname);
