@@ -154,6 +154,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .treino-foot { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; }
 .m-label { display: none; }
 @media (min-width: 1100px) { body:not(.modo-aluno) .wrap { max-width: 1280px; } }
+.plano-tools { margin-bottom: 4px; }
+.modelo-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .tec-cell { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); }
 .tec-cell label { display: grid; gap: 2px; }
 .tec-cell .m-label { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
@@ -676,10 +678,24 @@ const TECS = {
 };
 const tecPad = k => { const o = {}; ((TECS[k] || {}).c || []).forEach(([n, , , d]) => { o[n] = d; }); return o; };
 const tecTxt = it => { const T = it.tecnica && TECS[it.tecnica]; return T ? T.f(it.tp || {}) : ''; };
+const clonaTreino = t => JSON.parse(JSON.stringify({ ...t, id: uid(), itens: t.itens.map(i => ({ ...i, id: uid() })) }));
+function abreModelos(aid) {
+  const ms = db.modelos || [];
+  openDialog(`<div class="row spread"><h2>Modelos de treino</h2><button class="btn ghost" data-act="close">Fechar</button></div>
+    ${ms.length ? `<label class="row small"><input type="checkbox" id="md-subst"> Substituir o plano atual (senão, acrescenta)</label>
+      <div>${ms.map(m => `<div class="modelo-row"><div><b>${esc(m.nome)}</b><div class="small muted num">${m.treinos.length} ${m.treinos.length === 1 ? 'treino' : 'treinos'} · ${m.treinos.reduce((x, t) => x + t.itens.length, 0)} exercícios</div></div>
+        <div class="row"><button class="btn sm primary" data-act="usar-modelo" data-id="${aid}" data-modelo="${m.id}">Aplicar</button><button class="btn sm ghost danger" data-act="del-modelo" data-id="${aid}" data-modelo="${m.id}">Excluir</button></div></div>`).join('')}</div>`
+    : `<p class="muted" style="margin:0">Ainda não há modelos. Use "Guardar modelo" num treino, ou "Guardar programação como modelo", e depois aplique a qualquer aluno.</p>`}`);
+}
+function planoTools(a) {
+  const n = (db.modelos || []).length;
+  return `<div class="row plano-tools"><button class="btn sm" data-act="aplicar-modelo" data-id="${a.id}">Modelos${n ? ' (' + n + ')' : ''}: aplicar</button>
+    ${a.treinos.length ? `<button class="btn sm" data-act="copiar-prog" data-id="${a.id}">Copiar programação para outro aluno</button><button class="btn sm" data-act="modelo-prog" data-id="${a.id}">Guardar programação como modelo</button>` : ''}</div>`;
+}
 function tabPlano(a) {
-  if (!a.treinos.length) return `<div class="panel empty"><h2>Sem plano de treino</h2><p>Crie o Treino A e adicione os exercícios da biblioteca.</p>
+  if (!a.treinos.length) return planoTools(a) + `<div class="panel empty"><h2>Sem plano de treino</h2><p>Crie o Treino A e adicione os exercícios da biblioteca, ou aplique um modelo.</p>
     <button class="btn primary" data-act="add-treino" data-id="${a.id}">+ Criar Treino A</button></div>`;
-  return a.treinos.map((t, ti) => `
+  return planoTools(a) + a.treinos.map((t, ti) => `
   <section class="treino" aria-label="Treino ${LETRAS[ti]}">
     <div class="treino-head">
       <span class="treino-letter">${LETRAS[ti]}</span>
@@ -687,10 +703,12 @@ function tabPlano(a) {
       <div class="row">
         <button class="btn sm" data-act="registrar" data-id="${a.id}" data-treino="${t.id}" ${t.itens.length ? '' : 'disabled'}>Registrar sessão</button>
         <button class="btn ghost sm" data-act="dup-treino" data-id="${a.id}" data-treino="${t.id}">Duplicar</button>
+        <button class="btn ghost sm" data-act="copiar-treino" data-id="${a.id}" data-treino="${t.id}">Copiar para aluno</button>
+        <button class="btn ghost sm" data-act="modelo-treino" data-id="${a.id}" data-treino="${t.id}">Guardar modelo</button>
         <button class="btn ghost sm danger" data-act="del-treino" data-id="${a.id}" data-treino="${t.id}">Excluir</button>
       </div>
     </div>
-    ${t.itens.length ? `<div class="ficha-cols"><span>#</span><span>Exercício</span><span>Séries</span><span>Reps</span><span>Carga kg</span><span>Desc. s</span><span>Observação</span><span></span></div>` : ''}
+    ${t.itens.length ? `<div class="ficha-cols"><span>#</span><span>Exercício</span><span>Séries</span><span>Reps</span><span>Carga kg</span><span>Desc. s</span><span>Nota para o aluno</span><span></span></div>` : ''}
     ${t.itens.map((it, i) => {
       const ex = exById(it.exId); const yt = ex && ytParse(ex.url);
       const d = `data-aluno="${a.id}" data-treino="${t.id}" data-item="${it.id}"`;
@@ -702,7 +720,7 @@ function tabPlano(a) {
         <label><span class="m-label">Reps</span><input type="text" id="re-${it.id}" class="num" value="${esc(it.reps)}" data-edit="reps" ${d} aria-label="Repetições" placeholder="10-12"></label>
         <label><span class="m-label">Carga kg</span><input type="number" step="0.5" min="0" id="ca-${it.id}" class="num" value="${esc(it.carga)}" data-edit="carga" ${d} aria-label="Carga em kg"></label>
         <label><span class="m-label">Desc. s</span><input type="number" step="5" min="0" id="de-${it.id}" class="num" value="${esc(it.descanso)}" data-edit="descanso" ${d} aria-label="Descanso em segundos"></label>
-        <label class="obs"><span class="m-label">Observação</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Observação" placeholder="Dica para o aluno…"></label>
+        <label class="obs"><span class="m-label">Nota para o aluno</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Nota para o aluno" placeholder="Ex.: descer até 90°, joelhos para fora"></label>
         <div class="ficha-actions">
           <button class="btn ghost icon" data-act="mover" data-dir="-1" ${d} aria-label="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
           <button class="btn ghost icon" data-act="mover" data-dir="1" ${d} aria-label="Descer" ${i === t.itens.length - 1 ? 'disabled' : ''}>↓</button>
@@ -947,7 +965,7 @@ document.addEventListener('click', ev => {
     case 'close': closeDialog(); break;
     case 'limpar-exemplo':
       confirmar('Apagar os dados de exemplo?', 'Apagar exemplos', () => {
-        db = { exemplo: false, alunos: [], exercicios: db.exercicios.map(e => ({ ...e })) }; save(); rerender(); toast('Pronto. A biblioteca de exercícios foi mantida.');
+        db = { exemplo: false, alunos: [], modelos: db.modelos || [], exercicios: db.exercicios.map(e => ({ ...e })) }; save(); rerender(); toast('Pronto. A biblioteca de exercícios foi mantida.');
       }); break;
     case 'novo-aluno': openAlunoForm(); break;
     case 'ver-aluno': db.alunoAtivo = a.id; save(); break;
@@ -962,6 +980,27 @@ document.addEventListener('click', ev => {
     case 'del-treino': confirmar(`Excluir o Treino ${LETRAS[a.treinos.indexOf(t)]}?`, 'Excluir treino', () => { a.treinos = a.treinos.filter(x => x !== t); save(); rerender(); }); break;
     case 'add-item': t.itens.push({ id: uid(), exId: '', series: 3, reps: '10-12', carga: '', descanso: 60, obs: '' }); save(); rerender();
       setTimeout(() => { const s = $(`#ex-${t.itens[t.itens.length - 1].id}`); if (s) s.focus(); }, 0); break;
+    case 'copiar-treino': case 'copiar-prog': {
+      const outros = db.alunos.filter(x => x.id !== a.id);
+      if (!outros.length) { toast('Cadastre outro aluno primeiro'); break; }
+      const prog = act === 'copiar-prog';
+      openDialog(`<form id="f-copiar" class="dlg" style="padding:0" data-id="${a.id}" data-treino="${prog ? '' : t.id}">
+        <div><div class="eyebrow">${esc(a.nome)}</div><h2>${prog ? 'Copiar programação' : 'Copiar Treino ' + LETRAS[a.treinos.indexOf(t)]}</h2></div>
+        <label class="field">Para o aluno<select id="cp-dest">${outros.map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select></label>
+        ${prog ? `<label class="row small"><input type="checkbox" id="cp-subst"> Substituir o plano atual do aluno (senão, acrescenta)</label>` : '<p class="small muted" style="margin:0">O treino é acrescentado ao plano do aluno. Depois pode ajustar as cargas.</p>'}
+        <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Copiar</button></div></form>`); break; }
+    case 'modelo-treino': case 'modelo-prog': {
+      const prog = act === 'modelo-prog';
+      openDialog(`<form id="f-modelo" class="dlg" style="padding:0" data-id="${a.id}" data-treino="${prog ? '' : t.id}">
+        <div><div class="eyebrow">Novo modelo</div><h2>${prog ? 'Guardar programação como modelo' : 'Guardar treino como modelo'}</h2></div>
+        <label class="field">Nome do modelo<input type="text" id="md-nome" required placeholder="Ex.: Hipertrofia ABC iniciante" value="${esc(prog ? '' : (t.nome || ''))}"></label>
+        <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar modelo</button></div></form>`); break; }
+    case 'aplicar-modelo': abreModelos(a.id); break;
+    case 'usar-modelo': { const m = (db.modelos || []).find(x => x.id === b.dataset.modelo); if (!m) break;
+      const subst = $('#md-subst') && $('#md-subst').checked, novos = m.treinos.map(clonaTreino);
+      if (subst) a.treinos = novos; else a.treinos.push(...novos);
+      ui.tab[a.id] = 'plano'; save(); closeDialog(); rerender(); toast('Modelo aplicado'); break; }
+    case 'del-modelo': { const id = b.dataset.modelo, aid = a.id; closeDialog(); confirmar('Excluir este modelo?', 'Excluir modelo', () => { db.modelos = (db.modelos || []).filter(x => x.id !== id); save(); rerender(); abreModelos(aid); }); break; }
     case 'dup-item': { const i = t.itens.findIndex(x => x.id === b.dataset.item); if (i < 0) break; t.itens.splice(i + 1, 0, JSON.parse(JSON.stringify({ ...t.itens[i], id: uid() }))); save(); rerender(); break; }
     case 'del-item': t.itens = t.itens.filter(i => i.id !== b.dataset.item); save(); rerender(); break;
     case 'mover': { const i = t.itens.findIndex(x => x.id === b.dataset.item), j = i + (+b.dataset.dir); if (j < 0 || j >= t.itens.length) break; [t.itens[i], t.itens[j]] = [t.itens[j], t.itens[i]]; save(); rerender(); break; }
@@ -1025,6 +1064,20 @@ document.addEventListener('change', ev => {
   it[k] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value;
   save();
   if (k === 'exId') rerender();
+});
+document.addEventListener('submit', ev => {
+  const f = ev.target;
+  if (f.id === 'f-copiar') {
+    ev.preventDefault(); const a = alunoById(f.dataset.id), d = alunoById($('#cp-dest').value); if (!a || !d) return;
+    if (f.dataset.treino) d.treinos.push(clonaTreino(a.treinos.find(x => x.id === f.dataset.treino)));
+    else { const novos = a.treinos.map(clonaTreino); if ($('#cp-subst').checked) d.treinos = novos; else d.treinos.push(...novos); }
+    save(); closeDialog(); rerender(); toast('Copiado para ' + d.nome.split(' ')[0]);
+  }
+  if (f.id === 'f-modelo') {
+    ev.preventDefault(); const a = alunoById(f.dataset.id), nome = $('#md-nome').value.trim(); if (!a || !nome) return;
+    const ts = f.dataset.treino ? [a.treinos.find(x => x.id === f.dataset.treino)] : a.treinos;
+    (db.modelos = db.modelos || []).push({ id: uid(), nome, treinos: ts.map(clonaTreino) }); save(); closeDialog(); toast('Modelo guardado');
+  }
 });
 document.addEventListener('input', ev => {
   const el = ev.target;
@@ -1308,7 +1361,7 @@ function vTreino(a, t) {
         ${yt ? `<button class="thumb" data-act="play-inline" data-ex="${it.exId}" aria-label="Reproduzir vídeo de ${esc(ex.nome)}"><img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Ver vídeo</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span></button>`
           : `<div class="small muted">O personal ainda não adicionou vídeo a este exercício.</div>`}
         ${it.tecnica && TECS[it.tecnica] ? `<div class="dica tec"><b>${esc(TECS[it.tecnica].nome)}:</b> ${esc(tecTxt(it))}.<div class="small muted">${esc(TECS[it.tecnica].expl)}</div></div>` : ''}
-        ${it.obs || (ex && ex.notas) ? `<div class="dica"><b>Dica do personal:</b> ${esc([it.obs, ex && ex.notas].filter(Boolean).join('. '))}</div>` : ''}
+        ${it.obs || (ex && ex.notas) ? `<div class="dica"><b>Nota do personal:</b> ${esc([it.obs, ex && ex.notas].filter(Boolean).join('. '))}</div>` : ''}
         ${prev ? `<div class="small muted num">Última vez: ${fmtNum(prev.carga)} kg (${fmtData(prev.data)})</div>` : ''}
         <div class="sets-run">${w.sets.map((s, j) => `<div class="set-run ${s.done ? 'ok' : ''}">
           <span class="sn num">${j + 1}ª</span>
