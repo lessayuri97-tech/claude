@@ -527,6 +527,7 @@ body.papel-aluno .aluno-bar { display: none; }
 <dialog id="dlg"><div class="dlg" id="dlg-body"></div></dialog>
 
 <script src="config.js"></script>
+<script src="telefone.js"></script>
 <script>
 (() => {
 'use strict';
@@ -789,6 +790,7 @@ function viewAlunos() {
   : `<div class="panel empty"><h2>Nenhum aluno ainda</h2><p>Toque em <b>+ Nova aluna</b>, escreva só o nome e pronto. Depois monta o treino (e a alimentação, se quiser) e envia o convite pelo WhatsApp.</p><button class="btn primary" data-act="novo-aluno">+ Nova aluna</button></div>`}`;
 }
 
+let telAluna = null, telLead = null;
 function openAlunoForm(id) {
   const a = id ? alunoById(id) : { nome: '', objetivo: '', telefone: '', inicio: hoje(), notas: '' };
   openDialog(`<form id="f-aluno" data-id="${id || ''}" class="dlg" style="padding:0">
@@ -797,13 +799,14 @@ function openAlunoForm(id) {
       <label class="field wide">Nome<input type="text" id="a-nome" required value="${esc(a.nome)}"></label>
       <label class="field">Objetivo<input type="text" id="a-objetivo" list="objetivos" value="${esc(a.objetivo)}" placeholder="Ex.: Hipertrofia">
         <datalist id="objetivos"><option>Hipertrofia</option><option>Emagrecimento</option><option>Condicionamento</option><option>Reabilitação</option><option>Saúde e qualidade de vida</option><option>Performance esportiva</option></datalist></label>
-      <label class="field">Telefone / WhatsApp<input type="tel" id="a-tel" value="${esc(a.telefone)}"></label>
+      <div class="field"><span>Telefone / WhatsApp</span><div id="a-tel-box"></div></div>
       <label class="field">Início<input type="date" id="a-inicio" value="${esc(a.inicio)}"></label>
       <label class="field wide">Observações (lesões, restrições, rotina)<textarea id="a-notas">${esc(a.notas)}</textarea></label>
     </div>
     <div class="row spread">${id ? `<button type="button" class="btn danger" data-act="excluir-aluno" data-id="${id}">Excluir aluna</button>` : '<span></span>'}
     <div class="row"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Salvar</button></div></div>
   </form>`);
+  telAluna = PTTel.criar($('#a-tel-box'), { valor: a.telefone });
 }
 
 /* ---------- Vista: aluno ---------- */
@@ -1145,7 +1148,7 @@ function painelSino() {
 }
 const ESTADOS_LEAD = [['novo', 'Novo'], ['contactado', 'Contactado'], ['aluna', 'Virou aluna'], ['perdido', 'Perdido']];
 const todosLeads = () => ((typeof SB !== 'undefined' ? SB.leads : []).concat(db.leads || [])).slice().sort((a, b) => b.data.localeCompare(a.data));
-const waLead = l => 'https://wa.me/' + String(l.whatsapp).replace(/\D/g, '');
+const waLead = l => 'https://wa.me/' + PTTel.wa(l.whatsapp);
 function leadSet(id, patch) {
   const m = (db.leads || []).find(x => x.id === id); if (m) { Object.assign(m, patch); save(); return; }
   const r = SB.leads.find(x => x.id === id); if (r) { Object.assign(r, patch); if (patch.estado) SB.req('/rest/v1/leads?id=eq.' + encodeURIComponent(id), { method: 'PATCH', body: { estado: patch.estado, contactado: patch.estado !== 'novo' }, headers: { Prefer: 'return=minimal' } }); }
@@ -1341,9 +1344,9 @@ document.addEventListener('click', ev => {
       <label class="field wide"><textarea id="lc-txt" rows="9" placeholder="Olá! Fiz o diagnóstico da Squad.&#10;Nome: ..." required></textarea></label>
       <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Criar lead</button></div></form>`); break;
     case 'lead-novo': openDialog(`<form id="f-lead-novo" class="dlg" style="padding:0"><h2>Novo lead</h2><div class="form-grid">
-      <label class="field">Nome<input type="text" id="ln-nome" required></label><label class="field">WhatsApp (com +país)<input type="tel" id="ln-tel" placeholder="+5511999999999" required></label>
+      <label class="field">Nome<input type="text" id="ln-nome" required></label><div class="field"><span>WhatsApp</span><div id="ln-tel-box"></div></div>
       <label class="field wide">Objetivo ou nota<input type="text" id="ln-obj"></label></div>
-      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); break;
+      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); telLead = PTTel.criar($('#ln-tel-box'), {}); break;
     case 'sino': { const p = $('#sino-painel'); if (p.hidden) { painelSino(); p.hidden = false; } else p.hidden = true; break; }
     case 'notif-ir': { db.notifLidas = (db.notifLidas || []).concat([b.dataset.id]).slice(-400); save(); $('#sino-painel').hidden = true; location.hash = b.dataset.href.slice(1); verificaNotifs(); rerender(); break; }
     case 'notif-todas': { db.notifLidas = notifs().map(x => x.id).concat(db.notifLidas || []).slice(0, 400); save(); verificaNotifs(); painelSino(); break; }
@@ -1578,11 +1581,13 @@ document.addEventListener('submit', ev => {
     save(); closeDialog(); rerender(); toast('Lead criado'); return;
   }
   if (f.id === 'f-lead-novo') {
-    (db.leads = db.leads || []).push({ id: uid(), nome: v('ln-nome'), whatsapp: v('ln-tel'), data: hoje(), estado: 'novo', respostas: { objetivo: v('ln-obj') } });
+    if (!telLead.get()) { toast('Confira o número de WhatsApp'); return; }
+    (db.leads = db.leads || []).push({ id: uid(), nome: v('ln-nome'), whatsapp: telLead.get(), data: hoje(), estado: 'novo', respostas: { objetivo: v('ln-obj') } });
     save(); closeDialog(); rerender(); toast('Lead criado'); return;
   }
   if (f.id === 'f-aluno') {
-    const dados = { nome: v('a-nome'), objetivo: v('a-objetivo'), telefone: v('a-tel'), inicio: v('a-inicio'), notas: v('a-notas') };
+    if (telAluna.raw() && !telAluna.get()) { toast('Confira o número: DDD + celular'); return; }
+    const dados = { nome: v('a-nome'), objetivo: v('a-objetivo'), telefone: telAluna.get() || telAluna.raw(), inicio: v('a-inicio'), notas: v('a-notas') };
     if (!dados.nome) return;
     if (f.dataset.id) Object.assign(alunoById(f.dataset.id), dados);
     else { const novo = { id: uid(), ...dados, treinos: [], sessoes: [], medidas: [] }; db.alunos.push(novo); save(); closeDialog(); location.hash = 'aluno-' + novo.id; return; }
@@ -1848,7 +1853,7 @@ function textoConvite(a) {
   return `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\n1) Abre este link no celular: ${urlApp()}\n2) Utilizador: ${ac.usuario}\n3) Senha: ${ac.senha}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao tela de início" (no Android: menu ⋮ e "Instalar app"). Assim fica como uma app normal.${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
 }
 async function abreConvite(id) {
-  const a = alunoById(id), m = marca(), tel = String(a.telefone || '').replace(/\D/g, '');
+  const a = alunoById(id), m = marca(), tel = PTTel.wa(a.telefone);
   if (SBC && SB.ativo()) {
     toast('A preparar o convite…'); let link;
     try { link = await SB.novoConvite(a); } catch (e) { toast('Não foi possível criar o convite. Confira a internet.'); return; }

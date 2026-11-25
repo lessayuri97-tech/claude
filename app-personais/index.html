@@ -35,6 +35,8 @@ p { line-height: 1.5; margin: 0 0 14px; color: var(--muted); }
 .row { display: flex; gap: 10px; margin-top: 16px; }
 .row > * { flex: 1; }
 label { display: block; font-weight: 600; margin-bottom: 14px; }
+.lab { font-weight: 600; }
+#tel-host { margin-bottom: 14px; }
 input[type=text], input[type=tel] { width: 100%; font: 500 1.1rem Barlow, sans-serif; padding: 15px; margin-top: 6px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card); color: var(--fg); }
 input:focus { outline: 2px solid var(--a); outline-offset: 1px; }
 .back { background: none; border: 0; color: var(--muted); font: 500 1rem Barlow; padding: 12px 0; cursor: pointer; }
@@ -159,6 +161,7 @@ details.faq p { margin: 0 0 14px; }
 </main>
 <div class="foot">Este diagnóstico é uma orientação geral e não substitui avaliação médica. · <a href="app" style="opacity:.6">Equipe</a></div>
 <script src="config.js"></script>
+<script src="telefone.js"></script>
 <script>
 (() => {
 'use strict';
@@ -196,34 +199,17 @@ function pergunta() {
 function contacto() {
   $('#tela').innerHTML = `${barra(total)}<h2>Quase lá! Como podemos te chamar?</h2>
     <form id="f"><label>O seu nome<input type="text" id="n" autocomplete="name" required value="${esc(R.nome || '')}"></label>
-    <label>O seu WhatsApp<div class="tel"><button type="button" class="pais" id="pais" aria-label="Escolher país"></button><input type="tel" id="w" inputmode="tel" autocomplete="tel-national" placeholder="DDD + número" required value="${esc(R.tel || '')}"></div></label>
+    <div class="lab">O seu WhatsApp</div><div id="tel-host"></div>
     <div class="err" id="e"></div><button class="btn primary">Enviar e concluir</button></form>
     <button class="back" id="volta">← Voltar</button>`;
   $('#volta').onclick = () => { i = PERGUNTAS.length - 1; pergunta(); };
-  desenhaPais(); $('#pais').onclick = abrePaises;
-  $('#f').onsubmit = ev => { ev.preventDefault(); R.nome = $('#n').value.trim(); R.tel = $('#w').value.trim();
-    let d = R.tel.replace(/\D/g, ''); const dial = PAISES.find(x => x[0] === pais)[2];
-    if (R.tel.startsWith('+') && d.startsWith(dial)) d = d.slice(dial.length);
-    d = d.replace(/^0+/, '');
-    if (d.length < 6 || d.length > 12) { $('#e').textContent = 'Confira o número: escreva só o número, sem o prefixo do país.'; return; }
-    R.whatsapp = '+' + dial + d; R.pais = pais;
+  telC = PTTel.criar($('#tel-host'), { valor: R.whatsapp || '' });
+  $('#f').onsubmit = ev => { ev.preventDefault(); R.nome = $('#n').value.trim();
+    if (!telC.get()) { $('#e').textContent = telC.pais() === 'br' ? 'Confira o número: DDD + celular, ex.: (11) 98765-4321.' : 'Confira o número de WhatsApp.'; return; }
+    R.whatsapp = telC.get(); R.pais = telC.pais(); R.tel = R.whatsapp;
     guardaLead(); resultado(); };
 }
-const PAISES = [['br', 'Brasil', '55'], ['pt', 'Portugal', '351'], ['us', 'Estados Unidos', '1'], ['gb', 'Reino Unido', '44'], ['es', 'Espanha', '34'], ['fr', 'França', '33'], ['de', 'Alemanha', '49'], ['it', 'Itália', '39'], ['ao', 'Angola', '244'], ['mz', 'Moçambique', '258'], ['cv', 'Cabo Verde', '238'], ['gw', 'Guiné-Bissau', '245'], ['st', 'São Tomé e Príncipe', '239'], ['tl', 'Timor-Leste', '670'], ['ch', 'Suíça', '41'], ['lu', 'Luxemburgo', '352'], ['be', 'Bélgica', '32'], ['nl', 'Países Baixos', '31'], ['ie', 'Irlanda', '353'], ['ca', 'Canadá', '1'], ['ar', 'Argentina', '54'], ['uy', 'Uruguai', '598'], ['py', 'Paraguai', '595'], ['cl', 'Chile', '56'], ['co', 'Colômbia', '57'], ['mx', 'México', '52'], ['pe', 'Peru', '51'], ['ve', 'Venezuela', '58'], ['au', 'Austrália', '61'], ['jp', 'Japão', '81'], ['ae', 'Emirados Árabes Unidos', '971'], ['za', 'África do Sul', '27']];
-let pais = 'br';
-const flag = c => `<img src="https://flagcdn.com/w40/${c}.png" srcset="https://flagcdn.com/w80/${c}.png 2x" alt="" width="28" height="21" loading="lazy">`;
-function desenhaPais() { const x = PAISES.find(y => y[0] === pais); $('#pais').innerHTML = `${flag(x[0])}<span>+${x[2]}</span><span aria-hidden="true">▾</span>`; }
-function abrePaises() {
-  if ($('.lista')) { $('.lista').remove(); return; }
-  const box = document.createElement('div'); box.className = 'lista';
-  box.innerHTML = `<input type="text" id="pq" placeholder="Procurar país…" autocomplete="off"><div id="pl"></div>`;
-  $('.tel').appendChild(box);
-  const nm = v => String(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const lista = q => { $('#pl').innerHTML = PAISES.filter(x => !q || nm(x[1]).includes(nm(q)) || x[2].startsWith(q.replace('+', ''))).map(x => `<button type="button" class="lp" data-c="${x[0]}">${flag(x[0])}<span>${x[1]}</span><span>+${x[2]}</span></button>`).join('') || '<div class="lp">Nenhum país encontrado</div>'; };
-  lista(''); $('#pq').focus();
-  $('#pq').oninput = e => lista(e.target.value);
-  $('#pl').onclick = e => { const b = e.target.closest('.lp[data-c]'); if (!b) return; pais = b.dataset.c; box.remove(); desenhaPais(); $('#w').focus(); };
-}
+let telC = null;
 function resultado() {
   modo(false);
   const nome = esc(R.nome.split(' ')[0]);
