@@ -1820,7 +1820,9 @@ const MKEY = KEY + ':marca';
 const MARCA_PADRAO = { nome: 'Squad', sigla: 'SQ', cor: '#33354F', logo: '', tel: '', boasVindas: '', sub: 'Treino e nutrição' };
 function marca() {
   let l = {}; try { l = JSON.parse(localStorage.getItem(MKEY) || '{}'); } catch (e) {}
-  return Object.assign({}, MARCA_PADRAO, l, db && db.marca || {});
+  const o = Object.assign({}, MARCA_PADRAO, l, db && db.marca || {});
+  ['nome', 'sub', 'sigla', 'cor', 'logo'].forEach(k => { o[k] = MARCA_PADRAO[k]; }); // a marca Squad é fixa
+  return o;
 }
 function inkPara(hex) { const n = parseInt(String(hex).slice(1), 16) || 0, r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) > 165 ? '#161616' : '#ffffff'; }
 function marcaMark(px, extra) {
@@ -1868,33 +1870,17 @@ async function abreConvite(id) {
 }
 function viewDefinicoes() {
   const m = marca(), cores = ['#33354F', '#5B4034', '#1d4ed8', '#0f766e', '#b91c1c', '#7c3aed', '#c2410c', '#be185d', '#15803d'];
-  return `<div class="page-head"><div><div class="eyebrow">A sua marca</div><h1>Definições</h1></div></div>
-  <div class="panel"><h3>Marca</h3><p class="muted small" style="margin:0">É isto que os seus alunos veem no celular: o nome, o logótipo e a cor.</p>
+  return `<div class="page-head"><div><div class="eyebrow">Squad</div><h1>Definições</h1></div></div>
+  <div class="panel"><h3>Contato e mensagens</h3><p class="muted small" style="margin:0">O que as alunas veem no celular: o contato da equipe, a afirmação da semana e a mensagem de boas-vindas.</p>
     <div class="form-grid">
-      <label class="field">Nome do seu negócio<input type="text" data-marca="nome" value="${esc(m.nome)}" maxlength="40"></label>
-      <label class="field">Descrição curta<input type="text" data-marca="sub" value="${esc(m.sub)}" maxlength="40" placeholder="Ex.: Personal Trainer e Nutrição"></label>
-      <label class="field">Letras do logótipo (2 ou 3)<input type="text" data-marca="sigla" value="${esc(m.sigla)}" maxlength="3"></label>
-      <label class="field">WhatsApp do personal (com indicativo)<input type="tel" data-marca="tel" value="${esc(m.tel)}" placeholder="Ex.: 351912345678" inputmode="tel"></label>
-      <div class="field wide"><span>Cor da marca</span><div class="row" style="gap:8px">${cores.map(c => `<button type="button" class="cor-sw ${c.toLowerCase() === m.cor.toLowerCase() ? 'on' : ''}" style="background:${c}" data-act="cor-marca" data-cor="${c}" aria-label="Cor ${c}"></button>`).join('')}
-        <input type="color" data-marca="cor" value="${esc(m.cor)}" aria-label="Escolher outra cor" style="width:44px;height:36px;padding:2px"></div></div>
-      <div class="field wide"><span>Logótipo (opcional)</span><div class="row">${marcaMark(48)}<label class="btn sm" style="cursor:pointer">Escolher imagem<input type="file" accept="image/*" id="logo-file" hidden></label>${m.logo ? '<button class="btn ghost sm" data-act="tirar-logo">Tirar logótipo</button>' : ''}</div></div>
-      <label class="field wide">Afirmação da semana (aparece no topo do tela da aluna)<textarea data-marca="afirmacao" maxlength="160" placeholder="Ex.: Eu não preciso de perfeição, preciso de constância.">${esc(m.afirmacao || '')}</textarea></label>
-      <label class="field wide">Mensagem de boas-vindas para as alunas (aparece no convite e no início)<textarea data-marca="boasVindas" placeholder="Ex.: Bem-vindo! Qualquer dúvida, fala comigo. Vamos treinar!">${esc(m.boasVindas)}</textarea></label>
-    </div></div>
-  <div class="panel"><h3>Página de venda (o site)</h3><p class="muted small" style="margin:0">É o que aparece no site para quem faz o diagnóstico. Só escreva depoimentos e use fotos reais, com autorização da aluna. Se deixar vazio, a secção não aparece. Precisa do Supabase ligado.</p>
-    <div class="form-grid">${[0, 1, 2].map(k => `<label class="field">Depoimento ${k + 1}<textarea data-site="t${k}" maxlength="280" placeholder="O que a aluna disse, nas palavras dela">${esc(((m.site || {}).depoimentos || [])[k] ? m.site.depoimentos[k].t : '')}</textarea></label>
-      <label class="field">Nome (ex.: Ana, 28 anos)<input type="text" data-site="n${k}" maxlength="40" value="${esc(((m.site || {}).depoimentos || [])[k] ? m.site.depoimentos[k].n : '')}"></label>`).join('')}
-      <div class="field wide"><span>Fotos de resultados (até 4, com autorização)</span><div class="row">${((m.site || {}).fotos || []).map((f, k) => `<span class="foto-mini"><img src="${f.img}" alt=""><button class="btn ghost sm" data-act="site-foto-del" data-k="${k}" aria-label="Tirar foto">×</button></span>`).join('')}
-        ${((m.site || {}).fotos || []).length < 4 ? `<label class="btn sm" style="cursor:pointer">+ Adicionar foto<input type="file" accept="image/*" id="site-foto" hidden></label>` : ''}</div></div>
+      <label class="field">WhatsApp da equipe (com indicativo)<input type="tel" data-marca="tel" value="${esc(m.tel)}" placeholder="Ex.: 5511999999999" inputmode="tel"></label>
+      <label class="field wide">Afirmação da semana (aparece no topo da tela da aluna)<textarea data-marca="afirmacao" maxlength="160" placeholder="Ex.: Eu não preciso de perfeição, preciso de constância.">${esc(m.afirmacao || '')}</textarea></label>
+      <label class="field wide">Mensagem de boas-vindas para as alunas (aparece no convite e no início)<textarea data-marca="boasVindas" placeholder="Ex.: Bem-vinda à Squad! Qualquer dúvida, chama a equipe. Vamos juntas!">${esc(m.boasVindas)}</textarea></label>
     </div></div>
   <div class="panel"><h3>Avisos (notificações)</h3><p class="muted small" style="margin:0">O sino no topo acende quando uma aluna finaliza um treino ou alguém faz o diagnóstico no site.</p>
     <div class="small" style="display:grid;gap:4px"><span><b>Estado dos avisos do navegador:</b> ${'Notification' in window ? ({ granted: 'ativos', denied: 'bloqueados (desbloqueie nas definições do navegador)', default: 'desligados' })[Notification.permission] : 'este navegador não suporta'}</span></div>
     ${'Notification' in window && Notification.permission === 'default' ? '<div class="row"><button class="btn primary" data-act="avisos-ativar">Ativar avisos no navegador</button></div>' : ''}
-    <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>
-  <div class="panel"><h3>Os meus dados</h3><p class="muted small" style="margin:0">Guarde uma cópia de segurança dos suas alunas e treinos, ou restaure uma cópia antiga.</p>
-    <div class="row"><a class="btn" href="#backup">Cópia de segurança</a><button class="btn" data-act="limites">Limites da Central</button></div></div>
-  <div class="panel"><h3>Ajuda rápida</h3>
-    <ol class="small" style="margin:0;padding-left:18px;display:grid;gap:4px"><li><b>Alunas</b>: adicione um aluno e monte o treino e a alimentação.</li><li><b>Convidar</b>: na ficha da aluna, copie a mensagem e envie por WhatsApp.</li><li><b>Rever</b>: veja os treinos que os alunos fizeram.</li><li><b>Central</b>: veja quem treinou, quem faltou e quem precisa de um plano novo.</li></ol></div>`;
+    <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>`;
 }
 const USERS = { personal: { senha: 'personal', papel: 'personal' }, 'mariana ribeiro': { senha: 'alunateste', papel: 'aluno', nome: 'Mariana Ribeiro' } };
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
@@ -2456,8 +2442,6 @@ const SB = {
           const r = await SB.req('/rest/v1/rpc/pt_gravar_aluno', { method: 'POST', body: { p_id: a.id, p_dados: a } });
           if (r.ok) sbH[a.id] = s; else ok = false;
         }
-        const siteD = { tel: String(marca().tel || '').replace(/\D/g, ''), depoimentos: ((db.marca || {}).site || {}).depoimentos || [], fotos: ((db.marca || {}).site || {}).fotos || [] }, sE = estavel(siteD);
-        if (sE !== SB.hSite) { const r = await SB.req('/rest/v1/site_publico', { method: 'POST', body: { personal_id: sbS.uid, dados: siteD }, headers: { Prefer: 'resolution=merge-duplicates,return=minimal' } }); if (r.ok) SB.hSite = sE; else ok = false; }
         const ids = new Set(db.alunos.map(a => a.id));
         for (const id of Object.keys(sbH)) if (!ids.has(id)) { const r = await SB.req('/rest/v1/alunos_docs?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }); if (r.ok) delete sbH[id]; else ok = false; }
       } else {
