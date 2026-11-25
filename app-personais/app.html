@@ -253,6 +253,8 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .nu-check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
 .nu-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; } .nu-lista li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); } .nu-lista li:last-child { border-bottom: 0; }
 .agua { display: grid; gap: 10px; }
+.lead-det { font-size: .9rem; } .lead-det summary { cursor: pointer; color: var(--muted); }
+.lead-dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 0; } .lead-dl dt { color: var(--muted); font-size: .8rem; } .lead-dl dd { margin: 0; }
 .nu-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .nu-chip { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--fg); font-weight: 600; cursor: pointer; font-family: inherit; }
 .nu-chip.on { background: var(--fg); border-color: var(--fg); color: var(--bg); } .nu-chip.novo { border-style: dashed; color: var(--muted); }
@@ -1239,7 +1241,7 @@ function sinaisRevisao(a, cfg) {
 function notifs() {
   const out = [], lim = Date.now() - 14 * 864e5;
   db.alunos.forEach(a => a.sessoes.filter(s => s.peloAluno && new Date(s.data + 'T12:00').getTime() > lim).forEach(s => out.push({ id: 's:' + s.id, t: s.data, titulo: `${a.nome.split(' ')[0]} finalizou ${s.treinoNome || 'um treino'}`, sub: s.rpe ? 'Esforço ' + s.rpe + '/10' : 'Toque para rever', href: '#rever' })));
-  todosLeads().filter(l => l.estado === 'novo').forEach(l => out.push({ id: 'l:' + l.id, t: l.data, titulo: `Novo lead: ${l.nome}`, sub: (l.respostas || {}).objetivo || 'Fez o diagnóstico', href: '#leads' }));
+  todosLeads().filter(l => l.estado === 'novo').forEach(l => out.push({ id: 'l:' + l.id, t: l.data, titulo: `${leadQuente(l.respostas) ? 'Novo lead quente' : 'Novo lead'}: ${l.nome}`, sub: (l.respostas || {}).objetivo || 'Fez o diagnóstico', href: '#leads' }));
   const lidas = new Set(db.notifLidas || []);
   return out.map(x => Object.assign(x, { lida: lidas.has(x.id) })).sort((a, b) => b.t.localeCompare(a.t));
 }
@@ -1265,6 +1267,9 @@ function painelSino() {
     ${ns.length ? ns.slice(0, 30).map(x => `<button class="it ${x.lida ? '' : 'nl'}" data-act="notif-ir" data-id="${esc(x.id)}" data-href="${x.href}"><b>${esc(x.titulo)}</b><span class="small muted">${esc(x.sub)} · ${fmtData(x.t)}</span></button>`).join('') : '<div class="small muted" style="padding:14px">Sem novidades. Quando uma aluna finalizar um treino ou alguém fizer o diagnóstico, aparece aqui.</div>'}
     ${pode && Notification.permission === 'default' ? '<div style="padding:8px 10px"><button class="btn primary sm" data-act="avisos-ativar" style="width:100%;justify-content:center">Ativar avisos no navegador</button></div>' : ''}`;
 }
+const LEAD_CAMPOS = [['idade', 'Idade'], ['instagram', 'Instagram'], ['profissao', 'Profissão'], ['objetivo', 'Objetivo'], ['desafio', 'Maior desafio'], ['acompanhamento', 'Acompanhamento anterior'], ['caneta', 'Canetas emagrecedoras'], ['orcamento', 'Quanto investiria'], ['momento', 'Momento'], ['videochamada', 'Videochamada de diagnóstico'], ['nivel', 'Experiência'], ['dias', 'Dias por semana'], ['local', 'Local'], ['lesao', 'Limitações'], ['comida', 'Alimentação']];
+const leadQuente = r => !!r && /começar o quanto antes/i.test(r.momento || '') && norm(r.videochamada || '') === 'sim';
+const instaUrl = v => 'https://instagram.com/' + String(v || '').replace(/^@+/, '');
 const ESTADOS_LEAD = [['novo', 'Novo'], ['contactado', 'Contactado'], ['aluna', 'Virou aluna'], ['perdido', 'Perdido']];
 const todosLeads = () => ((typeof SB !== 'undefined' ? SB.leads : []).concat(db.leads || [])).slice().sort((a, b) => b.data.localeCompare(a.data));
 const waLead = l => 'https://wa.me/' + PTTel.wa(l.whatsapp);
@@ -1286,8 +1291,8 @@ function viewLeads() {
   <div class="row" style="flex-wrap:wrap;margin:10px 0">${chip('novo', 'Novos', n('novo'))}${chip('contactado', 'Contactados', n('contactado'))}${chip('aluna', 'Viraram aluna', n('aluna'))}${chip('perdido', 'Perdidos', n('perdido'))}${chip('todos', 'Todos', todos.length)}</div>
   ${lista.length ? lista.map(l => { const r = l.respostas || {}; return `<article class="panel"><div class="row spread"><div><b>${esc(l.nome)}</b><div class="small muted num">${fmtData(l.data)} · ${esc(l.whatsapp)}</div></div>
       <select data-lead-estado="${l.id}" aria-label="Estado do lead">${ESTADOS_LEAD.map(e => `<option value="${e[0]}" ${l.estado === e[0] ? 'selected' : ''}>${e[1]}</option>`).join('')}</select></div>
-    <div class="row" style="flex-wrap:wrap;gap:6px">${[r.objetivo, r.nivel, r.dias, r.local].filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>
-    ${r.lesao ? `<div class="small"><b>Limitações:</b> ${esc(r.lesao)}</div>` : ''}${r.comida ? `<div class="small"><b>Alimentação:</b> ${esc(r.comida)}</div>` : ''}
+    <div class="row" style="flex-wrap:wrap;gap:6px">${leadQuente(r) ? '<span class="chip accent">🔥 Lead quente</span>' : ''}${[r.objetivo, r.orcamento, r.idade ? r.idade + ' anos' : '', r.nivel, r.dias, r.local].filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('')}${r.instagram ? `<a class="chip" target="_blank" rel="noopener" href="${esc(instaUrl(r.instagram))}">${esc(r.instagram)}</a>` : ''}</div>
+    ${LEAD_CAMPOS.some(([k]) => r[k] && !['objetivo', 'instagram', 'idade', 'orcamento', 'nivel', 'dias', 'local'].includes(k)) ? `<details class="lead-det"><summary class="small">Ver todas as respostas</summary><dl class="lead-dl">${LEAD_CAMPOS.filter(([k]) => r[k]).map(([k, t]) => `<dt>${t}</dt><dd>${esc(r[k])}</dd>`).join('')}</dl></details>` : ''}
     <div class="row"><a class="btn primary sm" target="_blank" rel="noopener" href="${waLead(l)}">Abrir WhatsApp</a>${l.estado === 'aluna' && l.alunoId && alunoById(l.alunoId) ? `<a class="btn sm" href="#aluno-${l.alunoId}">Ver ficha</a>` : `<button class="btn sm" data-act="lead-converter" data-id="${l.id}">Converter em aluna</button>`}<button class="btn ghost sm danger" data-act="lead-del" data-id="${l.id}">Apagar</button></div></article>`; }).join('')
   : `<div class="panel empty">${todos.length ? 'Nenhum lead neste estado.' : 'Ainda não há leads. Quando alguém fizer o diagnóstico no site, aparece aqui.'}</div>`}`;
 }
@@ -1310,7 +1315,7 @@ function viewCentral() {
 
   // O que precisa de atenção hoje
   const acoes = [];
-  leadsNovos.slice(0, 5).forEach(l => acoes.push({ cls: 'lead', ico: '💌', nome: l.nome, tit: `Novo lead: ${esc(l.nome)}`, sub: [(l.respostas || {}).objetivo, (l.respostas || {}).dias].filter(Boolean).map(esc).join(' · ') || 'Fez o diagnóstico no site',
+  leadsNovos.slice(0, 5).forEach(l => acoes.push({ cls: 'lead', ico: '💌', nome: l.nome, tit: `Novo lead: ${esc(l.nome)}`, sub: [leadQuente(l.respostas) ? '🔥 Lead quente' : '', (l.respostas || {}).objetivo, (l.respostas || {}).orcamento || (l.respostas || {}).dias].filter(Boolean).map(esc).join(' · ') || 'Fez o diagnóstico no site',
     bot: `<a class="btn primary sm" target="_blank" rel="noopener" href="${waLead(l)}">Chamar no WhatsApp</a><a class="btn ghost sm" href="#leads">Ver lead</a>` }));
   if (leadsNovos.length > 5) acoes.push({ cls: 'lead', ico: '💌', nome: 'Leads', tit: `Mais ${leadsNovos.length - 5} leads novos`, sub: 'Todos esperando um contato', bot: '<a class="btn sm" href="#leads">Ver todos</a>' });
   if (porRever) acoes.push({ cls: 'rever', ico: '👀', nome: 'Rever', tit: `${porRever} ${porRever === 1 ? 'treino' : 'treinos'} para rever`, sub: 'Veja como foi e deixe um feedback para elas', bot: '<a class="btn primary sm" href="#rever">Rever agora</a>' });
@@ -1490,8 +1495,9 @@ document.addEventListener('click', ev => {
     case 'close': closeDialog(); break;
     case 'cor-marca': db.marca = Object.assign({}, db.marca || {}, { cor: b.dataset.cor }); save(); aplicaMarca(); rerender(); break;
     case 'lead-converter': { const l = todosLeads().find(x => x.id === b.dataset.id); if (!l) break; const r = l.respostas || {};
-      const novo = { id: uid(), nome: l.nome, objetivo: r.objetivo || 'Condicionamento', telefone: l.whatsapp, inicio: hoje(), notas: [r.nivel ? 'Experiência: ' + r.nivel : '', 'Veio do diagnóstico do site'].filter(Boolean).join('. '), treinos: [], sessoes: [], medidas: [],
-        anamnese: { objetivo: r.objetivo || '', dias: r.dias || '', local: r.local || '', rotina: '', lesoes: r.lesao || '', comida: r.comida || '', ts: Date.now() } };
+      const notas = [r.idade ? 'Idade: ' + r.idade : '', r.instagram ? 'Instagram: ' + r.instagram : '', r.profissao ? 'Profissão: ' + r.profissao : '', r.desafio ? 'Maior desafio: ' + r.desafio : '', r.acompanhamento ? 'Acompanhamento anterior: ' + r.acompanhamento : '', r.caneta ? 'Canetas emagrecedoras: ' + r.caneta : '', r.orcamento ? 'Investimento: ' + r.orcamento : '', r.nivel ? 'Experiência: ' + r.nivel : '', 'Veio do diagnóstico do site'].filter(Boolean).join('. ');
+      const novo = { id: uid(), nome: l.nome, objetivo: r.objetivo || 'Condicionamento', telefone: l.whatsapp, inicio: hoje(), notas, treinos: [], sessoes: [], medidas: [],
+        anamnese: { objetivo: r.objetivo || '', dias: r.dias || '', local: r.local || '', rotina: [r.profissao ? 'Profissão: ' + r.profissao : '', r.desafio ? 'Desafio: ' + r.desafio : ''].filter(Boolean).join('. '), lesoes: r.lesao || '', comida: r.comida || '', ts: Date.now() } };
       db.alunos.push(novo); leadSet(l.id, { estado: 'aluna', alunoId: novo.id }); save(); toast('Aluna criada com a ficha inicial'); location.hash = 'aluno-' + novo.id; break; }
     case 'lead-del': { if (confirm('Apagar este lead?')) { leadApaga(b.dataset.id); rerender(); } break; }
     case 'lead-colar': openDialog(`<form id="f-lead-colar" class="dlg" style="padding:0"><h2>Colar mensagem do diagnóstico</h2><p class="small muted" style="margin:0">Cole aqui a mensagem que a pessoa enviou pelo WhatsApp depois do diagnóstico. A app lê o nome, o número e as respostas.</p>
@@ -1749,7 +1755,7 @@ document.addEventListener('submit', ev => {
   if (f.id === 'f-lead-colar') {
     const t = v('lc-txt'), g = k => { const m = t.match(new RegExp('^\\s*' + k + '\\s*:\\s*(.+)$', 'im')); return m ? m[1].trim() : ''; };
     const nome = g('Nome'), tel = g('WhatsApp'); if (!nome || !tel) { toast('Não encontrei o nome e o WhatsApp na mensagem'); return; }
-    (db.leads = db.leads || []).push({ id: uid(), nome, whatsapp: tel, data: hoje(), estado: 'novo', respostas: { objetivo: g('Objetivo'), nivel: g('Experiência'), dias: g('Dias por semana'), local: g('Local'), lesao: g('Limitações'), comida: g('Alimentação') } });
+    (db.leads = db.leads || []).push({ id: uid(), nome, whatsapp: tel, data: hoje(), estado: 'novo', respostas: Object.fromEntries(Object.entries({ idade: g('Idade'), instagram: g('Instagram'), profissao: g('Profissão'), objetivo: g('Objetivo'), desafio: g('Maior desafio'), acompanhamento: g('Acompanhamento'), caneta: g('Canetas'), orcamento: g('Investimento'), momento: g('Momento'), videochamada: g('Videochamada'), nivel: g('Experiência'), dias: g('Dias por semana'), local: g('Local'), lesao: g('Limitações'), comida: g('Alimentação') }).filter(([, x]) => x)) });
     save(); closeDialog(); rerender(); toast('Lead criado'); return;
   }
   if (f.id === 'f-lead-novo') {

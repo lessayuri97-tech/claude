@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Squad · Diagnóstico gratuito</title>
-<meta name="description" content="Responda a 7 perguntas rápidas e receba o seu ponto de partida: treino, alimentação e próximos passos.">
+<meta name="description" content="Responda ao diagnóstico e receba o seu ponto de partida: treino, alimentação e próximos passos.">
 <meta name="theme-color" content="#EFF0EB">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -110,6 +110,10 @@ details.faq p { margin: 0 0 14px; }
 .sec h2 em, h1 em { font-style: italic; }
 .btn.primary::after { content: ' →'; font-weight: 400; }
 .sec .eyebrow { color: var(--a); opacity: .75; }
+.sub-q { margin: -6px 0 14px; color: var(--muted, #6b6d80); font-size: .95rem; }
+#tela textarea { width: 100%; font: inherit; padding: 12px 14px; border: 1.5px solid var(--line, #CDC9C0); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin-bottom: 8px; }
+#tela form input[type=text] { margin-bottom: 8px; }
+.resp { margin: 16px 0 12px; padding: 14px 16px; border-radius: 14px; background: #e6e3da; border-left: 4px solid #34364D; font-size: 1.02rem; line-height: 1.5; animation: respIn .45s ease both; } #fb .btn { margin-top: 4px; } @keyframes respIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { .resp { animation: none; } }
 </style>
 </head>
 <body>
@@ -121,7 +125,7 @@ details.faq p { margin: 0 0 14px; }
   <section class="sec alt"><div class="in"><div class="cab3"><span>O</span><span>Método</span><span><i>Squad</i></span></div>
     <div class="eyebrow" style="text-align:center">Como funciona</div><h2>Do primeiro passo ao resultado, em 3 passos</h2><p class="sub">Sem complicação e sem treino copiado da internet.</p>
     <div class="grid g3">
-      <div class="cartao"><div class="num-c">1</div><h3>Faça o diagnóstico</h3><p>7 perguntas rápidas sobre o seu objetivo, a sua rotina, lesões e alimentação. Leva menos de 1 minuto.</p></div>
+      <div class="cartao"><div class="num-c">1</div><h3>Faça o diagnóstico</h3><p>12 perguntas sobre você, o seu objetivo e o seu momento. Leva poucos minutos.</p></div>
       <div class="cartao"><div class="num-c">2</div><h3>Receba o seu plano</h3><p>Treino e dieta pra SUA rotina, no aplicativo, com vídeo de cada exercício e as refeições do dia.</p></div>
       <div class="cartao"><div class="num-c">3</div><h3>Evolua com acompanhamento</h3><p>Registre treinos, medidas e fotos, e tire dúvidas com a equipe pelo WhatsApp sempre que precisar.</p></div>
     </div>
@@ -164,7 +168,7 @@ details.faq p { margin: 0 0 14px; }
     <details class="faq"><summary>Como é a dieta?</summary><p>Simples e pra SUA rotina: metas de calorias e proteína, refeições e porções. Sem terrorismo e sem proibir os alimentos que você gosta.</p></details>
     <details class="faq"><summary>Como funciona o suporte?</summary><p>Você fala com a equipe pelo WhatsApp, direto do aplicativo, sempre que tiver dúvida sobre treino ou dieta.</p></details>
     <details class="faq"><summary>Quanto custa?</summary><p>Depois do diagnóstico, a equipe te passa as condições pelo WhatsApp, sem compromisso.</p></details>
-    <details class="faq"><summary>Como começo?</summary><p>Toque em “Começar o diagnóstico”, responda às 7 perguntas e deixe o seu WhatsApp: a nossa equipe entra em contato com você.</p></details>
+    <details class="faq"><summary>Como começo?</summary><p>Toque em “Começar o diagnóstico”, responda às 12 perguntas, com o seu WhatsApp,: a nossa equipe entra em contato com você.</p></details>
     <div class="cta-c" style="margin-top:26px"><button class="btn primary go">Começar o diagnóstico</button></div>
   </div></section>
 </main>
@@ -176,58 +180,79 @@ details.faq p { margin: 0 0 14px; }
 'use strict';
 const CFG = Object.assign({ whatsapp: '', leadsPara: '' }, window.PT_SUPABASE || {});
 const PERGUNTAS = [
-  { k: 'objetivo', t: 'Qual é o seu objetivo principal?', o: [['Emagrecer', 'perder gordura e ganhar leveza'], ['Ganhar massa muscular', 'ficar mais forte e maior'], ['Definir e tonificar', 'mais forma, menos gordura'], ['Saúde e energia', 'sentir-me bem no dia a dia']] },
-  { k: 'nivel', t: 'Qual é a sua experiência com treino?', o: [['Nunca treinei', ''], ['Parei há algum tempo', ''], ['Treino às vezes', ''], ['Treino com regularidade', '']] },
-  { k: 'dias', t: 'Quantos dias por semana consegue treinar?', o: [['2 dias', ''], ['3 dias', ''], ['4 dias', ''], ['5 ou mais', '']] },
-  { k: 'local', t: 'Onde prefere treinar?', o: [['No ginásio', ''], ['Em casa', 'com pouco material'], ['Ao ar livre', ''], ['Um pouco de tudo', '']] },
-  { k: 'lesao', t: 'Tem alguma lesão ou limitação?', o: [['Nenhuma', ''], ['Joelho', ''], ['Costas', ''], ['Ombro', ''], ['Outra / tenho dúvidas', 'vamos falar sobre isso']] },
-  { k: 'comida', t: 'Como está a sua alimentação?', o: [['Sem rotina', 'como o que aparece'], ['Tento, mas falho', ''], ['Razoável', ''], ['Bem organizada', '']] }
+  { k: 'nome', t: 'Nome completo:', tipo: 'texto', ac: 'name' },
+  { k: 'idade', t: 'Idade:', tipo: 'idade' },
+  { k: 'instagram', t: '@ do Instagram:', tipo: 'insta' },
+  { k: 'whatsapp', t: 'Telefone (com DDD):', tipo: 'tel' },
+  { k: 'profissao', t: 'Profissão:', s: 'Se for estudante, qual curso?', tipo: 'texto' },
+  { k: 'objetivo', t: 'Objetivo:', o: ['Emagrecimento', 'Hipertrofia', 'Performance na corrida mantendo/ganhando massa magra', 'Apenas saúde e bem-estar'], m: ['Um objetivo muito comum e muito possível de trabalhar com estratégia. Vamos montar um caminho para o seu ritmo, sem pressa e sem terror. 💛', 'Ganhar força e massa com um plano de treino e alimentação bem organizados é o nosso dia a dia. Vamos construir isso passo a passo. 💪', 'Correr bem e manter a massa magra pede equilíbrio entre treino e alimentação, e é exatamente aí que podemos ajudar. 🏃‍♀️', 'Cuidar da saúde e do bem-estar já é uma decisão linda. Vamos juntas encontrar uma rotina que caiba na sua vida. 🌿'] },
+  { k: 'desafio', t: 'Qual seu maior desafio hoje para alcançar esse objetivo?', s: 'Seja o mais detalhista possível.', tipo: 'longo', mt: 'Obrigada por abrir o jogo com a gente. Entender o que mais pesa na sua rotina é o primeiro passo para traçar um plano que funcione de verdade para você. Você não está sozinha nisso. 💛' },
+  { k: 'acompanhamento', t: 'Já teve algum acompanhamento antes?', o: ['Sim, tive uma boa experiência', 'Sim, mas não tive uma boa experiência', 'Sim, apenas presencial', 'Não, nunca tive acompanhamento on-line'], m: ['Que bom que a experiência foi boa! Vamos construir sobre o que já funcionou para você. 💛', 'Obrigada por contar. Cada pessoa precisa de um jeito diferente de ser acompanhada, e queremos entender o que faltou para fazer diferente. 🤍', 'O presencial tem o seu valor. Aqui vamos te acompanhar de perto também, adaptado à sua rotina. 💪', 'Sem problema nenhum! Muitas alunas começaram assim, e vamos te explicar cada passo com calma. 🌸'] },
+  { k: 'caneta', t: 'Já fez uso de canetas emagrecedoras?', o: ['Sim', 'Não', 'Ainda estou fazendo', 'Não, mas pretendo fazer'], m: ['Obrigada por compartilhar. Nós orientamos o treino e a alimentação, e o uso de qualquer medicação é sempre assunto para conversar com o seu médico. 💛', 'Tudo bem! Aqui o foco é construir hábitos de treino e alimentação que fazem sentido para você. 🌿', 'Obrigada por avisar. Esta informação nos ajuda a cuidar melhor de você, e o acompanhamento com o seu médico continua sendo essencial. 💛', 'Obrigada por contar. Qualquer decisão sobre medicação deve ser conversada com um profissional de saúde. Nós podemos ajudar com treino e alimentação. 🌿'] },
+  { k: 'orcamento', t: 'Caso você fosse investir hoje em seu acompanhamento quanto estarias disposta para isso?', o: ['Entre R$200-250 mensais', 'Entre R$250-300 mensais', 'Entre R$300-400 mensais'], m: ['Obrigada pela transparência! Isso nos ajuda a pensar numa proposta que faça sentido para você. 💛', 'Obrigada pela transparência! Isso nos ajuda a pensar numa proposta que faça sentido para você. 💛', 'Obrigada pela transparência! Isso nos ajuda a pensar numa proposta que faça sentido para você. 💛'] },
+  { k: 'momento', t: 'Qual momento você se encontra hoje em relação a buscar ajuda de um profissional para evoluir?', o: ['Ainda estou pesquisando e entendendo melhor meu caso', 'Tenho interesse, mas não sei se é o momento', 'Quero resolver isso logo e estou atrás de opções', 'Quero começar o quanto antes!'], m: ['Pesquisar com calma é importante. Estamos aqui para esclarecer o que precisar, sem pressão. 🌸', 'É normal ter essa dúvida. Muitas alunas começaram assim, e o primeiro passo pode ser pequeno. 💛', 'Boa! Vamos te ajudar a encontrar o melhor caminho para o seu momento. 💪', 'Adoramos essa energia! Vamos fazer o possível para você começar bem. 🚀'] },
+  { k: 'videochamada', t: 'Caso você for selecionada para um diagnóstico gratuito via video chamada, se comprometeria em comparecer e estar cem por cento concentrada na chamada?', s: 'Não estar em horário de trabalho, dirigindo, da rua ou fazendo outra coisa.', o: ['Sim', 'Não'], m: ['Perfeito! Com você 100% presente a conversa rende muito mais, e vamos poder entender bem o seu caso. 💛', 'Sem problema. Conseguimos conversar melhor quando você está com a atenção toda na chamada, então se for selecionada combinamos o melhor momento. 🌸'] }
 ];
-const R = {}; let i = 0;
+const R = {}; let i = 0, telC = null;
 const $ = s => document.querySelector(s);
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const total = PERGUNTAS.length + 1;
-const barra = n => `<div class="bar"><i style="width:${Math.round(n / total * 100)}%"></i></div><div class="step">Passo ${n} de ${total}</div>`;
+const total = PERGUNTAS.length;
+const barra = n => `<div class="bar"><i style="width:${Math.round((n - 1) / total * 100)}%"></i></div><div class="step">Pergunta ${n} de ${total}</div>`;
 function modo(home) { $('#wrap').classList.toggle('home', home); $('#venda').hidden = !home; if (!home) window.scrollTo(0, 0); }
 function inicio() {
   modo(true);
   $('#tela').innerHTML = `<div class="eyebrow">Consultoria fitness · corpo da mulher</div>
     <h1>Treino e dieta <span>pra SUA rotina</span></h1>
-    <p class="lead">A 1ª consultoria fitness com suporte 24h focada no corpo da mulher. Responda a ${total} perguntas rápidas e descubra o seu ponto de partida.</p>
+    <p class="lead">A 1ª consultoria fitness com suporte 24h focada no corpo da mulher. Responda a ${total} perguntas e descubra o seu ponto de partida.</p>
     <button class="btn primary go" id="go">Começar o diagnóstico</button>
     <div class="selo">Método com +500 mulheres transformadas</div>`;
-  document.querySelectorAll('.go').forEach(b => b.onclick = () => { i = 0; modo(false); pergunta(); });
+  document.querySelectorAll('.go').forEach(b => b.onclick = () => { i = 0; boasVindas(); });
 }
+function boasVindas() {
+  modo(false);
+  $('#tela').innerHTML = `<div class="bar"><i style="width:0%"></i></div>
+    <h1>Seja bem-vinda ao <span>SQUAD!</span></h1>
+    <p style="font-size:1.08rem"><b>Em poucos minutos, você vai responder algumas perguntas para entendermos melhor seu momento atual e como podemos ajudar.</b> Levamos nosso trabalho muito a <b>sério</b> — por isso, é de suma importância que sejas sincera em cada detalhe para que assim possamos <b>traçar juntos um plano estratégico</b> de evolução.</p>
+    <button class="btn primary" id="comeca">Começar</button>
+    <button class="back" id="volta">← Voltar</button>`;
+  $('#comeca').onclick = () => { i = 0; pergunta(); }; $('#volta').onclick = inicio;
+}
+const instaLimpo = v => { v = v.trim().replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@+/, '').replace(/\s+/g, ''); return v ? '@' + v : ''; };
+function anterior() { i--; i < 0 ? boasVindas() : pergunta(); }
+function proxima() { i++; i < PERGUNTAS.length ? pergunta() : concluir(); }
 function pergunta() {
-  const q = PERGUNTAS[i];
-  $('#tela').innerHTML = `${barra(i + 1)}<h2>${q.t}</h2><div class="opts">${q.o.map((o, n) => `<button class="opt ${R[q.k] === o[0] ? 'on' : ''}" data-n="${n}">${o[0]}${o[1] ? `<small>${o[1]}</small>` : ''}</button>`).join('')}</div>
-    <button class="back" id="volta">← Voltar</button>`;
-  document.querySelectorAll('.opt').forEach(b => b.onclick = () => { R[q.k] = q.o[+b.dataset.n][0]; i++; i < PERGUNTAS.length ? pergunta() : contacto(); });
-  $('#volta').onclick = () => { i--; i < 0 ? inicio() : pergunta(); };
+  const q = PERGUNTAS[i], cab = `${barra(i + 1)}<h2>${q.t}</h2>${q.s ? `<p class="sub-q">${q.s}</p>` : ''}`, volta = `<button class="back" id="volta" type="button">← Voltar</button>`;
+  if (q.o) {
+    $('#tela').innerHTML = `${cab}<div class="opts">${q.o.map((o, n) => `<button class="opt ${R[q.k] === o ? 'on' : ''}" data-n="${n}">${esc(o)}</button>`).join('')}</div>${volta}`;
+    const mostra = n => { document.querySelectorAll('.opt').forEach((x, k) => x.classList.toggle('on', k === n)); let c = $('#fb'); if (!c) { c = document.createElement('div'); c.id = 'fb'; $('.opts').after(c); } c.innerHTML = `<div class="resp">${q.m[n]}</div><button class="btn primary" id="cont" type="button">Continuar</button>`; $('#cont').onclick = proxima; };
+    document.querySelectorAll('.opt').forEach(b => b.onclick = () => { R[q.k] = q.o[+b.dataset.n]; if (q.m) mostra(+b.dataset.n); else proxima(); });
+    if (q.m && R[q.k] && q.o.includes(R[q.k])) mostra(q.o.indexOf(R[q.k]));
+    $('#volta').onclick = anterior; return;
+  }
+  const campo = q.tipo === 'tel' ? '<div id="tel-host"></div>'
+    : q.tipo === 'longo' ? `<textarea id="v" rows="4" required>${esc(R[q.k] || '')}</textarea>`
+    : `<input type="text" id="v" required value="${esc(R[q.k] || '')}" ${q.ac ? `autocomplete="${q.ac}"` : ''} ${q.tipo === 'idade' ? 'inputmode="numeric" maxlength="3"' : ''} ${q.tipo === 'insta' ? 'placeholder="@seuperfil" autocapitalize="none" autocorrect="off"' : ''}>`;
+  $('#tela').innerHTML = `${cab}<form id="f">${campo}<div class="err" id="e"></div><button class="btn primary">${i === total - 1 ? 'Enviar' : 'Continuar'}</button></form>${volta}`;
+  $('#volta').onclick = anterior;
+  if (q.tipo === 'tel') telC = PTTel.criar($('#tel-host'), { valor: R.whatsapp || '' }); else { const e = $('#v'); setTimeout(() => e.focus({ preventScroll: true }), 50); }
+  $('#f').onsubmit = ev => { ev.preventDefault(); const err = t => { $('#e').textContent = t; };
+    if (q.tipo === 'tel') { if (!telC.get()) return err(telC.pais() === 'br' ? 'Confira o número: DDD + celular, ex.: (11) 98765-4321.' : 'Confira o número de telefone.'); R.whatsapp = telC.get(); R.pais = telC.pais(); R.tel = R.whatsapp; return proxima(); }
+    let v = $('#v').value.trim(); if (!v) return err('Esta pergunta é obrigatória.');
+    if (q.tipo === 'idade') { const n = parseInt(v, 10); if (!(n >= 12 && n <= 100) || !/^\d+$/.test(v)) return err('Escreva a sua idade em números.'); v = String(n); }
+    if (q.tipo === 'insta') { v = instaLimpo(v); if (v.length < 2) return err('Escreva o seu @ do Instagram.'); }
+    R[q.k] = v;
+    if (q.mt && !$('#fb')) { const d = document.createElement('div'); d.id = 'fb'; d.innerHTML = `<div class="resp">${q.mt}</div>`; $('#f').before(d); $('#f button.btn').textContent = 'Continuar'; $('#v').readOnly = true; return; }
+    proxima(); };
 }
-function contacto() {
-  $('#tela').innerHTML = `${barra(total)}<h2>Quase lá! Como podemos te chamar?</h2>
-    <form id="f"><label>O seu nome<input type="text" id="n" autocomplete="name" required value="${esc(R.nome || '')}"></label>
-    <div class="lab">O seu WhatsApp</div><div id="tel-host"></div>
-    <div class="err" id="e"></div><button class="btn primary">Enviar e concluir</button></form>
-    <button class="back" id="volta">← Voltar</button>`;
-  $('#volta').onclick = () => { i = PERGUNTAS.length - 1; pergunta(); };
-  telC = PTTel.criar($('#tel-host'), { valor: R.whatsapp || '' });
-  $('#f').onsubmit = ev => { ev.preventDefault(); R.nome = $('#n').value.trim();
-    if (!telC.get()) { $('#e').textContent = telC.pais() === 'br' ? 'Confira o número: DDD + celular, ex.: (11) 98765-4321.' : 'Confira o número de WhatsApp.'; return; }
-    R.whatsapp = telC.get(); R.pais = telC.pais(); R.tel = R.whatsapp;
-    guardaLead(); resultado(); };
-}
-let telC = null;
+function concluir() { guardaLead(); resultado(); }
 function resultado() {
   modo(false);
-  const nome = esc(R.nome.split(' ')[0]);
+  const nome = esc((R.nome || '').split(' ')[0]);
   $('#tela').innerHTML = `<div class="bar"><i style="width:100%"></i></div>
     <div style="text-align:center;padding:24px 0">
     <img class="logo" src="logo-navy.png" alt="Squad" style="height:44px;margin:0 auto 22px;display:block">
-    <h1>Parabéns, ${nome}!<br><span>Você deu o primeiro passo.</span></h1>
-    <p style="font-size:1.1rem;max-width:460px;margin:0 auto 14px">Receber suas respostas já nos mostra o quanto você quer cuidar de você. Isso é o mais importante.</p>
-    <p style="font-size:1.1rem;max-width:460px;margin:0 auto 14px">A nossa equipe vai entrar em contato com você em breve, pelo WhatsApp que você indicou, para montar o seu começo.</p>
+    <h1>Obrigado por chegar até aqui${nome ? ', ' + nome : ''}!<br><span>Você deu o primeiro passo.</span></h1>
+    <p style="font-size:1.1rem;max-width:460px;margin:0 auto 14px">Fique atenta ao WhatsApp que em breve entraremos em contato com você caso seja selecionada.</p>
     <p style="font-size:1.1rem;max-width:460px;margin:0 auto"><b>Obrigada pela confiança. Estamos juntas!</b></p></div>`;
 }
 async function guardaLead() {
