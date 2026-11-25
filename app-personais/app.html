@@ -198,6 +198,18 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .dica.tec { border-left: 3px solid var(--fg); }
 
 /* Biblioteca de exercícios */
+.nav-badge { background: var(--fg); color: var(--bg); border-radius: 99px; font-size: .7rem; padding: 1px 7px; margin-left: 4px; font-weight: 700; }
+.rv { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 10px; }
+.rv.novo { border-left: 4px solid var(--fg); }
+.rv-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rv-top a { color: inherit; text-decoration: none; font-size: 1.05rem; } .rv-top a:hover { text-decoration: underline; }
+.rv-chips { gap: 6px; }
+.rv-ex { display: grid; gap: 2px; border-top: 1px solid var(--line); padding-top: 8px; }
+.rv-l { display: grid; grid-template-columns: minmax(180px, 1fr) 2fr; gap: 4px 16px; padding: 5px 0; border-bottom: 1px dashed var(--line); align-items: baseline; }
+.rv-l:last-child { border-bottom: 0; } .rv-nota { grid-column: 2; color: var(--fg); }
+.rv-d { font-size: .8rem; font-weight: 700; margin-left: 8px; } .rv-d.up { color: var(--ok); } .rv-d.down { color: var(--danger); }
+.rv-nota-fim { background: var(--surface-2); border-radius: 10px; padding: 8px 12px; font-size: .92rem; }
+@media (max-width: 760px) { .rv-l { grid-template-columns: 1fr; } .rv-nota { grid-column: 1; } }
 .lib-filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .lib-filtros input { max-width: 300px; } .lib-filtros select { max-width: 210px; }
 .pills { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -439,6 +451,7 @@ body.papel-aluno .aluno-bar { display: none; }
     </a>
     <nav class="nav" aria-label="Seções">
       <a href="#alunos" data-nav="alunos">Alunos</a>
+      <a href="#rever" data-nav="rever">Rever <span class="nav-badge" id="badge-rever" hidden></span></a>
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
       <a href="#backup" data-nav="backup">Backup</a>
     </nav>
@@ -448,6 +461,7 @@ body.papel-aluno .aluno-bar { display: none; }
 <main class="wrap" id="app"></main>
 <nav class="tabbar" aria-label="Seções">
   <a href="#alunos" data-nav="alunos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c1.9.6 3.1 2.4 3.5 5.2"/></svg><span>Alunos</span></a>
+  <a href="#rever" data-nav="rever"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.8"/></svg><span>Rever <span class="nav-badge" id="badge-rever2" hidden></span></span></a>
   <a href="#exercicios" data-nav="exercicios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg><span>Exercícios</span></a>
   <a href="#backup" data-nav="backup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg><span>Backup</span></a>
 </nav>
@@ -508,6 +522,7 @@ function exemplo() {
     itens: tC.itens.map(it => { const c = it.carga === '' ? '' : +it.carga + (it.carga > 50 ? i * 5 : Math.floor(i / 2) * 1), r = it.reps.split('-')[0];
       return { exId: it.exId, carga: c, reps: r, feito: !(i === 2 && it === tC.itens[3]), series: Array.from({ length: it.series }, () => ({ carga: c, reps: r })) }; }) }));
   const medC = [[17, 96.8, 31.5, 108], [10, 95.1, 30.9, 106], [2, 93.9, 30.2, 104.5]].map(([d, peso, gordura, cintura]) => ({ id: uid(), data: diasAtras(d), peso, gordura, cintura, quadril: '', braco: '' }));
+  if (sessoes.length) { const u = sessoes.reduce((m, x) => x.data > m.data ? x : m, sessoes[0]); u.peloAluno = true; u.revisto = false; u.minutos = 52; }
   return {
     exemplo: true,
     exercicios: ex,
@@ -546,6 +561,12 @@ function catalogoBase() {
   return out;
 }
 const EQUIPS = ['Barra', 'Halteres', 'Máquina', 'Polia', 'Smith', 'Peso corporal', 'Kettlebell', 'Elástico', 'Outro'];
+function migraRever() {
+  let papel = ''; try { papel = meuPapel(); } catch (e) {}
+  if (papel !== 'personal' || db.reverV) return;
+  db.alunos.forEach(a => a.sessoes.forEach(x => { if (x.revisto === undefined) x.revisto = !x.peloAluno; }));
+  db.reverV = 1; save();
+}
 function migraCatalogo() {
   let papel = ''; try { papel = meuPapel(); } catch (e) {}
   if (papel !== 'personal' || (db.catalogo || 0) >= 2) return;
@@ -649,7 +670,7 @@ function showVideo(exId) {
 /* ---------- Roteamento ---------- */
 const ui = { tab: {}, busca: '', grupo: '', equip: '', video: '', uso: '' };
 function route() {
-  migraCatalogo();
+  migraCatalogo(); migraRever();
   const h = location.hash.slice(1) || 'alunos';
   const sess = getSessao();
   if (!sess) { renderLogin(); return; }
@@ -662,9 +683,12 @@ function route() {
   if (h.startsWith('aluno-')) { view = 'aluno'; arg = h.slice(6); }
   document.querySelectorAll('[data-nav]').forEach(a => a.toggleAttribute('aria-current', false));
   const navKey = view === 'aluno' ? 'alunos' : view;
-  const cur = document.querySelector(`[data-nav="${navKey}"]`); if (cur) cur.setAttribute('aria-current', 'page');
+  const cur = document.querySelectorAll(`[data-nav="${navKey}"]`); cur.forEach(c => c.setAttribute('aria-current', 'page'));
+  const nr = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
+  ['badge-rever', 'badge-rever2'].forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = !nr; el.textContent = nr; } });
   const app = $('#app');
-  if (view === 'exercicios') app.innerHTML = viewExercicios();
+  if (view === 'rever') app.innerHTML = viewRever();
+  else if (view === 'exercicios') app.innerHTML = viewExercicios();
   else if (view === 'backup') app.innerHTML = viewBackup();
   else if (view === 'aluno' && alunoById(arg)) app.innerHTML = viewAluno(alunoById(arg));
   else app.innerHTML = viewAlunos();
@@ -982,6 +1006,45 @@ function filtraEx() {
 }
 const chaveBusca = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 const usosEx = id => db.alunos.reduce((s, a) => s + a.treinos.reduce((s2, t) => s2 + t.itens.filter(i => i.exId === id).length, 0), 0);
+const ver = { aluno: '', estado: 'novo', dias: '' };
+function viewRever() {
+  const todos = [];
+  db.alunos.forEach(a => a.sessoes.forEach(x => todos.push({ a, s: x })));
+  const lim = ver.dias ? new Date(Date.now() - (+ver.dias) * 864e5).toISOString().slice(0, 10) : '';
+  let lista = todos.filter(({ a, s }) => (!ver.aluno || a.id === ver.aluno) && (ver.estado === 'todos' || (ver.estado === 'novo') === (s.revisto === false)) && (!lim || s.data >= lim));
+  lista.sort((x, y) => y.s.data.localeCompare(x.s.data) || (x.s.revisto === false ? -1 : 1));
+  const nNovos = todos.filter(x => x.s.revisto === false).length;
+  const opt = (v, cur, t) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${t}</option>`;
+  return `${bannerExemplo()}
+  <div class="page-head"><div><div class="eyebrow num">${nNovos ? nNovos + ' por rever' : 'Tudo revisto'}</div><h1>Rever treinos</h1></div>
+    ${ver.estado !== 'todos' && lista.some(x => x.s.revisto === false) ? `<button class="btn" data-act="rever-todos">Marcar ${lista.filter(x => x.s.revisto === false).length} como revistos</button>` : ''}</div>
+  <div class="lib-filtros">
+    <select id="rv-aluno" aria-label="Aluno"><option value="">Todos os alunos</option>${db.alunos.map(a => opt(a.id, ver.aluno, esc(a.nome))).join('')}</select>
+    <select id="rv-estado" aria-label="Estado">${opt('novo', ver.estado, 'Por rever')}${opt('revisto', ver.estado, 'Já revistos')}${opt('todos', ver.estado, 'Todos')}</select>
+    <select id="rv-dias" aria-label="Período">${opt('', ver.dias, 'Todo o período')}${opt('7', ver.dias, 'Últimos 7 dias')}${opt('30', ver.dias, 'Últimos 30 dias')}</select></div>
+  ${lista.length ? lista.map(({ a, s }) => cartaoRever(a, s)).join('') : `<div class="panel empty">${ver.estado === 'novo' ? 'Nada por rever. Quando um aluno concluir um treino, ele aparece aqui.' : 'Nenhum treino encontrado.'}</div>`}`;
+}
+function cartaoRever(a, s) {
+  const feitos = s.itens.filter(i => i.feito), nS = feitos.reduce((n, i) => n + (i.series ? i.series.length : 0), 0);
+  const novo = s.revisto === false, tr = a.treinos.find(t => t.id === s.treinoId);
+  const ant = (exId, data) => { const l = a.sessoes.filter(x => x.data < data).sort((x, y) => y.data.localeCompare(x.data)); for (const x of l) { const i = x.itens.find(i => i.exId === exId && i.feito && i.carga !== ''); if (i) return +i.carga; } return null; };
+  const coms = (a.comentarios || []).filter(c => c.sessaoId === s.id && !c.exId && c.texto !== s.nota);
+  return `<article class="rv ${novo ? 'novo' : ''}">
+    <div class="rv-top"><span class="avatar-ini" style="width:40px;height:40px;font-size:1rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
+      <div style="min-width:0"><a href="#aluno-${a.id}" data-act="ir-sessoes" data-id="${a.id}"><b>${esc(a.nome)}</b></a><div class="small muted num">${fmtData(s.data)} · ${esc(s.treinoNome || 'Treino')}</div></div>
+      <div class="row rv-chips">${s.rpe !== '' && s.rpe != null ? `<span class="chip num">PSE ${esc(s.rpe)}</span>` : ''}${s.minutos ? `<span class="chip num">${s.minutos} min</span>` : ''}<span class="chip num">${nS} séries</span><span class="chip num">${fmtNum(volume(s))} kg</span>${s.peloAluno ? '' : '<span class="chip">registrado por você</span>'}</div>
+      <div class="row" style="margin-left:auto"><span class="chip ${novo ? 'accent' : 'ok'}">${novo ? 'Por rever' : 'Revisto'}</span>
+        <button class="btn sm ${novo ? 'primary' : 'ghost'}" data-act="rever-um" data-id="${a.id}" data-sessao="${s.id}">${novo ? 'Marcar como revisto' : 'Desfazer'}</button></div></div>
+    <div class="rv-ex">${s.itens.map(i => { const ex = exById(i.exId); const pi = tr && tr.itens.find(x => x.exId === i.exId); const tec = i.tecnica || (pi && pi.tecnica) || ''; const T = tec && TECS[tec];
+      const a0 = ant(i.exId, s.data), d = a0 !== null && i.carga !== '' ? +i.carga - a0 : null;
+      return `<div class="rv-l ${i.feito ? '' : 'muted'}"><div><b>${esc(ex ? ex.nome : 'Exercício removido')}</b>${T ? ` <span class="chip tec">${esc(T.nome)}</span>` : ''}${i.feito ? '' : ' <span class="small">(não feito)</span>'}</div>
+        <div class="num">${i.series && i.series.length ? i.series.map(x => `${x.carga !== '' ? fmtNum(x.carga) : '—'}×${esc(x.reps || '—')}`).join(' · ') : (i.carga !== '' ? fmtNum(i.carga) + ' kg × ' + esc(i.reps || '—') : '—')}
+        ${d ? `<span class="rv-d ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲ +' : '▼ '}${fmtNum(d)} kg</span>` : ''}</div>
+        ${i.nota ? `<div class="small rv-nota">💬 ${esc(i.nota)}</div>` : ''}</div>`; }).join('')}</div>
+    ${s.nota ? `<div class="rv-nota-fim"><b>Recado do aluno:</b> ${esc(s.nota)}</div>` : ''}
+    ${coms.map(c => `<div class="rv-nota-fim"><b>Comentário:</b> ${esc(c.texto)}</div>`).join('')}
+  </article>`;
+}
 function viewExercicios() {
   const lista = filtraEx();
   const semVideo = db.exercicios.filter(e => !ytParse(e.url)).length;
@@ -1076,6 +1139,9 @@ document.addEventListener('click', ev => {
   const t = a && (b.dataset.treino) && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'close': closeDialog(); break;
+    case 'rever-um': { const x = a.sessoes.find(q => q.id === b.dataset.sessao); if (x) { x.revisto = x.revisto === false; save(); rerender(); } break; }
+    case 'rever-todos': db.alunos.forEach(al => al.sessoes.forEach(x => { if (x.revisto === false && (!ver.aluno || al.id === ver.aluno)) x.revisto = true; })); save(); rerender(); break;
+    case 'ir-sessoes': ui.tab[a.id] = 'sessoes'; break;
     case 'filtro-grupo': ui.grupo = b.dataset.g; rerender(); break;
     case 'limpar-filtros': ui.grupo = ui.equip = ui.video = ui.uso = ui.busca = ''; rerender(); break;
     case 'limpar-exemplo':
@@ -1167,6 +1233,9 @@ function restaurar(txt) {
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (el.id === 'bk-file' && el.files[0]) { const r = new FileReader(); r.onload = () => restaurar(r.result); r.readAsText(el.files[0]); return; }
+  if (el.id === 'rv-aluno') { ver.aluno = el.value; rerender(); return; }
+  if (el.id === 'rv-estado') { ver.estado = el.value; rerender(); return; }
+  if (el.id === 'rv-dias') { ver.dias = el.value; rerender(); return; }
   if (el.id === 'filtro-equip') { ui.equip = el.value; rerender(); return; }
   if (el.id === 'filtro-video') { ui.video = el.value; rerender(); return; }
   if (el.id === 'filtro-uso') { ui.uso = el.value; rerender(); return; }
@@ -1249,7 +1318,7 @@ document.addEventListener('submit', ev => {
     });
     if ($('#s-atualizar', f).checked) itens.forEach((r, i) => { if (r.feito && r.carga !== '') t.itens[i].carga = r.carga; });
     const rpe = v('s-rpe');
-    a.sessoes.push({ id: uid(), data: v('s-data'), treinoId: t.id, treinoNome: `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`, rpe, nota: v('s-nota'), itens });
+    a.sessoes.push({ id: uid(), revisto: true, data: v('s-data'), treinoId: t.id, treinoNome: `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`, rpe, nota: v('s-nota'), itens });
     ui.tab[a.id] = 'sessoes'; save(); closeDialog(); rerender(); toast('Sessão registrada');
   }
 });
@@ -1267,15 +1336,16 @@ async function api(method, body) {
 function agendaPush() { if (sync.status === 'desligada') return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 500); }
 function mergeRemoto(local, remote) {
   const uniaoCom = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) y.lido = !!(y.lido || x.lido); else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
+  const uniaoSess = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) { if (x.revisto === true) y.revisto = true; } else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
   const uniao = (a = [], b = []) => { const ids = new Set(a.map(x => x.id)); return a.concat(b.filter(x => !ids.has(x.id))); };
   const par = (lista, a) => lista.find(x => x.id === a.id) || lista.find(x => norm(x.nome) === norm(a.nome));
   if (meuPapel() === 'aluno') { // a aluna só acrescenta sessões e medidas; o resto vem do personal
     const out = JSON.parse(JSON.stringify(remote));
-    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniao(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); } });
+    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniaoSess(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); } });
     out.alunoAtivo = local.alunoAtivo; return out;
   }
   const out = JSON.parse(JSON.stringify(local)); // o personal manda no plano; recebe as sessões e medidas da aluna
-  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniao(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); } });
+  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniaoSess(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); } });
   return out;
 }
 function rerenderSeguro() {
@@ -1666,9 +1736,10 @@ document.addEventListener('submit', ev => {
   const itens = wk.itens.map(w => {
     const done = w.sets.filter(s => s.done), base = done.length ? done : w.sets;
     const top = base.reduce((m, s) => (+s.carga || 0) > (+m.carga || 0) ? s : m, base[0]);
-    return { exId: w.exId, carga: top.carga, reps: top.reps, feito: done.length > 0, nota: (w.nota || '').trim(), series: done.map(s => ({ carga: s.carga, reps: s.reps })) };
+    const pi = t.itens.find(x => x.exId === w.exId) || {};
+    return { exId: w.exId, tecnica: pi.tecnica || '', tp: pi.tp || null, carga: top.carga, reps: top.reps, feito: done.length > 0, nota: (w.nota || '').trim(), series: done.map(s => ({ carga: s.carga, reps: s.reps })) };
   });
-  const sess = { id: uid(), data: hoje(), treinoId: t.id, treinoNome: treinoLabel(a, t), rpe: pse, nota: $('#c-nota').value.trim(), itens, peloAluno: true,
+  const sess = { id: uid(), revisto: false, data: hoje(), treinoId: t.id, treinoNome: treinoLabel(a, t), rpe: pse, nota: $('#c-nota').value.trim(), itens, peloAluno: true,
     minutos: Math.max(1, Math.round((Date.now() - wk.inicio) / 6e4)) };
   a.sessoes.push(sess);
   itens.forEach(i => { if (i.nota) novoComentario(a, i.nota, { exId: i.exId, treinoNome: sess.treinoNome, sessaoId: sess.id }); });

@@ -19,6 +19,7 @@ Webapp simples para personal trainers acompanharem alunos e planos de treino. Se
 - **Técnicas avançadas**: por exercício, o personal escolhe drop set, cluster, rest-pause, bi-set, super-set, isometria, negativa ou cadência, com campos próprios. A aluna vê a etiqueta e uma explicação curta; o texto do WhatsApp também leva a técnica. Duplicar e reordenar exercícios; o ecrã do personal usa a largura do computador.
 - **Copiar e modelos**: copiar um treino ou toda a programação para outro aluno (acrescentar ou substituir); guardar treinos ou programações como modelos e aplicá-los a qualquer aluno. Cada exercício tem a "Nota para o aluno", que aparece na área dele.
 - **Biblioteca**: lista compacta com ~175 exercícios genéricos de ginásio (grupo e equipamento), filtros por grupo, equipamento, com/sem vídeo e uso nos planos, busca sem acentos, e edição direta na linha (nome, grupo, equipamento, link do YouTube). Os exercícios novos são acrescentados à biblioteca do personal uma vez.
+- **Rever (personal)**: painel com os treinos feitos pelos alunos, mais recentes primeiro, com séries, técnica, esforço, comentários e variação de carga; estado Por rever / Revisto (sincroniza), filtros por aluno, estado e período, e contador no menu.
 - **Enviar plano ao aluno**: texto com cargas e links dos vídeos para colar no WhatsApp.
 - **Backup**: copiar/colar ou baixar/abrir ficheiro JSON.
 
