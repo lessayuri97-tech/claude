@@ -198,6 +198,22 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .dica.tec { border-left: 3px solid var(--fg); }
 
 /* Biblioteca de exercícios */
+.lib-filtros { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.lib-filtros input { max-width: 300px; } .lib-filtros select { max-width: 210px; }
+.pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 12px; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; color: var(--fg); }
+.pill .num { color: var(--muted); font-weight: 500; margin-left: 2px; }
+.pill.on { background: var(--fg); color: var(--bg); border-color: var(--fg); } .pill.on .num { color: inherit; opacity: .7; }
+.lib-tab { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.lib-cab, .lib-row { display: grid; grid-template-columns: 34px minmax(180px, 2.2fr) 130px 140px minmax(160px, 2fr) 74px 60px; gap: 8px; align-items: center; padding: 6px 14px; }
+.lib-cab { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; background: var(--surface-2); padding-block: 8px; }
+.lib-row { border-top: 1px solid var(--line); }
+.lib-row input, .lib-row select { padding: 5px 8px; font-size: .88rem; min-height: 34px; }
+.lib-row .lib-nome { font-weight: 600; border-color: transparent; background: transparent; }
+.lib-row .lib-nome:hover, .lib-row .lib-nome:focus { border-color: var(--line); background: var(--surface); }
+.lib-row .invalido { border-color: var(--danger); }
+@media (max-width: 900px) { .lib-cab { display: none; } .lib-row { grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr); } .lib-row .lib-nome { grid-column: 2 / -1; } .lib-row .lib-url { grid-column: 1 / -1; } .lib-row .lib-uso { display: none; } }
+
 .lib { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
 .ex-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
 .thumb { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: var(--surface-2); border: 0; padding: 0; cursor: pointer; display: block; width: 100%; overflow: hidden; }
@@ -453,7 +469,7 @@ function exemplo() {
   const ex = [
     ['Agachamento livre', 'Pernas'], ['Leg press 45°', 'Pernas'], ['Cadeira extensora', 'Pernas'], ['Mesa flexora', 'Pernas'],
     ['Supino reto com barra', 'Peito'], ['Supino inclinado com halteres', 'Peito'], ['Puxada frontal', 'Costas'], ['Remada baixa', 'Costas'],
-    ['Desenvolvimento com halteres', 'Ombros'], ['Elevação lateral', 'Ombros'], ['Rosca direta', 'Braços'], ['Tríceps na polia', 'Braços'],
+    ['Desenvolvimento com halteres', 'Ombros'], ['Elevação lateral', 'Ombros'], ['Rosca direta', 'Bíceps'], ['Tríceps na polia', 'Tríceps'],
     ['Prancha', 'Core'], ['Elevação pélvica', 'Glúteos']
   ].map(([nome, grupo]) => ({ id: uid(), nome, grupo, url: '', notas: '' }));
   const E = n => ex.find(e => e.nome === n).id;
@@ -509,6 +525,43 @@ function load() {
   try { const raw = localStorage.getItem(KEY); if (raw) { db = JSON.parse(raw); return; } } catch (e) {}
   db = exemplo();
 }
+
+/* ---------- Catálogo base de exercícios ---------- */
+function catalogoBase() {
+  const L = {
+    'Pernas': 'Agachamento livre:Barra; Agachamento frontal:Barra; Agachamento no Smith:Smith; Agachamento goblet:Halteres; Agachamento búlgaro:Halteres; Agachamento sumô:Halteres; Agachamento com peso corporal:Peso corporal; Agachamento com salto:Peso corporal; Sissy squat:Peso corporal; Hack squat:Máquina; Leg press 45°:Máquina; Leg press horizontal:Máquina; Cadeira extensora:Máquina; Mesa flexora:Máquina; Cadeira flexora:Máquina; Cadeira adutora:Máquina; Cadeira abdutora:Máquina; Afundo com halteres:Halteres; Avanço caminhando:Halteres; Passada com barra:Barra; Step-up:Halteres; Stiff com barra:Barra; Stiff com halteres:Halteres; Levantamento terra:Barra; Terra romeno:Barra; Levantamento terra com trap bar:Barra; Panturrilha em pé:Máquina; Panturrilha sentado:Máquina; Panturrilha no leg press:Máquina',
+    'Glúteos': 'Elevação pélvica:Barra; Elevação pélvica na máquina:Máquina; Ponte de glúteos:Peso corporal; Ponte de glúteos unilateral:Peso corporal; Coice na polia:Polia; Coice na máquina:Máquina; Abdução de quadril na polia:Polia; Abdução com elástico:Elástico; Clam shell com elástico:Elástico; Good morning:Barra; Passada lateral:Peso corporal; Caminhada lateral com elástico:Elástico; Hip thrust no Smith:Smith',
+    'Peito': 'Supino reto com barra:Barra; Supino reto com halteres:Halteres; Supino inclinado com barra:Barra; Supino inclinado com halteres:Halteres; Supino declinado:Barra; Supino na máquina:Máquina; Supino no Smith:Smith; Supino com pegada neutra:Halteres; Crucifixo reto com halteres:Halteres; Crucifixo inclinado:Halteres; Crucifixo na máquina:Máquina; Crossover na polia alta:Polia; Crossover na polia baixa:Polia; Flexão de braços:Peso corporal; Flexão inclinada:Peso corporal; Flexão declinada:Peso corporal; Mergulho para peito:Peso corporal; Pullover com halter:Halteres',
+    'Costas': 'Puxada frontal:Polia; Puxada supinada:Polia; Puxada com triângulo:Polia; Pulldown com corda:Polia; Barra fixa:Peso corporal; Barra fixa supinada:Peso corporal; Remada baixa:Polia; Remada curvada com barra:Barra; Remada unilateral com halter:Halteres; Remada cavalinho:Barra; Remada na máquina:Máquina; Remada no Smith:Smith; Remada invertida:Peso corporal; Pullover na polia:Polia; Encolhimento com halteres:Halteres; Encolhimento com barra:Barra; Hiperextensão lombar:Máquina',
+    'Ombros': 'Desenvolvimento com halteres:Halteres; Desenvolvimento com barra:Barra; Desenvolvimento na máquina:Máquina; Desenvolvimento no Smith:Smith; Desenvolvimento Arnold:Halteres; Press militar em pé:Barra; Landmine press:Barra; Elevação lateral:Halteres; Elevação lateral na polia:Polia; Elevação lateral inclinada:Halteres; Elevação frontal:Halteres; Elevação frontal com anilha:Outro; Crucifixo inverso:Halteres; Crucifixo inverso na máquina:Máquina; Face pull:Polia; Remada alta:Barra',
+    'Bíceps': 'Rosca direta:Barra; Rosca direta com barra W:Barra; Rosca alternada:Halteres; Rosca martelo:Halteres; Rosca martelo na corda:Polia; Rosca concentrada:Halteres; Rosca Scott:Máquina; Rosca na polia:Polia; Rosca inclinada:Halteres; Rosca spider:Barra; Rosca inversa:Barra; Rosca de punho:Barra; Rosca de punho inversa:Barra',
+    'Tríceps': 'Tríceps na polia:Polia; Tríceps na polia com barra:Polia; Tríceps unilateral na polia:Polia; Tríceps na máquina:Máquina; Tríceps testa:Barra; Tríceps francês:Halteres; Tríceps acima da cabeça na polia:Polia; Tríceps coice:Halteres; Supino fechado:Barra; Mergulho no banco:Peso corporal; Mergulho nas paralelas:Peso corporal; Flexão diamante:Peso corporal',
+    'Core': 'Prancha:Peso corporal; Prancha lateral:Peso corporal; Prancha com toque no ombro:Peso corporal; Abdominal crunch:Peso corporal; Abdominal infra:Peso corporal; Abdominal bicicleta:Peso corporal; Abdominal canivete:Peso corporal; Abdominal remador:Peso corporal; Abdominal na polia:Polia; Abdominal na máquina:Máquina; Elevação de pernas suspenso:Peso corporal; Russian twist:Outro; Roda abdominal:Outro; Mountain climber:Peso corporal; Dead bug:Peso corporal; Bird dog:Peso corporal; Hollow hold:Peso corporal; Woodchop na polia:Polia; Pallof press:Polia',
+    'Cardio': 'Esteira corrida:Máquina; Esteira inclinada:Máquina; Bicicleta ergométrica:Máquina; Elíptico:Máquina; Remo ergométrico:Máquina; Simulador de escada:Máquina; Skierg:Máquina; Air bike:Máquina; Corda de pular:Outro; Corda naval:Outro; Burpee:Peso corporal; Polichinelo:Peso corporal; Joelho alto:Peso corporal; Tiro de corrida:Peso corporal; Salto na caixa:Outro; Caminhada ao ar livre:Peso corporal; Corrida ao ar livre:Peso corporal',
+    'Mobilidade': 'Alongamento de quadríceps:Peso corporal; Alongamento de posteriores:Peso corporal; Alongamento de peitoral:Peso corporal; Alongamento de flexores do quadril:Peso corporal; Alongamento de glúteo (pombo):Peso corporal; Alongamento de panturrilha:Peso corporal; Mobilidade de ombros com bastão:Outro; Rotação torácica:Peso corporal; Gato-camelo:Peso corporal; Mobilidade 90/90 de quadril:Peso corporal; Agachamento profundo isométrico:Peso corporal; Rolo de liberação nas costas:Outro; Rolo de liberação nas pernas:Outro',
+    'Corpo inteiro': 'Kettlebell swing:Kettlebell; Turkish get-up:Kettlebell; Thruster com halteres:Halteres; Clean com barra:Barra; Arremesso de medicine ball:Outro; Slam ball:Outro; Farmer walk:Halteres; Agachamento com press:Halteres'
+  };
+  const out = [];
+  Object.keys(L).forEach(g => L[g].split(';').forEach(x => { const [nome, equip] = x.trim().split(':'); out.push({ nome, grupo: g, equip }); }));
+  return out;
+}
+const EQUIPS = ['Barra', 'Halteres', 'Máquina', 'Polia', 'Smith', 'Peso corporal', 'Kettlebell', 'Elástico', 'Outro'];
+function migraCatalogo() {
+  let papel = ''; try { papel = meuPapel(); } catch (e) {}
+  if (papel !== 'personal' || (db.catalogo || 0) >= 2) return;
+  const chave = n => String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  const tem = new Map(db.exercicios.map(e => [chave(e.nome), e]));
+  catalogoBase().forEach(c => {
+    const ex = tem.get(chave(c.nome));
+    if (ex) { if (!ex.equip) ex.equip = c.equip; }
+    else db.exercicios.push({ id: uid(), nome: c.nome, grupo: c.grupo, equip: c.equip, url: '', notas: '' });
+  });
+  db.exercicios.forEach(e => { // Braços passou a Bíceps / Tríceps
+    if (e.grupo === 'Braços') e.grupo = /tr[ií]ceps|mergulho|testa|franc[eê]s/i.test(e.nome) ? 'Tríceps' : 'Bíceps';
+    if (!e.equip) e.equip = 'Outro';
+  });
+  db.catalogo = 2; save();
+}
 function migra() { if (db.exemplo) db.alunos.forEach(a => { if (a.nome === 'Mariana Souza') a.nome = 'Mariana Ribeiro'; }); }
 const SYNCKEY = KEY + ':sync';
 let sync = { rev: 0, dirty: false, v: 0, status: 'inicio' }; // status: inicio | ativa | desligada | erro
@@ -525,7 +578,7 @@ const fmtData = iso => { if (!iso) return ''; const [y, m, d] = iso.split('-'); 
 const fmtNum = n => (n === '' || n == null || isNaN(n)) ? '' : (+n).toLocaleString('pt-BR', { maximumFractionDigits: 1 });
 const iniciais = nome => nome.trim().split(/\s+/).filter(Boolean).map(p => p[0]).slice(0, 2).join('').toUpperCase();
 const LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const GRUPOS = ['Pernas', 'Glúteos', 'Peito', 'Costas', 'Ombros', 'Braços', 'Core', 'Cardio', 'Mobilidade', 'Outro'];
+const GRUPOS = ['Pernas', 'Glúteos', 'Peito', 'Costas', 'Ombros', 'Bíceps', 'Tríceps', 'Core', 'Cardio', 'Mobilidade', 'Corpo inteiro', 'Outro'];
 const exById = id => db.exercicios.find(e => e.id === id);
 const alunoById = id => db.alunos.find(a => a.id === id);
 
@@ -594,8 +647,9 @@ function showVideo(exId) {
 }
 
 /* ---------- Roteamento ---------- */
-const ui = { tab: {}, busca: '', grupo: '' };
+const ui = { tab: {}, busca: '', grupo: '', equip: '', video: '', uso: '' };
 function route() {
+  migraCatalogo();
   const h = location.hash.slice(1) || 'alunos';
   const sess = getSessao();
   if (!sess) { renderLogin(); return; }
@@ -920,33 +974,50 @@ function textoPlano(a) {
 }
 
 /* ---------- Vista: exercícios ---------- */
+function filtraEx() {
+  const q = chaveBusca(ui.busca);
+  return db.exercicios.filter(e => (!ui.grupo || e.grupo === ui.grupo) && (!ui.equip || e.equip === ui.equip)
+    && (!ui.video || (ui.video === 'com') === !!ytParse(e.url)) && (!ui.uso || (ui.uso === 'usado') === (usosEx(e.id) > 0))
+    && (!q || chaveBusca(e.nome).includes(q))).sort((x, y) => x.nome.localeCompare(y.nome, 'pt-BR'));
+}
+const chaveBusca = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+const usosEx = id => db.alunos.reduce((s, a) => s + a.treinos.reduce((s2, t) => s2 + t.itens.filter(i => i.exId === id).length, 0), 0);
 function viewExercicios() {
-  const q = ui.busca.toLowerCase();
-  const lista = db.exercicios.filter(e => (!ui.grupo || e.grupo === ui.grupo) && (!q || e.nome.toLowerCase().includes(q)))
-    .sort((x, y) => x.nome.localeCompare(y.nome, 'pt-BR'));
+  const lista = filtraEx();
   const semVideo = db.exercicios.filter(e => !ytParse(e.url)).length;
   const grupos = [...new Set([...GRUPOS, ...db.exercicios.map(e => e.grupo).filter(Boolean)])];
+  const cont = g => db.exercicios.filter(e => e.grupo === g).length;
+  const opt = (v, atual, t) => `<option value="${v}" ${v === atual ? 'selected' : ''}>${t}</option>`;
   return `${bannerExemplo()}
   <div class="page-head"><div><div class="eyebrow num">${db.exercicios.length} exercícios${semVideo ? ` · ${semVideo} sem vídeo` : ''}</div><h1>Biblioteca de exercícios</h1></div>
   <button class="btn primary" data-act="novo-ex">+ Novo exercício</button></div>
-  <div class="filters"><input type="search" id="busca" placeholder="Buscar exercício" value="${esc(ui.busca)}" aria-label="Buscar exercício">
-    <select id="filtro-grupo" aria-label="Filtrar por grupo muscular"><option value="">Todos os grupos</option>${grupos.map(g => `<option ${g === ui.grupo ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select></div>
+  <div class="lib-filtros">
+    <input type="search" id="busca" placeholder="Buscar exercício" value="${esc(ui.busca)}" aria-label="Buscar exercício">
+    <select id="filtro-equip" aria-label="Equipamento"><option value="">Todo equipamento</option>${EQUIPS.map(q => opt(q, ui.equip, q)).join('')}</select>
+    <select id="filtro-video" aria-label="Vídeo">${opt('', ui.video, 'Com ou sem vídeo')}${opt('com', ui.video, 'Só com vídeo')}${opt('sem', ui.video, 'Só sem vídeo')}</select>
+    <select id="filtro-uso" aria-label="Uso nos planos">${opt('', ui.uso, 'Usados ou não')}${opt('usado', ui.uso, 'Usados em planos')}${opt('livre', ui.uso, 'Não usados')}</select>
+    ${(ui.grupo || ui.equip || ui.video || ui.uso || ui.busca) ? `<button class="btn ghost sm" data-act="limpar-filtros">Limpar filtros</button>` : ''}
+  </div>
+  <div class="pills" role="group" aria-label="Grupo muscular"><button class="pill ${ui.grupo ? '' : 'on'}" data-act="filtro-grupo" data-g="">Todos <span class="num">${db.exercicios.length}</span></button>
+    ${grupos.filter(g => cont(g)).map(g => `<button class="pill ${ui.grupo === g ? 'on' : ''}" data-act="filtro-grupo" data-g="${esc(g)}">${esc(g)} <span class="num">${cont(g)}</span></button>`).join('')}</div>
   <div id="lib-list">${libList(lista)}</div>`;
 }
 function libList(lista) {
   if (!lista.length) return `<div class="panel empty">Nenhum exercício encontrado.</div>`;
-  return `<div class="lib">${lista.map(e => {
-    const yt = ytParse(e.url);
-    const usos = db.alunos.reduce((s, a) => s + a.treinos.reduce((s2, t) => s2 + t.itens.filter(i => i.exId === e.id).length, 0), 0);
-    return `<article class="ex-card">
-      <button class="thumb" data-act="video" data-ex="${e.id}" aria-label="${yt ? 'Ver vídeo de ' : 'Adicionar vídeo a '}${esc(e.nome)}">
-        ${yt ? `<img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Vídeo do YouTube</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span>`
-          : `<span class="ph">Sem vídeo<br>Toque para colar o link do YouTube</span>`}
-      </button>
-      <div class="ex-body"><div class="row spread"><span class="chip">${esc(e.grupo || 'Outro')}</span><button class="btn ghost sm" data-act="editar-ex" data-ex="${e.id}">Editar</button></div>
-        <h3>${esc(e.nome)}</h3>${e.notas ? `<div class="small muted">${esc(e.notas)}</div>` : ''}
-        <div class="small muted num">${usos ? `Em ${usos} ${usos === 1 ? 'plano' : 'planos'}` : 'Não usado em planos'}</div></div>
-    </article>`;
+  const d = e => `data-ex="${e.id}"`;
+  return `<div class="lib-tab"><div class="lib-cab"><span></span><span>Exercício</span><span>Grupo</span><span>Equipamento</span><span>Link do YouTube</span><span>Uso</span><span></span></div>
+  <div class="small muted num" style="padding:6px 14px">${lista.length} ${lista.length === 1 ? 'exercício' : 'exercícios'}</div>
+  ${lista.map(e => {
+    const yt = ytParse(e.url), usos = usosEx(e.id);
+    return `<div class="lib-row">
+      <button class="play ${yt ? '' : 'novideo'}" data-act="video" ${d(e)} title="${yt ? 'Ver vídeo' : 'Sem vídeo'}" aria-label="${yt ? 'Ver vídeo de ' + esc(e.nome) : 'Sem vídeo'}">${PLAY}</button>
+      <input type="text" class="lib-nome" value="${esc(e.nome)}" data-lib="nome" ${d(e)} aria-label="Nome do exercício">
+      <select data-lib="grupo" ${d(e)} aria-label="Grupo">${GRUPOS.map(g => `<option ${g === e.grupo ? 'selected' : ''}>${g}</option>`).join('')}${GRUPOS.includes(e.grupo) || !e.grupo ? '' : `<option selected>${esc(e.grupo)}</option>`}</select>
+      <select data-lib="equip" ${d(e)} aria-label="Equipamento">${EQUIPS.map(q => `<option ${q === (e.equip || 'Outro') ? 'selected' : ''}>${q}</option>`).join('')}</select>
+      <input type="url" class="lib-url ${e.url && !yt ? 'invalido' : ''}" value="${esc(e.url)}" placeholder="Colar link do YouTube" data-lib="url" ${d(e)} inputmode="url" aria-label="Link do YouTube">
+      <span class="small muted num lib-uso">${usos ? usos + (usos === 1 ? ' plano' : ' planos') : '—'}</span>
+      <button class="btn ghost sm" data-act="editar-ex" ${d(e)}>Mais</button>
+    </div>`;
   }).join('')}</div>`;
 }
 // a imagem fica por cima do placeholder quando carrega
@@ -961,6 +1032,7 @@ function openExForm(id, depois) {
       <div class="wide" id="e-preview">${previewHtml(e.url)}</div>
       <label class="field">Nome<input type="text" id="e-nome" required value="${esc(e.nome)}" placeholder="Ex.: Agachamento búlgaro"></label>
       <label class="field">Grupo muscular<select id="e-grupo">${GRUPOS.map(g => `<option ${g === (e.grupo || 'Pernas') ? 'selected' : ''}>${g}</option>`).join('')}</select></label>
+      <label class="field">Equipamento<select id="e-equip">${EQUIPS.map(q => `<option ${q === (e.equip || 'Outro') ? 'selected' : ''}>${q}</option>`).join('')}</select></label>
       <label class="field wide">Dicas de execução (opcional)<textarea id="e-notas" placeholder="Ex.: manter coluna neutra, joelhos alinhados com a ponta dos pés">${esc(e.notas)}</textarea></label>
     </div>
     <div class="row spread">${id ? `<button type="button" class="btn danger" data-act="excluir-ex" data-ex="${id}">Excluir</button>` : '<span></span>'}
@@ -1004,6 +1076,8 @@ document.addEventListener('click', ev => {
   const t = a && (b.dataset.treino) && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'close': closeDialog(); break;
+    case 'filtro-grupo': ui.grupo = b.dataset.g; rerender(); break;
+    case 'limpar-filtros': ui.grupo = ui.equip = ui.video = ui.uso = ui.busca = ''; rerender(); break;
     case 'limpar-exemplo':
       confirmar('Apagar os dados de exemplo?', 'Apagar exemplos', () => {
         db = { exemplo: false, alunos: [], modelos: db.modelos || [], exercicios: db.exercicios.map(e => ({ ...e })) }; save(); rerender(); toast('Pronto. A biblioteca de exercícios foi mantida.');
@@ -1093,7 +1167,15 @@ function restaurar(txt) {
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (el.id === 'bk-file' && el.files[0]) { const r = new FileReader(); r.onload = () => restaurar(r.result); r.readAsText(el.files[0]); return; }
-  if (el.id === 'filtro-grupo') { ui.grupo = el.value; $('#lib-list').innerHTML = $('#app') && viewExercicios().match(/<div id="lib-list">([\s\S]*)<\/div>$/)[1]; return; }
+  if (el.id === 'filtro-equip') { ui.equip = el.value; rerender(); return; }
+  if (el.id === 'filtro-video') { ui.video = el.value; rerender(); return; }
+  if (el.id === 'filtro-uso') { ui.uso = el.value; rerender(); return; }
+  if (el.dataset.lib) {
+    const e = exById(el.dataset.ex), k = el.dataset.lib; if (!e) return;
+    if (k === 'nome') { const n = el.value.trim(); if (!n) { el.value = e.nome; return; } e.nome = n; save(); return; }
+    if (k === 'url') { const u = el.value.trim(); if (u && !ytParse(u)) { el.classList.add('invalido'); toast('Link do YouTube não reconhecido'); return; } e.url = u; save(); rerender(); return; }
+    e[k] = el.value; save(); return;
+  }
   if (el.id === 'evo-ex') { ui.exEvo = el.value; rerender(); return; }
   const k = el.dataset.edit; if (!k) return;
   const a = alunoById(el.dataset.aluno), t = a && a.treinos.find(x => x.id === el.dataset.treino); if (!t) return;
@@ -1142,7 +1224,7 @@ document.addEventListener('submit', ev => {
   if (f.id === 'f-ex') {
     const url = v('e-url');
     if (url && !ytParse(url)) { toast('O link do YouTube não foi reconhecido'); $('#e-url', f).focus(); return; }
-    const dados = { nome: v('e-nome'), grupo: v('e-grupo'), url, notas: v('e-notas') };
+    const dados = { nome: v('e-nome'), grupo: v('e-grupo'), equip: v('e-equip'), url, notas: v('e-notas') };
     if (!dados.nome) return;
     let id = f.dataset.id;
     if (id) Object.assign(exById(id), dados); else { id = uid(); db.exercicios.push({ id, ...dados }); }
