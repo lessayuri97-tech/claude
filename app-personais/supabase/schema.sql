@@ -121,8 +121,12 @@ create table if not exists public.leads (
 create index if not exists leads_personal_idx on public.leads(personal_id, created_at desc);
 alter table public.leads enable row level security;
 drop policy if exists leads_inserir on public.leads;
+create or replace function public.pt_espaco_existe(p uuid) returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from public.espacos where personal_id = p) $$;
+grant execute on function public.pt_espaco_existe(uuid) to anon, authenticated;
 create policy leads_inserir on public.leads for insert to anon, authenticated
-  with check (exists (select 1 from public.espacos e where e.personal_id = leads.personal_id));
+  with check (public.pt_espaco_existe(personal_id));
 drop policy if exists leads_dono on public.leads;
 create policy leads_dono on public.leads for all to authenticated
   using (personal_id = auth.uid()) with check (personal_id = auth.uid());
