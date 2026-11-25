@@ -1375,7 +1375,7 @@ document.addEventListener('click', ev => {
         <p class="small muted" style="margin:0">Substitui o plano alimentar do outra aluna (as metas ficam em branco para ajustar).</p>
         <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Copiar</button></div></form>`); break; }
     case 'convidar': abreConvite(a.id); break;
-    case 'sb-esqueci': { const e = $('#l-user').value.trim(); if (!e.includes('@')) { $('#l-err').textContent = 'Escreva primeiro o seu e-mail na caixa de cima.'; break; } SB.recuperar(e); $('#l-err').textContent = 'Se este e-mail tiver conta, enviámos um link para escolher uma senha nova.'; break; }
+    case 'sb-esqueci': { const e = $('#l-user').value.trim(); if (!e.includes('@')) { $('#l-err').textContent = 'Escreva primeiro o seu e-mail na caixa de cima.'; break; } SB.recuperar(e); $('#l-err').textContent = 'Se este e-mail tiver conta, enviamos um link para você escolher uma senha nova. Veja também a caixa de spam.'; break; }
     case 'nova-senha': a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); abreConvite(a.id); toast('Senha nova gerada'); break;
     case 'plano-revisto': a.revisaoPlano = hoje(); save(); rerender(); toast('Plano marcado como revisto'); break;
     case 'limites': { const c = cfgC(); openDialog(`<form id="f-config" class="dlg" style="padding:0"><div><div class="eyebrow">Central de clientes</div><h2>Limites dos avisos</h2></div>
@@ -1857,9 +1857,9 @@ async function abreConvite(id) {
   if (SBC && SB.ativo()) {
     toast('A preparar o convite…'); let link;
     try { link = await SB.novoConvite(a); } catch (e) { toast('Não foi possível criar o convite. Confira a internet.'); return; }
-    const tx = `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\nAbre este link no celular e cria a tua conta (é só uma vez):\n${link}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao tela de início" (no Android: menu ⋮ e "Instalar app").${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
+    const tx = `Olá ${a.nome.split(' ')[0]}! 👋\nSeu acompanhamento Squad já está pronto no aplicativo.\n\n1) Abra este link no celular e crie sua conta (só uma vez):\n${link}\n\n2) Depois, sempre que quiser entrar: ${urlApp()}\nUse o e-mail e a senha que você escolheu.\n\nDica: no iPhone toque em Compartilhar e "Adicionar à Tela de Início" (no Android: menu ⋮ e "Instalar app"). Assim fica como um app normal.${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
     openDialog(`<div class="row spread"><h2>Convidar ${esc(a.nome.split(' ')[0])}</h2><button class="btn ghost" data-act="close">Fechar</button></div>
-      <p class="muted" style="margin:0">Copie esta mensagem e cole no WhatsApp. O link serve para uma só pessoa e uma só vez.</p>
+      <p class="muted" style="margin:0">Copie esta mensagem e cole no WhatsApp. O link serve para uma só pessoa e uma só vez. Depois ela entra sempre pelo login, com e-mail e senha.</p>
       <textarea class="share" id="share-txt" readonly>${esc(tx)}</textarea>
       <div class="row"><button class="btn primary" data-act="copiar" data-src="share-txt">Copiar mensagem</button>
         ${tel.length >= 9 ? `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(tx)}">Abrir no WhatsApp</a>` : ''}</div>`);
@@ -1897,23 +1897,24 @@ function renderLogin() {
   const cab = `<div class="login-brand">${marcaMark(52)}<div><div class="eyebrow">O · Método · Squad</div><h1>${conv ? 'Criar a sua conta' : rec ? 'Nova senha' : 'Entrar'}</h1></div></div>`;
   if (SBC && conv) { $('#app').innerHTML = `<div class="login">${cab}
     <form class="login-card" id="f-convite" data-token="${conv}" autocomplete="on">
-      <p class="small" style="margin:0">O seu personal convidou-o. Escolha o seu e-mail e uma senha. Só precisa de fazer isto uma vez.</p>
-      <label class="field">O seu e-mail<input type="email" id="l-user" autocapitalize="none" required></label>
-      <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="l-senha" minlength="6" required></label>
+      <p class="small" style="margin:0">A equipe Squad convidou você! Escolha seu e-mail e uma senha. Você só faz isso uma vez: depois entra sempre com o e-mail e a senha.</p>
+      <label class="field">Seu e-mail<input type="email" id="l-user" autocomplete="username" autocapitalize="none" required></label>
+      <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="l-senha" autocomplete="new-password" minlength="6" required></label>
       <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar conta e entrar</button></form>
-    <p class="small muted" style="margin:0">Já tem conta? <a href="#">Entrar</a></p></div>`; return; }
+    <p class="small muted" style="margin:0">Já criou sua conta? <a href="#" onclick="history.replaceState(null,'',location.pathname);location.reload();return false">Entrar com e-mail e senha</a></p></div>`; return; }
   if (SBC && rec) { $('#app').innerHTML = `<div class="login">${cab}
     <form class="login-card" id="f-novasenha"><label class="field">Escolha a nova senha<input type="password" id="l-senha" minlength="6" required></label>
       <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Guardar nova senha</button></form></div>`; return; }
   $('#app').innerHTML = `<div class="login">${cab}
     <form class="login-card" id="f-login" autocomplete="on">
-      <label class="field">${SBC ? 'E-mail' : 'Usuário'}<input type="${SBC ? 'email' : 'text'}" id="l-user" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
-      <label class="field">Senha<input type="password" id="l-senha" autocapitalize="none" required></label>
+      <label class="field">${SBC ? 'E-mail' : 'Usuário'}<input type="${SBC ? 'email' : 'text'}" id="l-user" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
+      <label class="field">Senha<input type="password" id="l-senha" autocomplete="current-password" autocapitalize="none" required></label>
+      <label class="small" style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" onchange="document.getElementById('l-senha').type=this.checked?'text':'password'"> Mostrar a senha</label>
       <div class="login-err" id="l-err" role="alert"></div>
       <button class="btn primary" style="justify-content:center">Entrar</button>
       ${SBC ? '<button type="button" class="btn ghost sm" data-act="sb-esqueci" style="justify-content:center">Esqueci a minha senha</button>' : ''}
     </form>
-    <p class="small muted" style="margin:0">${SBC ? 'Recebeu um convite da equipe Squad? Abra o link que lhe enviaram.' : 'Recebeu um convite da equipe Squad? Escreva o usuário e a senha que lhe enviaram.'}</p>
+    <p class="small muted" style="margin:0">${SBC ? 'Primeiro acesso? Abra o link do convite que a equipe Squad enviou pelo WhatsApp e crie sua conta. Depois é só entrar aqui com seu e-mail e senha.' : 'Recebeu um convite da equipe Squad? Escreva o usuário e a senha que lhe enviaram.'}</p>
     ${SBC && /[?&]equipe\b/.test(location.search) ? `<details class="demo-box" open><summary><span class="chip accent">Equipe: criar acesso</span></summary>
       <form id="f-signup" style="display:grid;gap:10px;margin-top:10px"><label class="field">O seu e-mail<input type="email" id="s-email" autocapitalize="none" required></label>
       <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="s-senha" minlength="6" required></label>
@@ -1943,10 +1944,10 @@ document.addEventListener('submit', async ev => {
   if (SBC && (fid === 'f-convite' || fid === 'f-signup' || fid === 'f-novasenha')) {
     ev.preventDefault(); const er = $(fid === 'f-signup' ? '#s-err' : '#l-err'), btn = ev.target.querySelector('button.primary'); er.textContent = ''; btn.disabled = true;
     try {
-      if (fid === 'f-convite') { await SB.criarAluno($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('aluno'); }
+      if (fid === 'f-convite') { await SB.criarAluno($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('aluno'); toast('Conta criada! Da próxima vez, entre em ' + urlApp().replace('https://', '') + ' com seu e-mail e senha.'); }
       else if (fid === 'f-signup') { await SB.criarPersonal($('#s-email').value.trim(), $('#s-senha').value); sync.dirty = true; sync.v++; saveSync(); setSessao({ papel: 'personal' }); location.hash = 'central'; route(); SB.push(); }
       else { const r = await SB.novaSenha(sbRec, $('#l-senha').value); if (!r.ok) throw new Error(SB.erro(r)); sbRec = ''; toast('Senha alterada. Já pode entrar.'); renderLogin(); }
-    } catch (e) { er.textContent = e.message; btn.disabled = false; }
+    } catch (e) { er.textContent = fid === 'f-convite' && /convite/i.test(e.message) ? 'Este convite já foi usado ou não é válido. Se você já criou sua conta, entre com seu e-mail e senha. Se não, peça um convite novo à equipe.' : e.message; btn.disabled = false; }
     return;
   }
   if (fid !== 'f-login') return;
