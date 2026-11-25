@@ -1843,7 +1843,7 @@ function aplicaMarca() {
 const slugNome = n => norm(n).replace(/[^a-z0-9 ]/g, '').trim();
 const pinNovo = () => String(Math.floor(1000 + Math.random() * 9000));
 function acessoDe(a) { if (!a.acesso) { a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); } return a.acesso; }
-function urlApp() { return /^https?:/.test(location.origin) ? location.origin + '/app' : 'https://pt-example.vercel.app/app'; }
+function urlApp() { return /^https?:/.test(location.origin) ? location.origin + '/app' : 'https://squad.vercel.app/app'; }
 function textoConvite(a) {
   const m = marca(), ac = acessoDe(a);
   return `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\n1) Abre este link no celular: ${urlApp()}\n2) Utilizador: ${ac.usuario}\n3) Senha: ${ac.senha}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao tela de início" (no Android: menu ⋮ e "Instalar app"). Assim fica como uma app normal.${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;

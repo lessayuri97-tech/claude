@@ -5,7 +5,7 @@ Demora uns 10 minutos. É grátis. Faz isto uma vez só.
 ## 1. Criar a conta e o projeto
 1. Abra **supabase.com** e toque em **Start your project**. Entre com o Google ou GitHub.
 2. Toque em **New project**.
-3. **Name**: escreva `pt-example`.
+3. **Name**: escreva `squad`.
 4. **Database Password**: toque em **Generate a password** e guarde-a num sítio seu (não precisa de a enviar a ninguém).
 5. **Region**: escolha a mais perto (ex.: *West EU (Ireland)* ou *South America (São Paulo)*).
 6. Toque em **Create new project** e espere 1–2 minutos.
@@ -19,7 +19,7 @@ Demora uns 10 minutos. É grátis. Faz isto uma vez só.
 1. Menu da esquerda: **Authentication** → **Sign In / Providers** (ou **Providers**) → **Email**.
 2. Desligue **Confirm email** e toque em **Save**.
    (Se deixar ligado, cada pessoa tem de abrir um e-mail antes de entrar. Funciona, mas dá mais passos aos alunos.)
-3. Em **Authentication** → **URL Configuration**, em **Site URL** escreva `https://pt-example.vercel.app` e guarde. (Serve para o link de "esqueci a senha".)
+3. Em **Authentication** → **URL Configuration**, em **Site URL** escreva `https://squad.vercel.app` e guarde. (Serve para o link de "esqueci a senha".)
 
 ## 4. Copiar só duas coisas
 1. Menu da esquerda: **Project Settings** (a roda dentada) → **API** (ou **API Keys**).
