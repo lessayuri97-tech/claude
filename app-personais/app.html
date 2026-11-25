@@ -335,6 +335,22 @@ body.modo-aluno .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); 
 .perfil-top { display: flex; gap: 16px; align-items: center; }
 .evo-aluno { display: grid; gap: 14px; }
 body.modo-aluno .evo-aluno .grid-2 { grid-template-columns: minmax(0, 1fr); }
+
+/* ---------- Login demo ---------- */
+#btn-sair { margin-left: 4px; }
+.topbar .nav + #btn-sair { margin-left: 0; }
+@media (max-width: 760px) { #btn-sair { margin-left: auto; } }
+body.sem-login .topbar .nav, body.sem-login .tabbar, body.sem-login #btn-sair { display: none !important; }
+body.papel-aluno .aluno-bar { display: none; }
+.login { max-width: 420px; margin: 24px auto 0; display: grid; gap: 18px; width: 100%; }
+.login-brand { display: grid; gap: 10px; justify-items: start; }
+.login-brand .brand-mark { width: 52px; height: 52px; border-radius: 12px; }
+.login h1 { font-size: 2.2rem; }
+.login-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; gap: 14px; }
+.login-err { color: var(--danger); font-size: .9rem; min-height: 1.2em; }
+.demo-box { background: var(--accent-soft); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
+.demo-box .cred { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--surface); border-radius: 10px; padding: 10px 12px; }
+.demo-box code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85rem; overflow-wrap: anywhere; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -350,6 +366,7 @@ body.modo-aluno .evo-aluno .grid-2 { grid-template-columns: minmax(0, 1fr); }
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
       <a href="#backup" data-nav="backup">Backup</a>
     </nav>
+    <button class="btn ghost sm" id="btn-sair" data-sact="logout" type="button">Sair</button>
   </div>
 </header>
 <main class="wrap" id="app"></main>
@@ -418,9 +435,9 @@ function exemplo() {
     exemplo: true,
     exercicios: ex,
     alunos: [
-      { id: uid(), nome: 'Mariana Souza', objetivo: 'Hipertrofia', telefone: '(11) 98765-4321', inicio: diasAtras(30), notas: 'Treina 4x por semana, de manhã.', treinos: [tA, tB], sessoes, medidas },
+      { id: uid(), nome: 'Mariana Ribeiro', objetivo: 'Hipertrofia', telefone: '(11) 98765-4321', inicio: diasAtras(30), notas: 'Treina 4x por semana, de manhã.', treinos: [tA, tB], sessoes, medidas },
       { id: uid(), nome: 'Carlos Lima', objetivo: 'Emagrecimento', telefone: '(21) 99123-4567', inicio: diasAtras(18), notas: 'Hérnia de disco L5 (liberado pelo médico). Evitar carga axial alta.', treinos: [tC], sessoes: sessC, medidas: medC },
-      { id: uid(), nome: 'Ana Ribeiro', objetivo: 'Condicionamento', telefone: '', inicio: diasAtras(3), notas: '', treinos: [], sessoes: [], medidas: [] }
+      { id: uid(), nome: 'Ana Costa', objetivo: 'Condicionamento', telefone: '', inicio: diasAtras(3), notas: '', treinos: [], sessoes: [], medidas: [] }
     ]
   };
 }
@@ -430,8 +447,9 @@ function load() {
   try { const raw = localStorage.getItem(KEY); if (raw) { db = JSON.parse(raw); return; } } catch (e) {}
   db = exemplo();
 }
+function migra() { if (db.exemplo) db.alunos.forEach(a => { if (a.nome === 'Mariana Souza') a.nome = 'Mariana Ribeiro'; }); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
-load();
+load(); migra();
 
 /* ---------- Utilidades ---------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -495,6 +513,11 @@ function showVideo(exId) {
 const ui = { tab: {}, busca: '', grupo: '' };
 function route() {
   const h = location.hash.slice(1) || 'alunos';
+  const sess = getSessao();
+  if (!sess) { renderLogin(); return; }
+  document.body.classList.remove('sem-login');
+  document.body.classList.toggle('papel-aluno', sess.papel === 'aluno');
+  if (sess.papel === 'aluno' && !/^(meu-|meus-|minha-)/.test(h)) { location.hash = 'meu-inicio'; return; }
   if (/^(meu-|meus-|minha-)/.test(h)) { renderAluno(h); return; }
   document.body.classList.remove('modo-aluno');
   let view = h, arg = null;
@@ -971,11 +994,53 @@ document.addEventListener('submit', ev => {
   }
 });
 
+/* ================= LOGIN DEMO (sem servidor; só para demonstração) ================= */
+const SKEY = KEY + ':sessao';
+const USERS = { personal: { senha: 'personal', papel: 'personal' }, 'mariana ribeiro': { senha: 'alunateste', papel: 'aluno', nome: 'Mariana Ribeiro' } };
+const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+function getSessao() { try { return JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch (e) { return null; } }
+function setSessao(v) { try { v ? localStorage.setItem(SKEY, JSON.stringify(v)) : localStorage.removeItem(SKEY); } catch (e) {} }
+function renderLogin() {
+  document.body.classList.add('sem-login'); document.body.classList.remove('modo-aluno', 'papel-aluno');
+  $('#app').innerHTML = `<div class="login">
+    <div class="login-brand"><span class="brand-mark"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink);font-size:1.5rem">PT</span></span>
+      <div><div class="eyebrow">PT example</div><h1>Entrar</h1></div></div>
+    <form class="login-card" id="f-login" autocomplete="off">
+      <label class="field">Usuário<input type="text" id="l-user" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
+      <label class="field">Senha<input type="password" id="l-senha" autocapitalize="none" required></label>
+      <div class="login-err" id="l-err" role="alert"></div>
+      <button class="btn primary" style="justify-content:center">Entrar</button>
+    </form>
+    <div class="demo-box"><div><span class="chip accent">Demonstração</span></div>
+      <div class="small">Esta é uma versão de demonstração, sem servidor. Use os acessos de teste abaixo (toque para preencher).</div>
+      <button class="cred btn" type="button" data-fill="personal|personal" style="text-align:left"><span><b>Personal</b><br><code>personal</code> · <code>personal</code></span><span class="small">Usar</span></button>
+      <button class="cred btn" type="button" data-fill="Mariana Ribeiro|alunateste" style="text-align:left"><span><b>Aluna</b><br><code>Mariana Ribeiro</code> · <code>alunateste</code></span><span class="small">Usar</span></button>
+    </div></div>`;
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-fill]'); if (!b) return;
+  const [u, pw] = b.dataset.fill.split('|'); $('#l-user').value = u; $('#l-senha').value = pw; $('#f-login button.primary').focus();
+});
+document.addEventListener('submit', ev => {
+  if (ev.target.id !== 'f-login') return;
+  ev.preventDefault();
+  const u = USERS[norm($('#l-user').value)];
+  if (!u || u.senha !== $('#l-senha').value) { $('#l-err').textContent = 'Usuário ou senha incorretos.'; return; }
+  if (u.papel === 'personal') { setSessao({ papel: 'personal' }); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'alunos'; }
+  else {
+    let a = db.alunos.find(x => norm(x.nome) === norm(u.nome));
+    if (!a) { a = { id: uid(), nome: u.nome, objetivo: 'Condicionamento', telefone: '', inicio: hoje(), notas: '', treinos: [], sessoes: [], medidas: [] }; db.alunos.push(a); save(); }
+    setSessao({ papel: 'aluno', alunoId: a.id }); location.hash = 'meu-inicio';
+  }
+  route();
+});
+
 /* ================= ÁREA DO ALUNO ================= */
 const WKEY = KEY + ':treino-em-curso';
 const DIAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const isoDe = d => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 6e4); return z.toISOString().slice(0, 10); };
-function alunoAtivo() { return alunoById(db.alunoAtivo) || db.alunos.find(a => a.treinos.some(t => t.itens.length)) || db.alunos[0]; }
+function alunoAtivo() { const se = getSessao(); if (se && se.papel === 'aluno' && alunoById(se.alunoId)) return alunoById(se.alunoId);
+  return alunoById(db.alunoAtivo) || db.alunos.find(a => a.treinos.some(t => t.itens.length)) || db.alunos[0]; }
 function treinoLabel(a, t) { return `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`; }
 function proximoTreino(a) {
   const ts = a.treinos.filter(t => t.itens.length); if (!ts.length) return null;
@@ -983,7 +1048,7 @@ function proximoTreino(a) {
   const i = ts.findIndex(t => t.id === u.treinoId); return ts[(i + 1) % ts.length] || ts[0];
 }
 function duracaoEstimada(t) { return Math.max(10, Math.round(t.itens.reduce((s, it) => s + (+it.series || 3) * (40 + (+it.descanso || 60)), 0) / 60 / 5) * 5); }
-function volume(s) { return s.itens.reduce((v, i) => v + (i.series && i.series.length ? i.series : [{ carga: i.carga, reps: i.reps }]).reduce((x, se) => x + ((+se.carga || 0) * (parseInt(se.reps) || 0)), 0), 0); }
+function volume(s) { return s.itens.filter(i => i.feito).reduce((v, i) => v + (i.series && i.series.length ? i.series : [{ carga: i.carga, reps: i.reps }]).reduce((x, se) => x + ((+se.carga || 0) * (parseInt(se.reps) || 0)), 0), 0); }
 
 let wk = null; // treino em curso
 try { const r = localStorage.getItem(WKEY); if (r) wk = JSON.parse(r); } catch (e) {}
@@ -1117,6 +1182,7 @@ function vPerfil(a) {
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
   <div class="panel"><div class="eyebrow">Medidas</div><p style="margin:0" class="small muted">Registre seu peso para acompanhar a evolução.</p>
     <button class="btn" data-act="nova-medida" data-id="${a.id}">+ Registrar peso e medidas</button></div>
+  <button class="btn" data-sact="logout" style="justify-content:center">Sair da conta</button>
   <div class="panel"><div class="eyebrow">Instalar no celular</div><p style="margin:0" class="small">No Android: menu ⋮ do navegador, <b>Instalar app</b>. No iPhone: botão Compartilhar, <b>Adicionar à Tela de Início</b>.</p></div>`, 'perfil');
 }
 
@@ -1146,6 +1212,7 @@ document.addEventListener('click', ev => {
   const t = b.dataset.treino && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'sair': document.body.classList.remove('modo-aluno'); break;
+    case 'logout': setSessao(null); wk = null; saveWk(); location.hash = ''; route(); break;
     case 'iniciar': if (t) { iniciarTreino(a, t); } break;
     case 'abrir': ev.preventDefault(); { const i = +b.dataset.i; wk.aberto = wk.aberto === i ? -1 : i; saveWk(); rerender(); } break;
     case 'peso': { const s = wk.itens[b.dataset.i].sets[b.dataset.j]; s.carga = Math.max(0, (+s.carga || 0) + (+b.dataset.d)); saveWk();
@@ -1199,7 +1266,7 @@ document.addEventListener('submit', ev => {
   setTimeout(() => openDialog(`<div style="text-align:center;display:grid;gap:10px;justify-items:center">
     <div class="eyebrow">Treino concluído</div><h2>Bom trabalho, ${esc(a.nome.split(' ')[0])}!</h2>
     <div class="mini-stats num" style="width:100%"><div><b>${nS}</b><span>séries</span></div><div><b>${fmtNum(vol)}</b><span>kg de volume</span></div><div><b>${sess.minutos || '—'}</b><span>minutos</span></div></div>
-    <p class="small muted" style="margin:0">Seu personal já consegue ver este treino.</p>
+    <p class="small muted" style="margin:0">Treino salvo no histórico. Na versão completa, o personal recebe este treino na hora.</p>
     <button class="btn primary" data-act="close">Fechar</button></div>`), 50);
 });
 
