@@ -208,6 +208,8 @@ dialog::backdrop { background: rgba(10, 15, 25, .6); }
 .video-box { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #000; border-radius: 8px; overflow: hidden; }
 .video-box iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .tabbar { display: none; }
+.video-aviso { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; text-align: center; padding: 16px; background: var(--surface-2); color: var(--fg); }
+.video-aviso span { font-size: .85rem; color: var(--muted); }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 50; font-size: .9rem; }
 textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .82rem; }
 
@@ -486,7 +488,26 @@ function ytParse(url) {
 }
 const ytThumb = id => `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 const ytWatch = yt => `https://www.youtube.com/watch?v=${yt.id}${yt.start ? '&t=' + yt.start + 's' : ''}`;
-const ytEmbed = yt => `https://www.youtube-nocookie.com/embed/${yt.id}?rel=0&modestbranding=1${yt.start ? '&start=' + yt.start : ''}`;
+const ytEmbed = (yt, auto) => `https://www.youtube-nocookie.com/embed/${yt.id}?rel=0&modestbranding=1${yt.start ? '&start=' + yt.start : ''}${auto ? '&autoplay=1&playsinline=1&enablejsapi=1' + (/^https?:$/.test(location.protocol) ? '&origin=' + encodeURIComponent(location.origin) : '') : ''}`;
+/* Player no próprio lugar: o iframe é criado no toque do utilizador, por isso o iOS deixa tocar logo (autoplay + playsinline) */
+const playerHtml = (ex, yt) => `<div class="video-box"><iframe src="${ytEmbed(yt, true)}" data-yt="${yt.id}" data-start="${yt.start || 0}" title="${esc(ex.nome)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write" allowfullscreen></iframe></div>`;
+function avisoVideo(box, id, start) {
+  if (!box) return;
+  const url = `https://www.youtube.com/watch?v=${id}${+start ? '&t=' + start + 's' : ''}`;
+  box.innerHTML = `<div class="video-aviso"><b>Este vídeo não pode ser reproduzido aqui.</b><span>O dono do vídeo bloqueou a reprodução em outros sites.</span><a class="btn sm" href="${url}" target="_blank" rel="noopener">Ver no YouTube</a></div>`;
+}
+document.addEventListener('load', e => { // liga a escuta de erros do player do YouTube
+  const f = e.target; if (!f || f.tagName !== 'IFRAME' || !f.dataset.yt) return;
+  try { f.contentWindow.postMessage(JSON.stringify({ event: 'listening', id: 1, channel: 'widget' }), '*'); } catch (err) {}
+}, true);
+window.addEventListener('message', ev => {
+  let host = ''; try { host = new URL(ev.origin).hostname; } catch (e) { return; }
+  if (!/(^|\.)youtube(-nocookie)?\.com$/.test(host)) return;
+  let d = ev.data; if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) { return; } }
+  if (!d || d.event !== 'onError') return;
+  const fr = [...document.querySelectorAll('iframe[data-yt]')].find(f => f.contentWindow === ev.source);
+  if (fr) avisoVideo(fr.closest('.video-box'), fr.dataset.yt, fr.dataset.start);
+});
 
 const PLAY = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z" fill="currentColor"/></svg>';
 
@@ -508,10 +529,8 @@ function showVideo(exId) {
   openDialog(`
     <div class="row spread"><div><div class="eyebrow">${esc(ex.grupo)}</div><h2>${esc(ex.nome)}</h2></div>
     <button class="btn ghost" data-act="close">Fechar</button></div>
-    <div class="video-box"><iframe src="${ytEmbed(yt)}" title="${esc(ex.nome)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-    ${ex.notas ? `<p style="margin:0">${esc(ex.notas)}</p>` : ''}
-    <div class="row"><a class="btn" href="${ytWatch(yt)}" target="_blank" rel="noopener">Abrir no YouTube</a>
-    <span class="muted small">Se o vídeo não carregar aqui, use o botão para abrir direto no YouTube.</span></div>`);
+    ${playerHtml(ex, yt)}
+    ${ex.notas ? `<p style="margin:0">${esc(ex.notas)}</p>` : ''}`);
 }
 
 /* ---------- Roteamento ---------- */
@@ -895,6 +914,8 @@ document.addEventListener('click', ev => {
     case 'del-item': t.itens = t.itens.filter(i => i.id !== b.dataset.item); save(); rerender(); break;
     case 'mover': { const i = t.itens.findIndex(x => x.id === b.dataset.item), j = i + (+b.dataset.dir); if (j < 0 || j >= t.itens.length) break; [t.itens[i], t.itens[j]] = [t.itens[j], t.itens[i]]; save(); rerender(); break; }
     case 'video': showVideo(b.dataset.ex); break;
+    case 'play-inline': { const ex = exById(b.dataset.ex), yt = ex && ytParse(ex.url); if (!yt) break;
+      const t = document.createElement('div'); t.innerHTML = playerHtml(ex, yt); b.replaceWith(t.firstElementChild); break; }
     case 'registrar': openRegistrar(a.id, t.id); break;
     case 'del-sessao': confirmar('Excluir esta sessão?', 'Excluir sessão', () => { a.sessoes = a.sessoes.filter(s => s.id !== b.dataset.sessao); save(); rerender(); }); break;
     case 'nova-medida': openMedida(a.id); break;
@@ -1227,7 +1248,7 @@ function vTreino(a, t) {
         <span class="chev" aria-hidden="true">${open ? '−' : '+'}</span>
       </button>
       ${open ? `<div class="ex-run-body">
-        ${yt ? `<button class="thumb" data-act="video" data-ex="${it.exId}" aria-label="Ver vídeo de ${esc(ex.nome)}"><img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Ver vídeo</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span></button>`
+        ${yt ? `<button class="thumb" data-act="play-inline" data-ex="${it.exId}" aria-label="Reproduzir vídeo de ${esc(ex.nome)}"><img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Ver vídeo</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span></button>`
           : `<div class="small muted">O personal ainda não adicionou vídeo a este exercício.</div>`}
         ${it.obs || (ex && ex.notas) ? `<div class="dica"><b>Dica do personal:</b> ${esc([it.obs, ex && ex.notas].filter(Boolean).join('. '))}</div>` : ''}
         ${prev ? `<div class="small muted num">Última vez: ${fmtNum(prev.carga)} kg (${fmtData(prev.data)})</div>` : ''}
