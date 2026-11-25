@@ -1487,7 +1487,7 @@ function confirmar(msg, okLabel, fn) {
 }
 
 /* ---------- Eventos ---------- */
-document.addEventListener('click', ev => {
+document.addEventListener('click', async ev => {
   const b = ev.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, a = b.dataset.id && alunoById(b.dataset.id) || (b.dataset.aluno && alunoById(b.dataset.aluno));
   const t = a && (b.dataset.treino) && a.treinos.find(x => x.id === b.dataset.treino);
@@ -1545,6 +1545,12 @@ document.addEventListener('click', ev => {
         <label class="field">Para a aluna<select id="nc-dest">${outros.map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select></label>
         <p class="small muted" style="margin:0">Substitui o plano alimentar do outra aluna (as metas ficam em branco para ajustar).</p>
         <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Copiar</button></div></form>`); break; }
+    case 'eq-convite': { const r = await SB.req('/rest/v1/rpc/pt_convite_equipe', { method: 'POST', body: {} }); if (!r.ok) { toast('Não consegui gerar. Rode o supervisao.sql no Supabase.'); break; }
+      const link = urlApp() + '#equipe=' + r.j, txt = 'Convite para a supervisão da equipe Squad. Abra o link, escolha o seu e-mail e uma senha (vale 7 dias, só dá para usar uma vez): ' + link;
+      openDialog(`<div class="row spread"><h2>Convite de supervisor</h2><button class="btn ghost" data-act="close">Fechar</button></div><p class="muted small" style="margin:0">Envie esta mensagem só à pessoa que vai supervisionar. O link vale 7 dias e funciona uma vez.</p><textarea class="share" id="share-txt" readonly>${esc(txt)}</textarea>
+        <div class="row"><button class="btn primary" data-act="eq-copiar">Copiar</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">Enviar por WhatsApp</a></div>`); break; }
+    case 'eq-copiar': { const t = $('#share-txt'); t.select(); try { await navigator.clipboard.writeText(t.value); } catch (e) { document.execCommand('copy'); } toast('Copiado'); break; }
+    case 'eq-remover': confirmar('Remover o acesso de ' + (b.dataset.email || 'este supervisor') + '?', 'Remover acesso', async () => { const r = await SB.req('/rest/v1/rpc/pt_remover_supervisor', { method: 'POST', body: { p_user: b.dataset.uid } }); toast(r.ok ? 'Acesso removido' : 'Não consegui remover'); carregaEquipe(); }); break;
     case 'convidar': abreConvite(a.id); break;
     case 'sb-esqueci': { const e = $('#l-user').value.trim(); if (!e.includes('@')) { $('#l-err').textContent = 'Escreva primeiro o seu e-mail na caixa de cima.'; break; } SB.recuperar(e); $('#l-err').textContent = 'Se este e-mail tiver conta, enviamos um link para você escolher uma senha nova. Veja também a caixa de spam.'; break; }
     case 'nova-senha': a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); abreConvite(a.id); toast('Senha nova gerada'); break;
@@ -2320,10 +2326,24 @@ function viewDefinicoes() {
       <label class="field wide">Afirmação da semana (aparece no topo da tela da aluna)<textarea data-marca="afirmacao" maxlength="160" placeholder="Ex.: Eu não preciso de perfeição, preciso de constância.">${esc(m.afirmacao || '')}</textarea></label>
       <label class="field wide">Mensagem de boas-vindas para as alunas (aparece no convite e no início)<textarea data-marca="boasVindas" placeholder="Ex.: Bem-vinda à Squad! Qualquer dúvida, chama a equipe. Vamos juntas!">${esc(m.boasVindas)}</textarea></label>
     </div></div>
+  ${typeof SB !== 'undefined' && SB.ativo() ? painelEquipe() : ''}
   <div class="panel"><h3>Avisos (notificações)</h3><p class="muted small" style="margin:0">O sino no topo acende quando uma aluna finaliza um treino ou alguém faz o diagnóstico no site.</p>
     <div class="small" style="display:grid;gap:4px"><span><b>Estado dos avisos do navegador:</b> ${'Notification' in window ? ({ granted: 'ativos', denied: 'bloqueados (desbloqueie nas definições do navegador)', default: 'desligados' })[Notification.permission] : 'este navegador não suporta'}</span></div>
     ${'Notification' in window && Notification.permission === 'default' ? '<div class="row"><button class="btn primary" data-act="avisos-ativar">Ativar avisos no navegador</button></div>' : ''}
     <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>`;
+}
+function painelEquipe() {
+  if (SB.supervisor()) return `<div class="panel"><h3>Equipe</h3><p class="muted small" style="margin:0">Você tem acesso de supervisão: vê e edita as mesmas alunas, leads, treinos, nutrição e Central do dono da conta.</p></div>`;
+  setTimeout(carregaEquipe, 0);
+  return `<div class="panel"><h3>Equipe e supervisão</h3><p class="muted small" style="margin:0">Dê a outra pessoa da equipe o mesmo acesso que você tem: ela vê e edita as mesmas alunas, leads, treinos e nutrição. Gere um convite e envie o link; a pessoa cria o próprio e-mail e senha. Não há cadastro aberto.</p>
+    <div class="row"><button class="btn primary" data-act="eq-convite">Gerar convite de supervisor</button></div>
+    <div id="eq-lista" class="small muted">A carregar…</div></div>`;
+}
+async function carregaEquipe() {
+  const box = document.getElementById('eq-lista'); if (!box) return;
+  const r = await SB.req('/rest/v1/rpc/pt_listar_supervisores', { method: 'POST', body: {} });
+  if (!r.ok) { box.textContent = 'Para usar a supervisão, rode primeiro o ficheiro supervisao.sql no Supabase (veja o guia).'; return; }
+  box.innerHTML = r.j.length ? `<div class="eyebrow">Supervisores com acesso</div>` + r.j.map(x => `<div class="row spread" style="margin:6px 0"><span><b>${esc(x.email || 'sem e-mail')}</b> <span class="muted">desde ${fmtData(String(x.desde).slice(0, 10))}</span></span><button class="btn sm ghost danger" data-act="eq-remover" data-uid="${esc(x.user_id)}" data-email="${esc(x.email || '')}">Remover acesso</button></div>`).join('') : 'Ainda não há supervisores.';
 }
 const USERS = { personal: { senha: 'personal', papel: 'personal' }, 'mariana ribeiro': { senha: 'alunateste', papel: 'aluno', nome: 'Mariana Ribeiro' } };
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
@@ -2331,8 +2351,8 @@ function getSessao() { try { return JSON.parse(localStorage.getItem(SKEY) || 'nu
 function setSessao(v) { try { v ? localStorage.setItem(SKEY, JSON.stringify(v)) : localStorage.removeItem(SKEY); } catch (e) {} }
 function renderLogin() {
   document.body.classList.add('sem-login'); document.body.classList.remove('modo-aluno', 'papel-aluno');
-  const conv = (location.hash.match(/^#convite=(\w+)/) || [])[1], rec = typeof sbRec !== 'undefined' && sbRec;
-  const cab = `<div class="login-brand">${marcaMark(52)}<div><div class="eyebrow">O · Método · Squad</div><h1>${conv ? 'Criar a sua conta' : rec ? 'Nova senha' : 'Entrar'}</h1></div></div>`;
+  const conv = (location.hash.match(/^#convite=(\w+)/) || [])[1], sup = (location.hash.match(/^#equipe=(\w+)/) || [])[1], rec = typeof sbRec !== 'undefined' && sbRec;
+  const cab = `<div class="login-brand">${marcaMark(52)}<div><div class="eyebrow">O · Método · Squad</div><h1>${conv || sup ? 'Criar a sua conta' : rec ? 'Nova senha' : 'Entrar'}</h1></div></div>`;
   if (SBC && conv) { $('#app').innerHTML = `<div class="login">${cab}
     <form class="login-card" id="f-convite" data-token="${conv}" autocomplete="on">
       <p class="small" style="margin:0">A equipe Squad convidou você! Escolha seu e-mail e uma senha. Você só faz isso uma vez: depois entra sempre com o e-mail e a senha.</p>
@@ -2340,6 +2360,13 @@ function renderLogin() {
       <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="l-senha" autocomplete="new-password" minlength="6" required></label>
       <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar conta e entrar</button></form>
     <p class="small muted" style="margin:0">Já criou sua conta? <a href="#" onclick="history.replaceState(null,'',location.pathname);location.reload();return false">Entrar com e-mail e senha</a></p></div>`; return; }
+  if (SBC && sup) { $('#app').innerHTML = `<div class="login">${cab}
+    <form class="login-card" id="f-supervisor" data-token="${sup}" autocomplete="on">
+      <p class="small" style="margin:0">Você foi convidada(o) para a supervisão da equipe Squad, com acesso às mesmas alunas, treinos e nutrição. Escolha o seu e-mail e uma senha. Só faz isto uma vez: depois entra sempre com o e-mail e a senha.</p>
+      <label class="field">O seu e-mail<input type="email" id="l-user" autocomplete="username" autocapitalize="none" required></label>
+      <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="l-senha" autocomplete="new-password" minlength="6" required></label>
+      <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar conta e entrar</button></form>
+    <p class="small muted" style="margin:0">Já criou a conta? <a href="#" onclick="history.replaceState(null,'',location.pathname);location.reload();return false">Entrar com e-mail e senha</a></p></div>`; return; }
   if (SBC && rec) { $('#app').innerHTML = `<div class="login">${cab}
     <form class="login-card" id="f-novasenha"><label class="field">Escolha a nova senha<input type="password" id="l-senha" minlength="6" required></label>
       <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Guardar nova senha</button></form></div>`; return; }
@@ -2393,13 +2420,14 @@ window.addEventListener('resize', () => fechaMais(null));
 document.addEventListener('click', ev => { const p = $('#sino-painel'); if (p && !p.hidden && !ev.target.closest('#sino-painel') && !ev.target.closest('#sino')) p.hidden = true; });
 document.addEventListener('submit', async ev => {
   const fid = ev.target.id;
-  if (SBC && (fid === 'f-convite' || fid === 'f-signup' || fid === 'f-novasenha')) {
+  if (SBC && (fid === 'f-convite' || fid === 'f-supervisor' || fid === 'f-signup' || fid === 'f-novasenha')) {
     ev.preventDefault(); const er = $(fid === 'f-signup' ? '#s-err' : '#l-err'), btn = ev.target.querySelector('button.primary'); er.textContent = ''; btn.disabled = true;
     try {
-      if (fid === 'f-convite') { await SB.criarAluno($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('aluno'); toast('Conta criada! Da próxima vez, entre em ' + urlApp().replace('https://', '') + ' com seu e-mail e senha.'); }
+      if (fid === 'f-supervisor') { await SB.criarSupervisor($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('personal'); toast('Conta criada! Da próxima vez, entre com o seu e-mail e senha.'); }
+      else if (fid === 'f-convite') { await SB.criarAluno($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('aluno'); toast('Conta criada! Da próxima vez, entre em ' + urlApp().replace('https://', '') + ' com seu e-mail e senha.'); }
       else if (fid === 'f-signup') { await SB.criarPersonal($('#s-email').value.trim(), $('#s-senha').value); sync.dirty = true; sync.v++; saveSync(); setSessao({ papel: 'personal' }); location.hash = 'central'; route(); SB.push(); }
       else { const r = await SB.novaSenha(sbRec, $('#l-senha').value); if (!r.ok) throw new Error(SB.erro(r)); sbRec = ''; toast('Senha alterada. Já pode entrar.'); renderLogin(); }
-    } catch (e) { er.textContent = fid === 'f-convite' && /convite/i.test(e.message) ? 'Este convite já foi usado ou não é válido. Se você já criou sua conta, entre com seu e-mail e senha. Se não, peça um convite novo à equipe.' : e.message; btn.disabled = false; }
+    } catch (e) { er.textContent = fid === 'f-supervisor' && /convite/i.test(e.message) ? 'Este convite já foi usado, expirou ou não é válido. Se você já criou a conta, entre com e-mail e senha. Se não, peça um convite novo a quem lhe enviou.' : fid === 'f-convite' && /convite/i.test(e.message) ? 'Este convite já foi usado ou não é válido. Se você já criou sua conta, entre com seu e-mail e senha. Se não, peça um convite novo à equipe.' : e.message; btn.disabled = false; }
     return;
   }
   if (fid !== 'f-login') return;
@@ -2913,8 +2941,16 @@ const SB = {
     await SB.registar(email, senha);
     const r = await SB.req('/rest/v1/espacos', { method: 'POST', body: { personal_id: sbS.uid, dados: {} }, headers: { Prefer: 'resolution=merge-duplicates' } });
     if (!r.ok) throw new Error(SB.erro(r));
-    sbS.papel = 'personal'; SB.guarda();
+    sbS.papel = 'personal'; sbS.espaco = sbS.uid; SB.guarda();
     db.alunos = []; db.exemplo = false; saveLocal(); // conta nova: começa vazia
+  },
+  dono() { return (sbS && sbS.espaco) || (sbS && sbS.uid); },
+  supervisor() { return !!(sbS && sbS.espaco && sbS.espaco !== sbS.uid); },
+  async criarSupervisor(email, senha, token) {
+    await SB.registar(email, senha);
+    const r = await SB.req('/rest/v1/rpc/aceitar_convite_equipe', { method: 'POST', body: { p_token: token } });
+    if (!r.ok) throw new Error('convite');
+    sbS.papel = 'personal'; sbS.espaco = r.j; SB.guarda();
   },
   async criarAluno(email, senha, token) {
     await SB.registar(email, senha);
@@ -2923,8 +2959,9 @@ const SB = {
     sbS.papel = 'aluno'; sbS.alunoId = r.j; SB.guarda();
   },
   async descobrePapel() {
-    const a = await SB.req('/rest/v1/espacos?select=personal_id&personal_id=eq.' + sbS.uid);
-    if (a.ok && a.j.length) { sbS.papel = 'personal'; SB.guarda(); return 'personal'; }
+    const ep = await SB.req('/rest/v1/rpc/pt_espaco', { method: 'POST', body: {} }), dono = ep.ok && typeof ep.j === 'string' ? ep.j : sbS.uid;
+    const a = await SB.req('/rest/v1/espacos?select=personal_id&personal_id=eq.' + dono);
+    if (a.ok && a.j.length) { sbS.papel = 'personal'; sbS.espaco = dono; SB.guarda(); return 'personal'; }
     const b = await SB.req('/rest/v1/alunos_docs?select=id&user_id=eq.' + sbS.uid);
     if (b.ok && b.j.length) { sbS.papel = 'aluno'; sbS.alunoId = b.j[0].id; SB.guarda(); return 'aluno'; }
     SB.sair(false); throw new Error('Esta conta ainda não está ligada a nenhum personal ou aluno. Use o link de convite que recebeu.');
@@ -2944,7 +2981,7 @@ const SB = {
       if (pers && (forcar || Date.now() - SB.leadsT > 300000)) SB.carregaLeads();
       const [ra, re] = await Promise.all([
         SB.req('/rest/v1/alunos_docs?select=id,dados,updated_at' + (pers ? '' : '&user_id=eq.' + sbS.uid) + desde),
-        SB.req('/rest/v1/espacos?select=dados,updated_at' + (pers ? '&personal_id=eq.' + sbS.uid : '') + desde)]);
+        SB.req('/rest/v1/espacos?select=dados,updated_at' + (pers ? '&personal_id=eq.' + SB.dono() : '') + desde)]);
       if (ra.status === 401 || re.status === 401) { SB.sair(); setSessao(null); sync.status = 'erro'; mostraStatus(); route(); return; }
       if (!ra.ok || !re.ok) throw new Error('pull');
       sync.status = 'ativa';
@@ -2978,7 +3015,7 @@ const SB = {
       const v = sync.v; let ok = true;
       if (sbS.papel === 'personal') {
         const e = estavel(SB.espDados());
-        if (e !== sbHEsp) { const r = await SB.req('/rest/v1/espacos?personal_id=eq.' + sbS.uid, { method: 'PATCH', body: { dados: SB.espDados() }, headers: { Prefer: 'return=minimal' } }); ok = ok && r.ok; if (r.ok) sbHEsp = e; }
+        if (e !== sbHEsp) { const r = await SB.req('/rest/v1/espacos?personal_id=eq.' + SB.dono(), { method: 'PATCH', body: { dados: SB.espDados() }, headers: { Prefer: 'return=minimal' } }); ok = ok && r.ok; if (r.ok) sbHEsp = e; }
         for (const a of db.alunos) {
           const s = estavel(a); if (sbH[a.id] === s) continue;
           const r = await SB.req('/rest/v1/rpc/pt_gravar_aluno', { method: 'POST', body: { p_id: a.id, p_dados: a } });
@@ -3004,7 +3041,7 @@ const SB = {
   async novoConvite(a) {
     sync.dirty = true; await SB.push();
     const token = uid() + uid() + uid();
-    const r = await SB.req('/rest/v1/convites', { method: 'POST', body: { token, aluno_id: a.id, personal_id: sbS.uid }, headers: { Prefer: 'return=minimal' } });
+    const r = await SB.req('/rest/v1/convites', { method: 'POST', body: { token, aluno_id: a.id, personal_id: SB.dono() }, headers: { Prefer: 'return=minimal' } });
     if (!r.ok) throw new Error('convite');
     return urlApp() + '#convite=' + token;
   }

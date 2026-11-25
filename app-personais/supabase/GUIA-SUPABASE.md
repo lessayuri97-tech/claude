@@ -36,3 +36,13 @@ O Claude coloca o URL e a chave no ficheiro `config.js`. Depois faça duplo cliq
 - **Personal**: abre a app, toca em **Sou personal e quero criar a minha conta**, escreve e-mail e senha.
 - **Aluno**: o personal toca em **Convidar para a app** na ficha do aluno e envia a mensagem por WhatsApp. O aluno abre o link, escolhe e-mail e senha, e já está dentro.
 - Cada personal só vê os seus alunos. Cada aluno só vê o seu próprio plano.
+
+## Supervisão: dar o mesmo acesso a outra pessoa da equipe
+1. No Supabase: **SQL Editor** → **New query** → cole o conteúdo de `supabase/supervisao.sql` → **Run**. (Só uma vez. É seguro repetir.)
+2. Na app, entre como dono: **Definições → Equipe e supervisão → Gerar convite de supervisor**. Envie o link por WhatsApp só à pessoa certa. O link vale 7 dias e só funciona uma vez.
+3. A pessoa abre o link, escolhe o próprio e-mail e senha e entra. Daí em diante entra em `www.vemprosquad.com.br/app` com esse e-mail e senha.
+
+**O que o supervisor pode:** ver e editar as mesmas alunas, leads, treinos, nutrição, modelos e a Central. Os dados são os mesmos que os seus, não uma cópia.
+**O que não pode:** gerar convites para outros supervisores. As alunas continuam a ver só o seu próprio registo.
+
+**Remover o acesso:** em **Definições → Equipe e supervisão**, toque em **Remover acesso** ao lado do e-mail. O acesso termina logo. (Opcional: apagar também a conta em Supabase → Authentication → Users.)
