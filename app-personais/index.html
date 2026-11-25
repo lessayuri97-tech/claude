@@ -113,7 +113,7 @@ details.faq p { margin: 0 0 14px; }
 .sub-q { margin: -6px 0 14px; color: var(--muted, #6b6d80); font-size: .95rem; }
 #tela textarea { width: 100%; font: inherit; padding: 12px 14px; border: 1.5px solid var(--line, #CDC9C0); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin-bottom: 8px; }
 #tela form input[type=text] { margin-bottom: 8px; }
-.resp { margin: 16px 0 12px; padding: 14px 16px; border-radius: 14px; background: #e6e3da; border-left: 4px solid #34364D; font-size: 1.02rem; line-height: 1.5; animation: respIn .45s ease both; } #fb .btn { margin-top: 4px; } @keyframes respIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { .resp { animation: none; } }
+.resp { margin: 16px 0 12px; padding: 14px 16px; border-radius: 14px; background: #e6e3da; border-left: 4px solid #34364D; font-size: 1.02rem; line-height: 1.5; animation: respIn .45s ease both; } .resp { cursor: pointer; } .rbar { height: 4px; border-radius: 99px; background: rgba(52,54,77,.15); margin: 12px 0 8px; overflow: hidden; } .rbar i { display: block; height: 100%; width: 0; background: #34364D; } .resp.pausa .rbar i { opacity: .45; } .rrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #6b6d80; } .rnext { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #34364D; color: #fff; font-size: 1.3rem; cursor: pointer; flex: none; } @keyframes respIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } } @media (prefers-reduced-motion: reduce) { .resp { animation: none; } }
 </style>
 </head>
 <body>
@@ -180,11 +180,11 @@ details.faq p { margin: 0 0 14px; }
 'use strict';
 const CFG = Object.assign({ whatsapp: '', leadsPara: '' }, window.PT_SUPABASE || {});
 const PERGUNTAS = [
-  { k: 'nome', t: 'Nome completo:', tipo: 'texto', ac: 'name' },
-  { k: 'idade', t: 'Idade:', tipo: 'idade' },
-  { k: 'instagram', t: '@ do Instagram:', tipo: 'insta' },
-  { k: 'whatsapp', t: 'Telefone (com DDD):', tipo: 'tel' },
-  { k: 'profissao', t: 'Profissão:', s: 'Se for estudante, qual curso?', tipo: 'texto' },
+  { k: 'nome', t: 'Nome completo:', tipo: 'texto', ac: 'name', mt: r => `Prazer, ${esc((r.nome || '').split(' ')[0])}! 💛 Vamos te conhecer melhor para cuidar de você do jeito certo.` },
+  { k: 'idade', t: 'Idade:', tipo: 'idade', mt: () => 'Obrigada! Cada fase da vida tem o seu ritmo, e o seu plano é pensado para o seu. 🌸' },
+  { k: 'instagram', t: '@ do Instagram:', tipo: 'insta', mt: r => `Anotado, ${esc(r.instagram)}! Assim a nossa equipe também consegue te encontrar por lá. ✨` },
+  { k: 'whatsapp', t: 'Telefone (com DDD):', tipo: 'tel', mt: () => 'Perfeito! É por aí que vamos te chamar, então fique de olho no seu WhatsApp. 💬' },
+  { k: 'profissao', t: 'Profissão:', s: 'Se for estudante, qual curso?', tipo: 'texto', mt: () => 'Conhecer a sua rotina ajuda a montar um plano que cabe nela, e não o contrário. 🌿' },
   { k: 'objetivo', t: 'Objetivo:', o: ['Emagrecimento', 'Hipertrofia', 'Performance na corrida mantendo/ganhando massa magra', 'Apenas saúde e bem-estar'], m: ['Um objetivo muito comum e muito possível de trabalhar com estratégia. Vamos montar um caminho para o seu ritmo, sem pressa e sem terror. 💛', 'Ganhar força e massa com um plano de treino e alimentação bem organizados é o nosso dia a dia. Vamos construir isso passo a passo. 💪', 'Correr bem e manter a massa magra pede equilíbrio entre treino e alimentação, e é exatamente aí que podemos ajudar. 🏃‍♀️', 'Cuidar da saúde e do bem-estar já é uma decisão linda. Vamos juntas encontrar uma rotina que caiba na sua vida. 🌿'] },
   { k: 'desafio', t: 'Qual seu maior desafio hoje para alcançar esse objetivo?', s: 'Seja o mais detalhista possível.', tipo: 'longo', mt: 'Obrigada por abrir o jogo com a gente. Entender o que mais pesa na sua rotina é o primeiro passo para traçar um plano que funcione de verdade para você. Você não está sozinha nisso. 💛' },
   { k: 'acompanhamento', t: 'Já teve algum acompanhamento antes?', o: ['Sim, tive uma boa experiência', 'Sim, mas não tive uma boa experiência', 'Sim, apenas presencial', 'Não, nunca tive acompanhamento on-line'], m: ['Que bom que a experiência foi boa! Vamos construir sobre o que já funcionou para você. 💛', 'Obrigada por contar. Cada pessoa precisa de um jeito diferente de ser acompanhada, e queremos entender o que faltou para fazer diferente. 🤍', 'O presencial tem o seu valor. Aqui vamos te acompanhar de perto também, adaptado à sua rotina. 💪', 'Sem problema nenhum! Muitas alunas começaram assim, e vamos te explicar cada passo com calma. 🌸'] },
@@ -218,33 +218,46 @@ function boasVindas() {
   $('#comeca').onclick = () => { i = 0; pergunta(); }; $('#volta').onclick = inicio;
 }
 const instaLimpo = v => { v = v.trim().replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@+/, '').replace(/\s+/g, ''); return v ? '@' + v : ''; };
-function anterior() { i--; i < 0 ? boasVindas() : pergunta(); }
-function proxima() { i++; i < PERGUNTAS.length ? pergunta() : concluir(); }
+function anterior() { limpaTimer(); i--; i < 0 ? boasVindas() : pergunta(); }
+function proxima() { limpaTimer(); i++; i < PERGUNTAS.length ? pergunta() : concluir(); }
+let tmr = null;
+function limpaTimer() { if (tmr) { cancelAnimationFrame(tmr.raf); tmr = null; } }
+function resp(msg) {
+  limpaTimer();
+  let c = $('#fb'); if (!c) { c = document.createElement('div'); c.id = 'fb'; $('#tela').insertBefore(c, $('#volta')); }
+  c.innerHTML = `<div class="resp" id="rsp" role="status"><div class="rtxt">${msg}</div><div class="rbar"><i></i></div><div class="rrow"><span class="small" id="rdica">Toque na mensagem para pausar</span><button type="button" class="rnext" id="rnext" aria-label="Avançar para a próxima pergunta">→</button></div></div>`;
+  const DUR = 10000, bar = c.querySelector('.rbar i'), t = tmr = { raf: 0 }; let falta = DUR, pausa = false, last = performance.now();
+  const tick = now => { if (tmr !== t) return; if (!pausa) falta -= Math.min(250, now - last); last = now; bar.style.width = (100 - falta / DUR * 100) + '%'; if (falta <= 0) { limpaTimer(); proxima(); return; } t.raf = requestAnimationFrame(tick); };
+  t.raf = requestAnimationFrame(tick);
+  $('#rsp').onclick = e => { if (e.target.closest('#rnext')) return; pausa = !pausa; $('#rsp').classList.toggle('pausa', pausa); $('#rdica').textContent = pausa ? 'Em pausa. Toque de novo para continuar, ou use a seta.' : 'Toque na mensagem para pausar'; };
+  $('#rnext').onclick = e => { e.stopPropagation(); limpaTimer(); proxima(); };
+}
 function pergunta() {
-  const q = PERGUNTAS[i], cab = `${barra(i + 1)}<h2>${q.t}</h2>${q.s ? `<p class="sub-q">${q.s}</p>` : ''}`, volta = `<button class="back" id="volta" type="button">← Voltar</button>`;
+  limpaTimer();
+  const q = PERGUNTAS[i], ultima = i === total - 1, cab = `${barra(i + 1)}<h2>${q.t}</h2>${q.s ? `<p class="sub-q">${q.s}</p>` : ''}`, volta = `<button class="back" id="volta" type="button">← Voltar</button>`;
   if (q.o) {
     $('#tela').innerHTML = `${cab}<div class="opts">${q.o.map((o, n) => `<button class="opt ${R[q.k] === o ? 'on' : ''}" data-n="${n}">${esc(o)}</button>`).join('')}</div>${volta}`;
-    const mostra = n => { document.querySelectorAll('.opt').forEach((x, k) => x.classList.toggle('on', k === n)); let c = $('#fb'); if (!c) { c = document.createElement('div'); c.id = 'fb'; $('.opts').after(c); } c.innerHTML = `<div class="resp">${q.m[n]}</div><button class="btn primary" id="cont" type="button">Continuar</button>`; $('#cont').onclick = proxima; };
-    document.querySelectorAll('.opt').forEach(b => b.onclick = () => { R[q.k] = q.o[+b.dataset.n]; if (q.m) mostra(+b.dataset.n); else proxima(); });
-    if (q.m && R[q.k] && q.o.includes(R[q.k])) mostra(q.o.indexOf(R[q.k]));
+    const escolhe = n => { R[q.k] = q.o[n]; document.querySelectorAll('.opt').forEach((x, k) => x.classList.toggle('on', k === n));
+      if (ultima) { if (!R._salvo) { R._salvo = 1; guardaLead(); } document.querySelector('.opts').style.pointerEvents = 'none'; }
+      resp(q.m[n]); };
+    document.querySelectorAll('.opt').forEach(b => b.onclick = () => escolhe(+b.dataset.n));
     $('#volta').onclick = anterior; return;
   }
   const campo = q.tipo === 'tel' ? '<div id="tel-host"></div>'
     : q.tipo === 'longo' ? `<textarea id="v" rows="4" required>${esc(R[q.k] || '')}</textarea>`
     : `<input type="text" id="v" required value="${esc(R[q.k] || '')}" ${q.ac ? `autocomplete="${q.ac}"` : ''} ${q.tipo === 'idade' ? 'inputmode="numeric" maxlength="3"' : ''} ${q.tipo === 'insta' ? 'placeholder="@seuperfil" autocapitalize="none" autocorrect="off"' : ''}>`;
-  $('#tela').innerHTML = `${cab}<form id="f">${campo}<div class="err" id="e"></div><button class="btn primary">${i === total - 1 ? 'Enviar' : 'Continuar'}</button></form>${volta}`;
+  $('#tela').innerHTML = `${cab}<form id="f">${campo}<div class="err" id="e"></div><button class="btn primary" id="ok">Responder</button></form>${volta}`;
   $('#volta').onclick = anterior;
   if (q.tipo === 'tel') telC = PTTel.criar($('#tel-host'), { valor: R.whatsapp || '' }); else { const e = $('#v'); setTimeout(() => e.focus({ preventScroll: true }), 50); }
-  $('#f').onsubmit = ev => { ev.preventDefault(); const err = t => { $('#e').textContent = t; };
-    if (q.tipo === 'tel') { if (!telC.get()) return err(telC.pais() === 'br' ? 'Confira o número: DDD + celular, ex.: (11) 98765-4321.' : 'Confira o número de telefone.'); R.whatsapp = telC.get(); R.pais = telC.pais(); R.tel = R.whatsapp; return proxima(); }
+  const mostra = () => { const f = $('#f'); $('#ok').style.display = 'none'; $('#e').textContent = ''; if (q.tipo === 'tel') $('#tel-host').style.pointerEvents = 'none'; else $('#v').readOnly = true; resp(typeof q.mt === 'function' ? q.mt(R) : q.mt); };
+  $('#f').onsubmit = ev => { ev.preventDefault(); if ($('#fb')) return; const err = t => { $('#e').textContent = t; };
+    if (q.tipo === 'tel') { if (!telC.get()) return err(telC.pais() === 'br' ? 'Confira o número: DDD + celular, ex.: (11) 98765-4321.' : 'Confira o número de telefone.'); R.whatsapp = telC.get(); R.pais = telC.pais(); R.tel = R.whatsapp; return mostra(); }
     let v = $('#v').value.trim(); if (!v) return err('Esta pergunta é obrigatória.');
     if (q.tipo === 'idade') { const n = parseInt(v, 10); if (!(n >= 12 && n <= 100) || !/^\d+$/.test(v)) return err('Escreva a sua idade em números.'); v = String(n); }
     if (q.tipo === 'insta') { v = instaLimpo(v); if (v.length < 2) return err('Escreva o seu @ do Instagram.'); }
-    R[q.k] = v;
-    if (q.mt && !$('#fb')) { const d = document.createElement('div'); d.id = 'fb'; d.innerHTML = `<div class="resp">${q.mt}</div>`; $('#f').before(d); $('#f button.btn').textContent = 'Continuar'; $('#v').readOnly = true; return; }
-    proxima(); };
+    R[q.k] = v; mostra(); };
 }
-function concluir() { guardaLead(); resultado(); }
+function concluir() { if (!R._salvo) { R._salvo = 1; guardaLead(); } resultado(); }
 function resultado() {
   modo(false);
   const nome = esc((R.nome || '').split(' ')[0]);
@@ -257,7 +270,7 @@ function resultado() {
 }
 async function guardaLead() {
   if (!CFG.url || !CFG.anonKey || !CFG.leadsPara) return;
-  try { await fetch(CFG.url + '/rest/v1/leads', { method: 'POST', headers: Object.assign({ apikey: CFG.anonKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, /^eyJ/.test(CFG.anonKey) ? { Authorization: 'Bearer ' + CFG.anonKey } : {}), body: JSON.stringify({ personal_id: CFG.leadsPara, nome: R.nome, whatsapp: R.whatsapp, respostas: R }) }).then(r => { if (!r.ok) r.text().then(t => console.warn('lead não gravado', r.status, t)); }); } catch (e) { console.warn('lead não gravado', e); }
+  try { await fetch(CFG.url + '/rest/v1/leads', { method: 'POST', headers: Object.assign({ apikey: CFG.anonKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, /^eyJ/.test(CFG.anonKey) ? { Authorization: 'Bearer ' + CFG.anonKey } : {}), body: JSON.stringify({ personal_id: CFG.leadsPara, nome: R.nome, whatsapp: R.whatsapp, respostas: Object.fromEntries(Object.entries(R).filter(([k]) => k[0] !== '_')) }) }).then(r => { if (!r.ok) r.text().then(t => console.warn('lead não gravado', r.status, t)); }); } catch (e) { console.warn('lead não gravado', e); }
 }
 inicio();
 })();
