@@ -367,11 +367,11 @@ body.modo-aluno .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); 
 .ex-run-body .thumb { border-radius: 10px; }
 .dica { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
 .sets-run { display: grid; gap: 8px; }
-.set-run { display: grid; grid-template-columns: 30px minmax(0, 1fr) 64px 48px; gap: 8px; align-items: center; padding: 6px; border-radius: 12px; background: var(--surface-2); }
+.set-run { display: grid; grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) 44px; gap: 6px; align-items: center; padding: 6px; border-radius: 12px; background: var(--surface-2); }
 .set-run.ok { background: var(--ok-soft); }
 .set-run .sn { font-family: var(--font-display); font-weight: 700; color: var(--muted); text-align: center; }
-.stepper { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; gap: 4px; align-items: center; }
-.stepper button { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-size: 1.3rem; font-weight: 600; cursor: pointer; color: var(--fg); }
+.stepper { display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 3px; align-items: center; }
+.stepper button { height: 44px; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-size: 1.3rem; font-weight: 600; cursor: pointer; color: var(--fg); }
 .stepper label, .set-run .reps { position: relative; display: block; }
 .stepper input, .set-run .reps input { width: 100%; height: 44px; text-align: center; font-weight: 600; font-size: 1.05rem; padding: 0 4px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); -moz-appearance: textfield; appearance: textfield; }
 .stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -1491,7 +1491,9 @@ function vTreino(a, t) {
           <div class="stepper"><button data-sact="peso" data-i="${i}" data-j="${j}" data-d="-2.5" aria-label="Menos peso">−</button>
             <label><input type="number" inputmode="decimal" step="0.5" min="0" id="w-c-${i}-${j}" class="num" value="${esc(s.carga)}" data-sedit="carga" data-i="${i}" data-j="${j}" aria-label="Peso em kg, série ${j + 1}"><small>kg</small></label>
             <button data-sact="peso" data-i="${i}" data-j="${j}" data-d="2.5" aria-label="Mais peso">+</button></div>
-          <label class="reps"><input type="text" inputmode="numeric" id="w-r-${i}-${j}" class="num" value="${esc(s.reps)}" data-sedit="reps" data-i="${i}" data-j="${j}" aria-label="Repetições, série ${j + 1}"><small>reps</small></label>
+          <div class="stepper"><button data-sact="reps" data-i="${i}" data-j="${j}" data-d="-1" aria-label="Menos repetições">−</button>
+            <label><input type="text" inputmode="numeric" id="w-r-${i}-${j}" class="num" value="${esc(s.reps)}" data-sedit="reps" data-i="${i}" data-j="${j}" aria-label="Repetições, série ${j + 1}"><small>reps</small></label>
+            <button data-sact="reps" data-i="${i}" data-j="${j}" data-d="1" aria-label="Mais repetições">+</button></div>
           <button class="check" data-sact="check" data-i="${i}" data-j="${j}" aria-pressed="${s.done}" aria-label="${s.done ? 'Desmarcar' : 'Marcar'} série ${j + 1} como feita">✓</button>
         </div>`).join('')}</div>
         <button class="btn sm" data-sact="rest-start" data-i="${i}" style="justify-self:start">⏱ Iniciar descanso de ${esc(it.descanso || 60)}s</button>
@@ -1607,6 +1609,8 @@ document.addEventListener('click', ev => {
     case 'abrir': ev.preventDefault(); { const i = +b.dataset.i; wk.aberto = wk.aberto === i ? -1 : i; saveWk(); rerender(); } break;
     case 'peso': { const s = wk.itens[b.dataset.i].sets[b.dataset.j]; s.carga = Math.max(0, (+s.carga || 0) + (+b.dataset.d)); saveWk();
       const inp = $(`#w-c-${b.dataset.i}-${b.dataset.j}`); if (inp) inp.value = s.carga; break; }
+    case 'reps': { const s = wk.itens[b.dataset.i].sets[b.dataset.j]; s.reps = String(Math.max(0, (parseInt(s.reps) || 0) + (+b.dataset.d))); saveWk();
+      const inp = $(`#w-r-${b.dataset.i}-${b.dataset.j}`); if (inp) inp.value = s.reps; break; }
     case 'check': {
       const i = +b.dataset.i, j = +b.dataset.j, w = wk.itens[i], s = w.sets[j];
       s.done = !s.done; saveWk();
