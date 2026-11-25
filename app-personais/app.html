@@ -209,6 +209,27 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .cc-l:hover { background: var(--surface-2); } .cc-l > span:last-child { display: grid; min-width: 0; }
 .cc-rev { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--line); }
 @media (max-width: 900px) { .cc-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cc-grid { grid-template-columns: 1fr; } }
+.nu-metas { display: flex; flex-wrap: wrap; gap: 12px; }
+.nu-metas input { width: 110px; text-align: center; font-family: var(--font-display); font-size: 1.2rem; font-weight: 600; }
+.nu-dia, .nu-m { display: grid; gap: 6px; } .nu-dia { background: var(--surface-2); border-radius: 12px; padding: 12px 14px; }
+.nu-bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; } .nu-dia .nu-bar { background: var(--surface); }
+.nu-bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px; transition: width .3s; } .nu-bar.grande { height: 12px; }
+.nu-ref { gap: 8px; } .nu-nome { max-width: 280px; font-weight: 700; font-size: 1.05rem; }
+.nu-cab, .nu-it { display: grid; grid-template-columns: minmax(160px, 3fr) repeat(5, minmax(56px, 1fr)) 32px; gap: 6px; align-items: center; }
+.nu-cab { font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.nu-it input { padding: 6px 8px; font-size: .9rem; min-height: 36px; } .nu-it input.num { text-align: center; }
+.nu-notaref { flex: 1; min-width: 220px; font-size: .88rem; }
+.nu-sem { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
+.nu-sem > div { display: grid; gap: 2px; justify-items: center; } .nu-col { width: 100%; max-width: 44px; height: 64px; background: var(--surface-2); border-radius: 8px; display: flex; align-items: flex-end; overflow: hidden; } .nu-col i { width: 100%; background: var(--ok); }
+.nu-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 10px; }
+.nu-card.feita { border-color: var(--ok); background: var(--ok-soft); }
+.nu-check { min-height: 48px; padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; cursor: pointer; color: var(--fg); }
+.nu-check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+.nu-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; } .nu-lista li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); } .nu-lista li:last-child { border-bottom: 0; }
+.agua { display: grid; gap: 10px; }
+@media (max-width: 900px) { .nu-cab { display: none; } .nu-it { grid-template-columns: repeat(4, 1fr) 32px; } .nu-it input[list] { grid-column: 1 / -1; } }
+.cor-sw { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); cursor: pointer; }
+.cor-sw.on { box-shadow: 0 0 0 3px var(--fg); }
 .nav-badge { background: var(--fg); color: var(--bg); border-radius: 99px; font-size: .7rem; padding: 1px 7px; margin-left: 4px; font-weight: 700; }
 .rv { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 10px; }
 .rv.novo { border-left: 4px solid var(--fg); }
@@ -300,7 +321,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .topbar .nav { display: none; }
   .topbar .wrap { padding-block: 8px; }
   main.wrap { padding-block: 16px calc(96px + env(safe-area-inset-bottom, 0px)); gap: 16px; }
-  .tabbar { display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
     padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
   .tabbar a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; }
   .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -344,7 +365,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
 .tabbar-aluno { display: none; }
 body.modo-aluno .topbar .nav, body.modo-aluno .tabbar { display: none !important; }
 body.modo-aluno main.wrap { max-width: 600px; padding-block: 12px calc(100px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
-body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
   padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
 .tabbar-aluno a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; max-width: 140px; width: 100%; margin: 0 auto; }
 .tabbar-aluno svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -456,16 +477,14 @@ body.papel-aluno .aluno-bar { display: none; }
 <body>
 <header class="topbar">
   <div class="wrap">
-    <a class="brand" href="#central" aria-label="PT example, início">
-      <span class="brand-mark" aria-hidden="true"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink);font-size:1.05rem;letter-spacing:.02em">PT</span></span>
-      <b>PT example</b><span class="small muted" style="margin-left:-4px">Personal Trainer</span>
+    <a class="brand" href="#central" aria-label="Início" id="brand-top"></a>
     </a>
     <nav class="nav" aria-label="Seções">
       <a href="#central" data-nav="central">Central</a>
       <a href="#alunos" data-nav="alunos">Alunos</a>
       <a href="#rever" data-nav="rever">Rever <span class="nav-badge" id="badge-rever" hidden></span></a>
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
-      <a href="#backup" data-nav="backup">Backup</a>
+      <a href="#definicoes" data-nav="definicoes">Definições</a>
     </nav>
     <button class="btn ghost sm" id="btn-sair" data-sact="logout" type="button">Sair</button>
   </div>
@@ -476,7 +495,7 @@ body.papel-aluno .aluno-bar { display: none; }
   <a href="#alunos" data-nav="alunos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c1.9.6 3.1 2.4 3.5 5.2"/></svg><span>Alunos</span></a>
   <a href="#rever" data-nav="rever"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.8"/></svg><span>Rever <span class="nav-badge" id="badge-rever2" hidden></span></span></a>
   <a href="#exercicios" data-nav="exercicios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg><span>Exercícios</span></a>
-  <a href="#backup" data-nav="backup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg><span>Backup</span></a>
+  <a href="#definicoes" data-nav="definicoes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Definições</span></a>
 </nav>
 
 <div id="rest" class="rest" hidden role="timer" aria-label="Cronômetro de descanso"></div>
@@ -695,12 +714,13 @@ function route() {
   let view = h, arg = null;
   if (h.startsWith('aluno-')) { view = 'aluno'; arg = h.slice(6); }
   document.querySelectorAll('[data-nav]').forEach(a => a.toggleAttribute('aria-current', false));
-  const navKey = view === 'aluno' ? 'alunos' : view;
+  const navKey = view === 'aluno' ? 'alunos' : view === 'backup' ? 'definicoes' : view;
   const cur = document.querySelectorAll(`[data-nav="${navKey}"]`); cur.forEach(c => c.setAttribute('aria-current', 'page'));
   const nr = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
   ['badge-rever', 'badge-rever2'].forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = !nr; el.textContent = nr; } });
   const app = $('#app');
-  if (view === 'central') app.innerHTML = viewCentral();
+  if (view === 'definicoes') app.innerHTML = viewDefinicoes();
+  else if (view === 'central') app.innerHTML = viewCentral();
   else if (view === 'rever') app.innerHTML = viewRever();
   else if (view === 'exercicios') app.innerHTML = viewExercicios();
   else if (view === 'backup') app.innerHTML = viewBackup();
@@ -775,12 +795,12 @@ function viewAluno(a) {
     <div class="row" style="gap:14px"><span class="avatar-ini" style="width:56px;height:56px;font-size:1.4rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
     <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}
       ${a.inicio ? `<span>Desde ${fmtData(a.inicio)}</span>` : ''}${a.telefone ? `<span>${esc(a.telefone)}</span>` : ''}</div></div></div>
-    <div class="row"><a class="btn primary" href="#meu-inicio" data-act="ver-aluno" data-id="${a.id}">Ver como aluno</a><button class="btn" data-act="compartilhar" data-id="${a.id}">Enviar plano ao aluno</button><button class="btn" data-act="editar-aluno" data-id="${a.id}">Editar</button></div>
+    <div class="row"><a class="btn primary" href="#meu-inicio" data-act="ver-aluno" data-id="${a.id}">Ver como aluno</a><button class="btn" data-act="convidar" data-id="${a.id}">Convidar para a app</button><button class="btn" data-act="compartilhar" data-id="${a.id}">Enviar plano por mensagem</button><button class="btn" data-act="editar-aluno" data-id="${a.id}">Editar</button></div>
   </div>
   ${a.notas ? `<div class="panel" style="padding:12px 16px"><div class="eyebrow">Observações</div><div>${esc(a.notas)}</div></div>` : ''}
   ${comentariosPanel(a)}
-  <div class="tabs" role="tablist">${t('plano', 'Plano de treino')}${t('sessoes', `Sessões (${a.sessoes.length})`)}${t('evolucao', 'Evolução')}</div>
-  ${tab === 'plano' ? tabPlano(a) : tab === 'sessoes' ? tabSessoes(a) : tabEvolucao(a)}`;
+  <div class="tabs" role="tablist">${t('plano', 'Plano de treino')}${t('sessoes', `Sessões (${a.sessoes.length})`)}${t('evolucao', 'Evolução')}${t('nutri', 'Nutrição')}</div>
+  ${tab === 'plano' ? tabPlano(a) : tab === 'sessoes' ? tabSessoes(a) : tab === 'nutri' ? tabNutri(a) : tabEvolucao(a)}`;
 }
 
 function exOptions(sel) {
@@ -1197,6 +1217,24 @@ document.addEventListener('click', ev => {
   const t = a && (b.dataset.treino) && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'close': closeDialog(); break;
+    case 'cor-marca': db.marca = Object.assign({}, db.marca || {}, { cor: b.dataset.cor }); save(); aplicaMarca(); rerender(); break;
+    case 'tirar-logo': db.marca = Object.assign({}, db.marca || {}, { logo: '' }); save(); aplicaMarca(); rerender(); break;
+    case 'sugerir-metas': { const g = sugestaoMetas(a); if (g) { Object.assign(nutri(a).metas, g); save(); rerender(); toast('Metas sugeridas. Pode ajustar.'); } break; }
+    case 'nu-padrao': nutri(a).refeicoes = REFEICOES_PADRAO.map(([nome, hora]) => ({ id: uid(), nome, hora, itens: [], nota: '' })); save(); rerender(); break;
+    case 'nu-add-ref': nutri(a).refeicoes.push({ id: uid(), nome: 'Nova refeição', hora: '', itens: [], nota: '' }); save(); rerender(); break;
+    case 'nu-del-ref': confirmar('Excluir esta refeição?', 'Excluir refeição', () => { nutri(a).refeicoes = nutri(a).refeicoes.filter(r => r.id !== b.dataset.ref); save(); rerender(); }); break;
+    case 'nu-dup-ref': { const l = nutri(a).refeicoes, i = l.findIndex(r => r.id === b.dataset.ref); if (i >= 0) l.splice(i + 1, 0, JSON.parse(JSON.stringify({ ...l[i], id: uid(), nome: l[i].nome + ' (cópia)', itens: l[i].itens.map(x => ({ ...x, id: uid() })) }))); save(); rerender(); break; }
+    case 'nu-mover': { const l = nutri(a).refeicoes, i = l.findIndex(r => r.id === b.dataset.ref), j = i + (+b.dataset.dir); if (i < 0 || j < 0 || j >= l.length) break; [l[i], l[j]] = [l[j], l[i]]; save(); rerender(); break; }
+    case 'nu-add-it': { const r = nutri(a).refeicoes.find(x => x.id === b.dataset.ref); if (r) { const it = { id: uid(), nome: '', g: 100, k: '', p: '', c: '', f: '' }; r.itens.push(it); save(); rerender(); setTimeout(() => { const els = document.querySelectorAll('.nu-it input[list]'); if (els.length) { const el = [...els].find(e => e.dataset.item === it.id); if (el) el.focus(); } }, 0); } break; }
+    case 'nu-del-it': { const r = nutri(a).refeicoes.find(x => x.id === b.dataset.ref); if (r) { r.itens = r.itens.filter(i => i.id !== b.dataset.item); save(); rerender(); } break; }
+    case 'nutri-texto': openDialog(`<div class="row spread"><h2>Enviar plano alimentar</h2><button class="btn ghost" data-act="close">Fechar</button></div><p class="muted" style="margin:0">Copie e cole no WhatsApp ou e-mail.</p><textarea class="share" id="share-txt" readonly>${esc(textoNutri(a))}</textarea><div class="row"><button class="btn primary" data-act="copiar" data-src="share-txt">Copiar texto</button></div>`); break;
+    case 'nutri-copiar': { const outros = db.alunos.filter(x => x.id !== a.id); if (!outros.length) { toast('Cadastre outro aluno primeiro'); break; }
+      openDialog(`<form id="f-nutri-copiar" class="dlg" style="padding:0" data-id="${a.id}"><div><div class="eyebrow">${esc(a.nome)}</div><h2>Copiar plano alimentar</h2></div>
+        <label class="field">Para o aluno<select id="nc-dest">${outros.map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select></label>
+        <p class="small muted" style="margin:0">Substitui o plano alimentar do outro aluno (as metas ficam em branco para ajustar).</p>
+        <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Copiar</button></div></form>`); break; }
+    case 'convidar': abreConvite(a.id); break;
+    case 'nova-senha': a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); abreConvite(a.id); toast('Senha nova gerada'); break;
     case 'plano-revisto': a.revisaoPlano = hoje(); save(); rerender(); toast('Plano marcado como revisto'); break;
     case 'limites': { const c = cfgC(); openDialog(`<form id="f-config" class="dlg" style="padding:0"><div><div class="eyebrow">Central de clientes</div><h2>Limites dos avisos</h2></div>
       <div class="form-grid">
@@ -1300,6 +1338,22 @@ function restaurar(txt) {
 document.addEventListener('change', ev => {
   const el = ev.target;
   if (el.id === 'bk-file' && el.files[0]) { const r = new FileReader(); r.onload = () => restaurar(r.result); r.readAsText(el.files[0]); return; }
+  if (el.dataset.nu) {
+    const a = alunoById(el.dataset.aluno); if (!a) return; const n = nutri(a), k = el.dataset.nu, v = el.value;
+    if (k.startsWith('m-')) { n.metas[k.slice(2)] = v === '' ? '' : +v; save(); refreshNu(a); return; }
+    if (k === 'nota') { n.nota = v; save(); return; }
+    const r = n.refeicoes.find(x => x.id === el.dataset.ref); if (!r) return;
+    if (k === 'r-nome') r.nome = v.trim() || 'Refeição'; else if (k === 'r-hora') r.hora = v; else if (k === 'r-nota') r.nota = v.trim();
+    else { const i = r.itens.find(x => x.id === el.dataset.item); if (!i) return;
+      if (k === 'i-nome') i.nome = v.trim(); else if (k === 'i-g') i.g = v === '' ? '' : +v; else i[k.slice(2)] = v === '' ? '' : +v;
+      if (k === 'i-nome' || k === 'i-g') { const mx = macrosItem(i.nome, i.g); if (mx) { Object.assign(i, mx); ['k', 'p', 'c', 'f'].forEach(c => { const e2 = document.getElementById('n' + c + '-' + i.id); if (e2) e2.value = i[c]; }); } } }
+    save(); refreshNu(a); return;
+  }
+  if (el.dataset.marca) { db.marca = Object.assign({}, db.marca || {}, { [el.dataset.marca]: el.dataset.marca === 'sigla' ? el.value.trim().toUpperCase().slice(0, 3) || 'PT' : el.value.trim() }); save(); aplicaMarca(); if (el.dataset.marca === 'cor') rerender(); return; }
+  if (el.id === 'logo-file' && el.files[0]) {
+    const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => { const k = 160 / Math.max(im.width, im.height, 1), cv = document.createElement('canvas'); cv.width = Math.round(im.width * Math.min(1, k)); cv.height = Math.round(im.height * Math.min(1, k)); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      db.marca = Object.assign({}, db.marca || {}, { logo: cv.toDataURL('image/png') }); save(); aplicaMarca(); rerender(); toast('Logótipo guardado'); }; im.onerror = () => toast('Não consegui abrir essa imagem'); im.src = rd.result; }; rd.readAsDataURL(el.files[0]); return;
+  }
   if (el.id === 'rv-aluno') { ver.aluno = el.value; rerender(); return; }
   if (el.id === 'rv-estado') { ver.estado = el.value; rerender(); return; }
   if (el.id === 'rv-dias') { ver.dias = el.value; rerender(); return; }
@@ -1326,6 +1380,11 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('submit', ev => {
   const f = ev.target;
+  if (f.id === 'f-nutri-copiar') {
+    ev.preventDefault(); const a = alunoById(f.dataset.id), d = alunoById($('#nc-dest').value); if (!a || !d) return;
+    const src = JSON.parse(JSON.stringify(nutri(a))); src.refeicoes.forEach(r => { r.id = uid(); r.itens.forEach(i => { i.id = uid(); }); }); src.metas = { kcal: '', p: '', c: '', f: '', agua: src.metas.agua || 8 };
+    d.nutri = src; save(); closeDialog(); toast('Copiado para ' + d.nome.split(' ')[0]); return;
+  }
   if (f.id === 'f-config') {
     ev.preventDefault(); const n = (id, d, mn) => Math.max(mn, parseInt($(id).value) || d);
     db.config = { diasParado: n('#cf-dias', 3, 1), nSess: n('#cf-n', 3, 2), minEx: n('#cf-min', 2, 1), pseBaixo: Math.min(10, n('#cf-pse', 6, 0)) };
@@ -1400,12 +1459,13 @@ const API = '/api/dados';
 let pushTimer = null, emVoo = false;
 const meuPapel = () => { const se = getSessao(); return se ? se.papel : ''; };
 function dadosRemotos() { const c = JSON.parse(JSON.stringify(db)); delete c.alunoAtivo; return c; }
-async function api(method, body) {
-  const r = await fetch(API, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+async function api(metodo, body) { // 'GET', 'GET?rev=3' ou 'PUT'
+  const [method, qs] = metodo.split('?');
+  const r = await fetch(API + (qs ? '?' + qs : ''), { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
   let j = null; try { j = await r.json(); } catch (e) {}
   return { status: r.status, j };
 }
-function agendaPush() { if (sync.status === 'desligada') return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 500); }
+function agendaPush() { if (sync.status === 'desligada') return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 8000); }
 function mergeRemoto(local, remote) {
   const uniaoCom = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) y.lido = !!(y.lido || x.lido); else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
   const uniaoSess = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) { if (x.revisto === true) y.revisto = true; } else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
@@ -1449,29 +1509,199 @@ async function push() {
 async function pull(forcar) {
   if (sync.status === 'desligada' || emVoo) return;
   try {
-    const r = await api('GET');
+    ultimoPull = Date.now();
+    const r = await api('GET' + (forcar ? '' : '?rev=' + sync.rev));
     if (r.status === 503 || r.status === 404) { sync.status = 'desligada'; mostraStatus(); return; }
     if (r.status !== 200 || !r.j) { sync.status = 'erro'; mostraStatus(); return; }
     sync.status = 'ativa';
     const rem = r.j;
+    if (rem.semAlteracoes) { mostraStatus(); return; }
     if (!rem.data) { if (meuPapel() === 'personal') { sync.dirty = true; sync.v++; saveSync(); push(); } mostraStatus(); return; }
     if (rem.rev > sync.rev || forcar) {
       if (sync.dirty && !forcar) { db = mergeRemoto(db, rem.data); sync.rev = rem.rev; sync.v++; saveLocal(); saveSync(); push(); }
       else { const ativo = db.alunoAtivo; db = rem.data; if (ativo) db.alunoAtivo = ativo; migra(); sync.rev = rem.rev; sync.dirty = false; saveLocal(); saveSync(); }
-      rerenderSeguro();
+      aplicaMarca(); rerenderSeguro();
     }
     mostraStatus();
   } catch (e) { sync.status = 'erro'; mostraStatus(); }
 }
-setInterval(() => { if (!document.hidden) pull(); }, 6000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); else if (sync.dirty) push(); });
-window.addEventListener('focus', () => pull());
+// poucas idas ao servidor (o plano grátis do armazenamento é limitado): 1 verificação por minuto com o ecrã aberto, e ao voltar à app (no máximo de 20 em 20 s)
+let ultimoPull = 0;
+const pullSuave = () => { if (Date.now() - ultimoPull < 20000) return; ultimoPull = Date.now(); pull(); };
+setInterval(() => { if (!document.hidden) pullSuave(); }, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pullSuave(); else if (sync.dirty) { clearTimeout(pushTimer); push(); } });
+window.addEventListener('focus', pullSuave);
 window.addEventListener('storage', e => { // outra aba do mesmo navegador guardou alterações
   if (e.key === KEY && e.newValue) { try { db = JSON.parse(e.newValue); migra(); rerenderSeguro(); } catch (err) {} }
 });
 
 /* ================= LOGIN DEMO (sem servidor; só para demonstração) ================= */
 const SKEY = KEY + ':sessao';
+/* ================= NUTRIÇÃO ================= */
+function alimentosBase() { // por 100 g: [nome, kcal, proteína, hidratos, gordura]
+  return [['Arroz cozido', 130, 2.5, 28, .3], ['Arroz integral cozido', 123, 2.7, 26, 1], ['Batata-doce cozida', 86, 1.6, 20, .1], ['Batata cozida', 87, 1.9, 20, .1], ['Massa cozida', 131, 5, 25, 1.1], ['Massa integral cozida', 124, 5.3, 25, 1.1], ['Cuscuz cozido', 113, 2.2, 25, .7], ['Tapioca (goma)', 240, 0, 60, 0],
+    ['Pão integral', 250, 10, 45, 3.5], ['Pão de forma', 265, 9, 49, 3.2], ['Aveia em flocos', 389, 17, 66, 7], ['Flocos de milho', 357, 7, 84, .9], ['Feijão cozido', 77, 4.8, 14, .5], ['Lentilhas cozidas', 116, 9, 20, .4], ['Grão-de-bico cozido', 164, 9, 27, 2.6],
+    ['Peito de frango grelhado', 165, 31, 0, 3.6], ['Coxa de frango sem pele', 172, 25, 0, 8], ['Peru fiambre', 105, 17, 2, 3], ['Carne de vaca magra grelhada', 190, 29, 0, 8], ['Carne picada magra', 200, 26, 0, 10], ['Lombo de porco', 170, 27, 0, 7],
+    ['Salmão grelhado', 206, 22, 0, 12], ['Atum em água', 116, 26, 0, 1], ['Pescada cozida', 90, 19, 0, 1], ['Camarão cozido', 99, 24, .2, .3], ['Ovo cozido', 155, 13, 1.1, 11], ['Clara de ovo', 52, 11, .7, .2],
+    ['Queijo fresco', 98, 11, 3, 4], ['Requeijão light', 120, 10, 4, 7], ['Iogurte natural', 61, 3.5, 4.7, 3.3], ['Iogurte grego 0%', 59, 10, 3.6, .4], ['Skyr', 63, 11, 4, .2], ['Leite meio-gordo', 46, 3.3, 4.8, 1.6], ['Whey protein', 400, 80, 8, 6], ['Tofu', 76, 8, 1.9, 4.8],
+    ['Banana', 89, 1.1, 23, .3], ['Maçã', 52, .3, 14, .2], ['Laranja', 47, .9, 12, .1], ['Morangos', 32, .7, 7.7, .3], ['Uvas', 69, .7, 18, .2], ['Manga', 60, .8, 15, .4], ['Papaia', 43, .5, 11, .3], ['Kiwi', 61, 1.1, 15, .5], ['Abacate', 160, 2, 9, 15],
+    ['Brócolos cozidos', 35, 2.4, 7, .4], ['Cenoura', 41, .9, 10, .2], ['Tomate', 18, .9, 3.9, .2], ['Alface', 15, 1.4, 2.9, .2], ['Pepino', 15, .7, 3.6, .1], ['Courgette cozida', 17, 1.2, 3.1, .3], ['Espinafres cozidos', 23, 3, 3.8, .3], ['Couve-flor cozida', 23, 1.8, 4.1, .5], ['Salada mista', 20, 1.5, 3.5, .2],
+    ['Azeite', 884, 0, 0, 100], ['Manteiga de amendoim', 588, 25, 20, 50], ['Amêndoas', 579, 21, 22, 50], ['Nozes', 654, 15, 14, 65], ['Mel', 304, .3, 82, 0], ['Chocolate negro 70%', 598, 7.8, 46, 43], ['Húmus', 166, 8, 14, 10], ['Café sem açúcar', 2, .1, 0, 0]];
+}
+const REFEICOES_PADRAO = [['Pequeno-almoço', '08:00'], ['Lanche da manhã', '10:30'], ['Almoço', '13:00'], ['Lanche da tarde', '16:30'], ['Jantar', '20:00'], ['Ceia', '22:00']];
+function nutri(a) { return a.nutri || (a.nutri = { metas: { kcal: '', p: '', c: '', f: '', agua: 8 }, refeicoes: [], nota: '' }); }
+const r1 = x => Math.round((+x || 0) * 10) / 10;
+function macrosItem(nome, g) { const al = alimentosBase().find(x => norm(x[0]) === norm(nome)); if (!al || !(+g > 0)) return null; const f = +g / 100; return { k: Math.round(al[1] * f), p: r1(al[2] * f), c: r1(al[3] * f), f: r1(al[4] * f) }; }
+function totRef(r) { return r.itens.reduce((t, i) => ({ k: t.k + (+i.k || 0), p: t.p + (+i.p || 0), c: t.c + (+i.c || 0), f: t.f + (+i.f || 0) }), { k: 0, p: 0, c: 0, f: 0 }); }
+function totDia(n, soFeitas, a, dia) { return n.refeicoes.filter(r => !soFeitas || refFeita(a, dia, r.id)).reduce((t, r) => { const x = totRef(r); return { k: t.k + x.k, p: t.p + x.p, c: t.c + x.c, f: t.f + x.f }; }, { k: 0, p: 0, c: 0, f: 0 }); }
+const refFeita = (a, dia, rid) => { const x = (a.nutriReg || []).find(q => q.id === dia + '|' + rid); return !!(x && x.feito); };
+const aguaDe = (a, dia) => { const x = (a.agua || []).find(q => q.id === dia); return x ? x.copos : 0; };
+function barra(v, meta, cls) { const pc = meta > 0 ? Math.min(100, Math.round(v / meta * 100)) : 0; return `<div class="nu-bar ${cls || ''}"><i style="width:${pc}%"></i></div>`; }
+function macroLinha(rot, v, meta, un) { return `<div class="nu-m"><div class="row spread small"><span>${rot}</span><span class="num"><b>${Math.round(v)}</b>${meta ? ' / ' + Math.round(meta) : ''} ${un}</span></div>${meta ? barra(v, meta) : ''}</div>`; }
+function resumoDia(n, tot) { const m = n.metas; return `${macroLinha('Calorias', tot.k, +m.kcal, 'kcal')}${macroLinha('Proteína', tot.p, +m.p, 'g')}${macroLinha('Hidratos', tot.c, +m.c, 'g')}${macroLinha('Gordura', tot.f, +m.f, 'g')}`; }
+function sugestaoMetas(a) {
+  const med = a.medidas.filter(x => x.peso !== '' && x.peso != null).sort((x, y) => y.data.localeCompare(x.data))[0];
+  if (!med) return null; const peso = +med.peso, ob = norm(a.objetivo);
+  const f = /emagre|defini|perd/.test(ob) ? 26 : /hipertrof|massa|ganh/.test(ob) ? 36 : 31;
+  const kcal = Math.round(peso * f / 50) * 50, p = Math.round(peso * 2), g = Math.round(peso * .9), c = Math.max(0, Math.round((kcal - p * 4 - g * 9) / 4));
+  return { kcal, p, c, f: g };
+}
+function tabNutri(a) {
+  const n = nutri(a), m = n.metas, tot = totDia(n);
+  const dl = `<datalist id="lista-alim">${alimentosBase().map(x => `<option value="${esc(x[0])}">`).join('')}</datalist>`;
+  const d = (extra) => `data-aluno="${a.id}" ${extra || ''}`;
+  const sug = sugestaoMetas(a);
+  return `${dl}
+  <div class="panel"><div class="row spread"><div><h3>Metas diárias</h3><div class="small muted">Defina o objetivo do dia. A aluna acompanha pelo telemóvel.</div></div>
+    <div class="row"><button class="btn sm" data-act="sugerir-metas" data-id="${a.id}" ${sug ? '' : 'disabled title="Registe primeiro o peso do aluno"'}>Sugerir pelas medidas</button>
+    <button class="btn sm ghost" data-act="nutri-copiar" data-id="${a.id}">Copiar para outro aluno</button><button class="btn sm ghost" data-act="nutri-texto" data-id="${a.id}">Enviar por mensagem</button></div></div>
+    <div class="nu-metas">
+      <label class="met"><span>Calorias (kcal)</span><input type="number" class="num" min="0" value="${esc(m.kcal)}" ${d('data-nu="m-kcal"')}></label>
+      <label class="met"><span>Proteína (g)</span><input type="number" class="num" min="0" value="${esc(m.p)}" ${d('data-nu="m-p"')}></label>
+      <label class="met"><span>Hidratos (g)</span><input type="number" class="num" min="0" value="${esc(m.c)}" ${d('data-nu="m-c"')}></label>
+      <label class="met"><span>Gordura (g)</span><input type="number" class="num" min="0" value="${esc(m.f)}" ${d('data-nu="m-f"')}></label>
+      <label class="met"><span>Água (copos)</span><input type="number" class="num" min="0" value="${esc(m.agua)}" ${d('data-nu="m-agua"')}></label></div>
+    ${sug ? `<div class="small muted">Sugestão pelo último peso: ${sug.kcal} kcal · ${sug.p} g proteína · ${sug.c} g hidratos · ${sug.f} g gordura. É uma estimativa simples, ajuste ao seu critério profissional.</div>` : ''}
+    <div class="nu-dia" id="nu-dia"><div class="eyebrow">O plano de refeições soma</div>${resumoDia(n, tot)}</div></div>
+  ${n.refeicoes.length ? n.refeicoes.map((r, ri) => {
+    const t = totRef(r);
+    return `<section class="panel nu-ref" aria-label="${esc(r.nome)}">
+      <div class="row" style="gap:10px;flex-wrap:wrap"><input type="text" class="nu-nome" value="${esc(r.nome)}" placeholder="Nome da refeição" ${d(`data-nu="r-nome" data-ref="${r.id}"`)} aria-label="Nome da refeição">
+        <input type="time" value="${esc(r.hora || '')}" ${d(`data-nu="r-hora" data-ref="${r.id}"`)} aria-label="Hora" style="width:110px">
+        <span class="small muted num" id="mt-${r.id}" style="margin-left:auto">${Math.round(t.k)} kcal · P ${r1(t.p)} · H ${r1(t.c)} · G ${r1(t.f)}</span>
+        <div class="row" style="gap:2px"><button class="btn ghost icon" data-act="nu-mover" data-dir="-1" data-id="${a.id}" data-ref="${r.id}" ${ri === 0 ? 'disabled' : ''} aria-label="Subir refeição">↑</button><button class="btn ghost icon" data-act="nu-mover" data-dir="1" data-id="${a.id}" data-ref="${r.id}" ${ri === n.refeicoes.length - 1 ? 'disabled' : ''} aria-label="Descer refeição">↓</button><button class="btn ghost icon" data-act="nu-dup-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Duplicar refeição" title="Duplicar">⧉</button><button class="btn ghost icon danger" data-act="nu-del-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Excluir refeição">✕</button></div></div>
+      ${r.itens.length ? `<div class="nu-cab"><span>Alimento</span><span>Gramas</span><span>kcal</span><span>Prot.</span><span>Hidr.</span><span>Gord.</span><span></span></div>` : ''}
+      ${r.itens.map(i => `<div class="nu-it"><input type="text" list="lista-alim" value="${esc(i.nome)}" placeholder="Escreva ou escolha o alimento" ${d(`data-nu="i-nome" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Alimento">
+        <input type="number" class="num" min="0" value="${esc(i.g)}" ${d(`data-nu="i-g" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Gramas" id="ng-${i.id}">
+        <input type="number" class="num" min="0" value="${esc(i.k)}" ${d(`data-nu="i-k" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Calorias" id="nk-${i.id}">
+        <input type="number" class="num" min="0" step="0.1" value="${esc(i.p)}" ${d(`data-nu="i-p" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Proteína" id="np-${i.id}">
+        <input type="number" class="num" min="0" step="0.1" value="${esc(i.c)}" ${d(`data-nu="i-c" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Hidratos" id="nc-${i.id}">
+        <input type="number" class="num" min="0" step="0.1" value="${esc(i.f)}" ${d(`data-nu="i-f" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Gordura" id="nf-${i.id}">
+        <button class="btn ghost icon danger" data-act="nu-del-it" data-id="${a.id}" data-ref="${r.id}" data-item="${i.id}" aria-label="Remover alimento">✕</button></div>`).join('')}
+      <div class="row"><button class="btn sm" data-act="nu-add-it" data-id="${a.id}" data-ref="${r.id}">+ Alimento</button>
+        <input type="text" class="nu-notaref" value="${esc(r.nota || '')}" placeholder="Nota para o aluno (ex.: pode trocar o arroz por batata-doce)" ${d(`data-nu="r-nota" data-ref="${r.id}"`)} aria-label="Nota da refeição"></div>
+    </section>`; }).join('') : `<div class="panel empty"><h2>Ainda não há plano alimentar</h2><p>Comece pela estrutura padrão (6 refeições) e depois escolha os alimentos. As calorias e os macros calculam-se sozinhos.</p>
+      <button class="btn primary" data-act="nu-padrao" data-id="${a.id}">Criar as 6 refeições do dia</button></div>`}
+  <div class="row"><button class="btn" data-act="nu-add-ref" data-id="${a.id}">+ Refeição</button></div>
+  <div class="panel"><label class="field">Notas gerais para o aluno (hidratação, suplementos, dias livres…)<textarea ${d('data-nu="nota"')} placeholder="Ex.: beber 2 litros de água por dia. Ao fim de semana pode fazer uma refeição livre.">${esc(n.nota || '')}</textarea></label></div>
+  ${adesaoNutri(a)}`;
+}
+function adesaoNutri(a) {
+  const n = nutri(a); if (!n.refeicoes.length) return '';
+  const dias = Array.from({ length: 7 }, (_, k) => isoDe(new Date(Date.now() - (6 - k) * 864e5)));
+  const dados = dias.map(dia => ({ dia, f: n.refeicoes.filter(r => refFeita(a, dia, r.id)).length, agua: aguaDe(a, dia) }));
+  const tot = dados.reduce((x, y) => x + y.f, 0), pc = Math.round(tot / (n.refeicoes.length * 7) * 100);
+  return `<div class="panel"><div class="row spread"><h3>Como tem corrido (7 dias)</h3><span class="chip ${pc >= 70 ? 'ok' : 'accent'} num">${pc}% das refeições feitas</span></div>
+    <div class="nu-sem">${dados.map(x => `<div><div class="nu-col"><i style="height:${Math.round(x.f / n.refeicoes.length * 100)}%"></i></div><span class="small muted num">${fmtData(x.dia).slice(0, 5)}</span><span class="small num">${x.f}/${n.refeicoes.length}</span></div>`).join('')}</div></div>`;
+}
+function refreshNu(a) {
+  const n = nutri(a); const e = document.getElementById('nu-dia'); if (e) e.innerHTML = `<div class="eyebrow">O plano de refeições soma</div>${resumoDia(n, totDia(n))}`;
+  n.refeicoes.forEach(r => { const t = totRef(r), el = document.getElementById('mt-' + r.id); if (el) el.textContent = `${Math.round(t.k)} kcal · P ${r1(t.p)} · H ${r1(t.c)} · G ${r1(t.f)}`; });
+}
+function textoNutri(a) {
+  const n = nutri(a), m = n.metas, l = [`PLANO ALIMENTAR · ${a.nome}`];
+  if (m.kcal) l.push(`Metas do dia: ${m.kcal} kcal · ${m.p || '—'} g proteína · ${m.c || '—'} g hidratos · ${m.f || '—'} g gordura · ${m.agua || 8} copos de água`);
+  n.refeicoes.forEach(r => { const t = totRef(r); l.push('', `${r.hora ? r.hora + ' · ' : ''}${r.nome.toUpperCase()} (${Math.round(t.k)} kcal)`); r.itens.forEach(i => l.push(`- ${i.nome}${i.g ? ' ' + i.g + ' g' : ''}`)); if (r.nota) l.push(`  Nota: ${r.nota}`); });
+  if (n.nota) l.push('', n.nota); return l.join('\n');
+}
+/* aluna */
+function vNutri(a) {
+  const n = nutri(a), dia = hoje(), m = n.metas;
+  if (!n.refeicoes.length) return shell(`<div class="ola"><div class="eyebrow">Hoje</div><h1>Alimentação</h1></div><div class="panel empty"><h2>Ainda sem plano alimentar</h2><p>Quando o seu personal ou nutricionista montar o plano, as refeições aparecem aqui.</p>
+    <button class="btn" data-sact="comentar">💬 Perguntar ao personal</button></div>`, 'nutri');
+  const feitas = n.refeicoes.filter(r => refFeita(a, dia, r.id)).length, tot = totDia(n, true, a, dia), copos = aguaDe(a, dia), alvoA = +m.agua || 8;
+  return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Alimentação</h1></div>
+  <div class="panel"><div class="row spread"><b>${feitas} de ${n.refeicoes.length} refeições feitas</b><span class="chip ${feitas === n.refeicoes.length ? 'ok' : 'accent'} num">${Math.round(feitas / n.refeicoes.length * 100)}%</span></div>
+    ${barra(feitas, n.refeicoes.length, 'grande')}${m.kcal ? resumoDia(n, tot) : ''}</div>
+  <div class="panel agua"><div class="row spread"><b>💧 Água</b><span class="num small"><b>${copos}</b> de ${alvoA} copos</span></div>${barra(copos, alvoA)}
+    <div class="row" style="justify-content:center;gap:12px"><button class="btn" data-sact="agua" data-d="-1" aria-label="Menos um copo" style="min-width:56px;justify-content:center">−</button><button class="btn primary" data-sact="agua" data-d="1" style="min-width:140px;justify-content:center">+ 1 copo</button></div></div>
+  ${n.refeicoes.map(r => { const t = totRef(r), f = refFeita(a, dia, r.id);
+    return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div></div>
+      <button class="nu-check" data-sact="refeicao" data-ref="${r.id}" aria-pressed="${f}" aria-label="${f ? 'Desmarcar' : 'Marcar'} ${esc(r.nome)} como feita">${f ? '✓ Feita' : 'Marcar feita'}</button></div>
+      <ul class="nu-lista">${r.itens.map(i => `<li><span>${esc(i.nome)}</span><span class="num muted">${i.g ? esc(i.g) + ' g' : ''}</span></li>`).join('') || '<li class="muted">Sem alimentos definidos.</li>'}</ul>
+      ${r.nota ? `<div class="dica">${esc(r.nota)}</div>` : ''}
+      <button class="btn ghost sm" data-sact="comentar" data-ctx="Refeição: ${esc(r.nome)}" style="justify-self:start">💬 Comentar</button></article>`; }).join('')}
+  ${n.nota ? `<div class="panel"><div class="eyebrow">Notas do seu personal</div><div>${esc(n.nota)}</div></div>` : ''}`, 'nutri');
+}
+/* ================= MARCA DO PERSONAL ================= */
+const MKEY = KEY + ':marca';
+const MARCA_PADRAO = { nome: 'PT example', sigla: 'PT', cor: '#262625', logo: '', tel: '', boasVindas: '', sub: 'Personal Trainer' };
+function marca() {
+  let l = {}; try { l = JSON.parse(localStorage.getItem(MKEY) || '{}'); } catch (e) {}
+  return Object.assign({}, MARCA_PADRAO, l, db && db.marca || {});
+}
+function inkPara(hex) { const n = parseInt(String(hex).slice(1), 16) || 0, r = n >> 16, g = (n >> 8) & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) > 165 ? '#161616' : '#ffffff'; }
+function marcaMark(px, extra) {
+  const m = marca(), st = `width:${px}px;height:${px}px;border-radius:${Math.round(px / 4)}px;${extra || ''}`;
+  return m.logo ? `<span class="brand-mark" aria-hidden="true" style="${st};background:#fff;border:1px solid var(--line);overflow:hidden"><img src="${m.logo}" alt="" style="width:100%;height:100%;object-fit:contain"></span>`
+    : `<span class="brand-mark" aria-hidden="true" style="${st}"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink);font-size:${Math.round(px * .42)}px;letter-spacing:.02em">${esc(m.sigla)}</span></span>`;
+}
+function aplicaMarca() {
+  const m = marca(), r = document.documentElement.style;
+  const ok = /^#[0-9a-f]{6}$/i.test(m.cor);
+  if (ok && m.cor.toLowerCase() !== MARCA_PADRAO.cor) { r.setProperty('--accent', m.cor); r.setProperty('--accent-ink', inkPara(m.cor)); r.setProperty('--accent-soft', `color-mix(in srgb, ${m.cor} 14%, var(--surface))`); }
+  else { r.removeProperty('--accent'); r.removeProperty('--accent-ink'); r.removeProperty('--accent-soft'); }
+  const t = document.getElementById('brand-top'); if (t) t.innerHTML = `${marcaMark(34)}<b>${esc(m.nome)}</b><span class="small muted" style="margin-left:-4px">${esc(m.sub)}</span>`;
+  document.title = m.nome;
+  try { localStorage.setItem(MKEY, JSON.stringify({ nome: m.nome, sigla: m.sigla, cor: m.cor, logo: m.logo, sub: m.sub })); } catch (e) {}
+}
+const slugNome = n => norm(n).replace(/[^a-z0-9 ]/g, '').trim();
+const pinNovo = () => String(Math.floor(1000 + Math.random() * 9000));
+function acessoDe(a) { if (!a.acesso) { a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); } return a.acesso; }
+function urlApp() { return location.origin && location.origin !== 'null' ? location.origin + '/app' : 'https://pt-example.vercel.app/app'; }
+function textoConvite(a) {
+  const m = marca(), ac = acessoDe(a);
+  return `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\n1) Abre este link no telemóvel: ${urlApp()}\n2) Utilizador: ${ac.usuario}\n3) Senha: ${ac.senha}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao ecrã principal" (no Android: menu ⋮ e "Instalar app"). Assim fica como uma app normal.${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
+}
+function abreConvite(id) {
+  const a = alunoById(id), m = marca(), tel = String(a.telefone || '').replace(/\D/g, '');
+  openDialog(`<div class="row spread"><h2>Convidar ${esc(a.nome.split(' ')[0])}</h2><button class="btn ghost" data-act="close">Fechar</button></div>
+    <p class="muted" style="margin:0">Copie esta mensagem e cole no WhatsApp. Ela já leva o link, o utilizador e a senha.</p>
+    <textarea class="share" id="share-txt" readonly>${esc(textoConvite(a))}</textarea>
+    <div class="row"><button class="btn primary" data-act="copiar" data-src="share-txt">Copiar mensagem</button>
+      ${tel.length >= 9 ? `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(textoConvite(a))}">Abrir no WhatsApp</a>` : ''}
+      <button class="btn ghost" data-act="nova-senha" data-id="${a.id}">Gerar senha nova</button></div>
+    <p class="small muted" style="margin:0">Se o aluno esquecer a senha, gere uma nova aqui e envie outra vez.</p>`);
+}
+function viewDefinicoes() {
+  const m = marca(), cores = ['#262625', '#1d4ed8', '#0f766e', '#b91c1c', '#7c3aed', '#c2410c', '#be185d', '#15803d'];
+  return `<div class="page-head"><div><div class="eyebrow">A sua marca</div><h1>Definições</h1></div></div>
+  <div class="panel"><h3>Marca</h3><p class="muted small" style="margin:0">É isto que os seus alunos veem no telemóvel: o nome, o logótipo e a cor.</p>
+    <div class="form-grid">
+      <label class="field">Nome do seu negócio<input type="text" data-marca="nome" value="${esc(m.nome)}" maxlength="40"></label>
+      <label class="field">Descrição curta<input type="text" data-marca="sub" value="${esc(m.sub)}" maxlength="40" placeholder="Ex.: Personal Trainer e Nutrição"></label>
+      <label class="field">Letras do logótipo (2 ou 3)<input type="text" data-marca="sigla" value="${esc(m.sigla)}" maxlength="3"></label>
+      <label class="field">WhatsApp do personal (com indicativo)<input type="tel" data-marca="tel" value="${esc(m.tel)}" placeholder="Ex.: 351912345678" inputmode="tel"></label>
+      <div class="field wide"><span>Cor da marca</span><div class="row" style="gap:8px">${cores.map(c => `<button type="button" class="cor-sw ${c.toLowerCase() === m.cor.toLowerCase() ? 'on' : ''}" style="background:${c}" data-act="cor-marca" data-cor="${c}" aria-label="Cor ${c}"></button>`).join('')}
+        <input type="color" data-marca="cor" value="${esc(m.cor)}" aria-label="Escolher outra cor" style="width:44px;height:36px;padding:2px"></div></div>
+      <div class="field wide"><span>Logótipo (opcional)</span><div class="row">${marcaMark(48)}<label class="btn sm" style="cursor:pointer">Escolher imagem<input type="file" accept="image/*" id="logo-file" hidden></label>${m.logo ? '<button class="btn ghost sm" data-act="tirar-logo">Tirar logótipo</button>' : ''}</div></div>
+      <label class="field wide">Mensagem de boas-vindas para os alunos (aparece no convite e no início)<textarea data-marca="boasVindas" placeholder="Ex.: Bem-vindo! Qualquer dúvida, fala comigo. Vamos treinar!">${esc(m.boasVindas)}</textarea></label>
+    </div></div>
+  <div class="panel"><h3>Os meus dados</h3><p class="muted small" style="margin:0">Guarde uma cópia de segurança dos seus alunos e treinos, ou restaure uma cópia antiga.</p>
+    <div class="row"><a class="btn" href="#backup">Cópia de segurança</a><button class="btn" data-act="limites">Limites da Central</button></div></div>
+  <div class="panel"><h3>Ajuda rápida</h3>
+    <ol class="small" style="margin:0;padding-left:18px;display:grid;gap:4px"><li><b>Alunos</b>: adicione um aluno e monte o treino e a alimentação.</li><li><b>Convidar</b>: na ficha do aluno, copie a mensagem e envie por WhatsApp.</li><li><b>Rever</b>: veja os treinos que os alunos fizeram.</li><li><b>Central</b>: veja quem treinou, quem faltou e quem precisa de um plano novo.</li></ol></div>`;
+}
 const USERS = { personal: { senha: 'personal', papel: 'personal' }, 'mariana ribeiro': { senha: 'alunateste', papel: 'aluno', nome: 'Mariana Ribeiro' } };
 const norm = v => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
 function getSessao() { try { return JSON.parse(localStorage.getItem(SKEY) || 'null'); } catch (e) { return null; } }
@@ -1479,20 +1709,21 @@ function setSessao(v) { try { v ? localStorage.setItem(SKEY, JSON.stringify(v)) 
 function renderLogin() {
   document.body.classList.add('sem-login'); document.body.classList.remove('modo-aluno', 'papel-aluno');
   $('#app').innerHTML = `<div class="login">
-    <div class="login-brand"><span class="brand-mark"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink);font-size:1.5rem">PT</span></span>
-      <div><div class="eyebrow">PT example</div><h1>Entrar</h1></div></div>
+    <div class="login-brand">${marcaMark(52)}
+      <div><div class="eyebrow">${esc(marca().nome)}</div><h1>Entrar</h1></div></div>
     <form class="login-card" id="f-login" autocomplete="off">
       <label class="field">Usuário<input type="text" id="l-user" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
       <label class="field">Senha<input type="password" id="l-senha" autocapitalize="none" required></label>
       <div class="login-err" id="l-err" role="alert"></div>
       <button class="btn primary" style="justify-content:center">Entrar</button>
     </form>
-    <div class="demo-box"><div><span class="chip accent">Demonstração</span></div>
-      <div class="small">Esta é uma versão de demonstração. Use os acessos de teste abaixo (toque para preencher).</div>
+    <p class="small muted" style="margin:0">Recebeu um convite do seu personal? Escreva o utilizador e a senha que ele lhe enviou.</p>
+    <details class="demo-box"><summary><span class="chip accent">Quero só experimentar</span></summary>
+      <div class="small" style="margin-top:8px">Versão de demonstração: toque num acesso de teste para preencher.</div>
       <div class="small muted sync-status"></div>
       <button class="cred btn" type="button" data-fill="personal|personal" style="text-align:left"><span><b>Personal</b><br><code>personal</code> · <code>personal</code></span><span class="small">Usar</span></button>
       <button class="cred btn" type="button" data-fill="Mariana Ribeiro|alunateste" style="text-align:left"><span><b>Aluna</b><br><code>Mariana Ribeiro</code> · <code>alunateste</code></span><span class="small">Usar</span></button>
-    </div></div>`;
+    </details></div>`;
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-fill]'); if (!b) return;
@@ -1501,12 +1732,19 @@ document.addEventListener('click', ev => {
 document.addEventListener('submit', async ev => {
   if (ev.target.id !== 'f-login') return;
   ev.preventDefault();
-  const u = USERS[norm($('#l-user').value)];
-  if (!u || u.senha !== $('#l-senha').value) { $('#l-err').textContent = 'Usuário ou senha incorretos.'; return; }
-  if (u.papel === 'aluno') { try { await pull(); } catch (e) {} }
+  const un = norm($('#l-user').value), sn = $('#l-senha').value.trim();
+  let u = USERS[un]; if (u && u.senha !== sn) u = null;
+  if (!u) { // aluno convidado: procura nos dados deste aparelho e, se preciso, na nuvem
+    const procura = () => db.alunos.find(x => x.acesso && norm(x.acesso.usuario) === un && x.acesso.senha === sn);
+    let conv = procura();
+    if (!conv) { $('#l-err').textContent = 'A verificar…'; try { await pull(true); } catch (e) {} conv = procura(); }
+    if (!conv) { $('#l-err').textContent = 'Não encontrei esse utilizador ou senha. Confirme as letras e os números, ou peça outra senha ao seu personal.'; return; }
+    u = { papel: 'aluno', nome: conv.nome, convidado: conv.id };
+  }
+  if (u.papel === 'aluno' && !u.convidado) { try { await pull(); } catch (e) {} }
   if (u.papel === 'personal') { setSessao({ papel: 'personal' }); pull(); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'central'; }
   else {
-    let a = db.alunos.find(x => norm(x.nome) === norm(u.nome));
+    let a = (u.convidado && alunoById(u.convidado)) || db.alunos.find(x => norm(x.nome) === norm(u.nome));
     if (!a) { a = { id: uid(), nome: u.nome, objetivo: 'Condicionamento', telefone: '', inicio: hoje(), notas: '', treinos: [], sessoes: [], medidas: [] }; db.alunos.push(a); save(); }
     setSessao({ papel: 'aluno', alunoId: a.id, nome: a.nome }); location.hash = 'meu-inicio';
   }
@@ -1555,6 +1793,7 @@ function shell(content, aba) {
   <nav class="tabbar-aluno" aria-label="Área do aluno">
     ${t('inicio', 'meu-inicio', 'Início', '<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>')}
     ${t('treinar', 'meus-treinos', 'Treinar', '<svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>')}
+    ${t('nutri', 'minha-nutricao', 'Comida', '<svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 3 3v8M9 3v7M12 3v7a3 3 0 0 1-3 3"/><path d="M17 3c-2 1.5-3 4-3 7 0 2 1 3 3 3v8"/></svg>')}
     ${t('evolucao', 'minha-evolucao', 'Evolução', '<svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M5 15l4-4 4 3 6-7"/><path d="M15 7h4v4"/></svg>')}
     ${t('perfil', 'meu-perfil', 'Perfil', '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>')}
   </nav>`;
@@ -1576,6 +1815,7 @@ function vInicio(a) {
   return shell(`
   <div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Olá, ${esc(a.nome.split(' ')[0])}</h1></div>
   ${semanaHtml(a)}
+  ${marca().boasVindas ? `<div class="panel" style="padding:12px 16px"><div class="small">${esc(marca().boasVindas)}</div></div>` : ''}
   ${emCurso ? `<a class="hoje-card" href="#meu-treino-${emCurso.id}"><div class="eyebrow">Treino em andamento</div><h2>${esc(treinoLabel(a, emCurso))}</h2>
      <div class="small">${wk.itens.filter(i => i.sets.every(s => s.done)).length} de ${wk.itens.length} exercícios feitos</div><span class="btn primary">Continuar treino</span></a>`
   : prox ? `<a class="hoje-card" href="#meu-treino-${prox.id}" data-sact="iniciar" data-treino="${prox.id}"><div class="eyebrow">Treino de hoje</div><h2>${esc(treinoLabel(a, prox))}</h2>
@@ -1659,9 +1899,10 @@ function vPerfil(a) {
   return shell(`<div class="perfil-top"><span class="avatar-ini" style="width:72px;height:72px;font-size:1.8rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
     <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Aluno desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
   <div class="panel"><div class="eyebrow">Meu personal</div>
-    <div class="row" style="gap:12px"><span class="brand-mark" aria-hidden="true" style="width:44px;height:44px"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink)">PT</span></span>
-    <div><b>PT example</b><div class="small muted">Personal Trainer</div></div></div>
-    <div class="small muted">Dúvidas sobre o treino? Fale com seu personal pelo WhatsApp.</div></div>
+    <div class="row" style="gap:12px">${marcaMark(44)}
+    <div><b>${esc(marca().nome)}</b><div class="small muted">${esc(marca().sub)}</div></div></div>
+    <div class="small muted">Dúvidas sobre o treino? Fale com o seu personal.</div>
+    ${String(marca().tel).replace(/\D/g, '').length >= 9 ? `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${String(marca().tel).replace(/\D/g, '')}">Falar no WhatsApp</a>` : ''}</div>
   <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
   <div class="panel"><div class="eyebrow">Comentários</div><p style="margin:0" class="small muted">Dor, dúvida ou recado? O personal vê na sua ficha.</p>
@@ -1678,7 +1919,7 @@ function renderAluno(h) {
   const a = alunoAtivo(); const app = $('#app');
   if (!a) { app.innerHTML = `<div class="panel empty">Cadastre um aluno primeiro.</div>`; return; }
   if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); if (t) pedeWake(); return; }
-  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
+  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-nutricao' ? vNutri(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
 }
 
 /* descanso cronometrado */
@@ -1728,8 +1969,8 @@ async function pedeWake() { try { if (!wake && wk && navigator.wakeLock && docum
 function soltaWake() { try { wake && wake.release(); } catch (e) {} wake = null; }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (rest.ativo) tickRest(); if (wk) pedeWake(); } });
 
-function abreComentario() {
-  openDialog(`<form id="f-comentario" class="dlg" style="padding:0"><div><div class="eyebrow">Para o seu personal</div><h2>Deixar comentário</h2></div>
+function abreComentario(ctx) {
+  openDialog(`<form id="f-comentario" class="dlg" style="padding:0" data-ctx="${esc(ctx || '')}"><div><div class="eyebrow">${ctx ? esc(ctx) : 'Para o seu personal'}</div><h2>Deixar comentário</h2></div>
     <label class="field">O que quer contar?<textarea id="cm-texto" required placeholder="Ex.: dor no ombro, dúvida sobre o treino, horário que não consigo…"></textarea></label>
     <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Enviar</button></div></form>`);
 }
@@ -1772,7 +2013,9 @@ document.addEventListener('click', ev => {
     case 'rest-fim': stopRest(); break;
     case 'rest-som': rest.mudo = !rest.mudo; try { localStorage.setItem('pt-example:v1:mudo', rest.mudo ? '1' : '0'); } catch (e) {} liberaAudio(); tickRest(); break;
     case 'rest-start': { liberaAudio(); const tr = a.treinos.find(x => x.id === wk.treinoId); const ex = exById(tr.itens[+b.dataset.i].exId); startRest(+tr.itens[+b.dataset.i].descanso || 60, 'Descanso · ' + (ex ? ex.nome : '')); break; }
-    case 'comentar': abreComentario(); break;
+    case 'comentar': abreComentario(b.dataset.ctx || ''); break;
+    case 'agua': { const x = (a.agua = a.agua || []).find(q => q.id === hoje()), c = Math.max(0, (x ? x.copos : 0) + (+b.dataset.d)); if (x) { x.copos = c; x.ts = Date.now(); } else a.agua.push({ id: hoje(), data: hoje(), copos: c, ts: Date.now() }); save(); rerender(); break; }
+    case 'refeicao': { const id = hoje() + '|' + b.dataset.ref, reg = (a.nutriReg = a.nutriReg || []), x = reg.find(q => q.id === id); if (x) { x.feito = !x.feito; x.ts = Date.now(); } else reg.push({ id, data: hoje(), refId: b.dataset.ref, feito: true, ts: Date.now() }); save(); rerender(); break; }
     case 'cancelar':
       confirmar('Cancelar este treino?', 'Cancelar treino', () => { wk = null; saveWk(); stopRest(); soltaWake(); location.hash = 'meus-treinos'; }); break;
     case 'concluir': {
@@ -1799,7 +2042,7 @@ document.addEventListener('input', ev => {
 document.addEventListener('submit', ev => {
   if (ev.target.id === 'f-comentario') {
     ev.preventDefault(); const a = alunoAtivo(), tx = $('#cm-texto').value.trim(); if (!a || !tx) return;
-    novoComentario(a, tx); save(); closeDialog(); toast('Comentário enviado ao personal'); return;
+    novoComentario(a, tx, ev.target.dataset.ctx ? { treinoNome: ev.target.dataset.ctx } : null); save(); closeDialog(); toast('Comentário enviado ao personal'); return;
   }
   if (ev.target.id !== 'f-concluir') return;
   ev.preventDefault();
@@ -1826,6 +2069,7 @@ document.addEventListener('submit', ev => {
     <button class="btn primary" data-act="close">Fechar</button></div>`), 50);
 });
 
+aplicaMarca();
 route();
 pull();
 })();
