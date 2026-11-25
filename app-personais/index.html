@@ -168,8 +168,20 @@ th { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color:
 td.num, th.num { text-align: right; }
 .sessao { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; display: grid; gap: 6px; background: var(--surface); }
 .sessao ul { margin: 0; padding-left: 18px; font-size: .9rem; }
-.reg-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) 120px 90px 90px; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
-.reg-row:last-child { border-bottom: 0; }
+.reg-ex { padding: 12px 0; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+.reg-ex:last-child { border-bottom: 0; }
+.reg-ex .head { display: flex; gap: 10px; align-items: center; }
+.reg-ex .head input { width: 20px; height: 20px; flex: none; }
+.sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; padding-left: 30px; }
+.set { display: grid; grid-template-columns: 24px minmax(0, 1fr) 12px minmax(0, .8fr); gap: 4px; align-items: center; background: var(--surface-2); border-radius: 8px; padding: 6px 8px; }
+.set b { font-family: var(--font-display); color: var(--muted); }
+.set input { padding: 5px 6px; text-align: right; }
+.set input::-webkit-inner-spin-button, .set input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.set input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.set .x { color: var(--muted); text-align: center; font-size: .85rem; }
+.set-legend { padding-left: 30px; font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.reg-ex.off .sets { opacity: .45; }
+.kg-up { color: var(--ok); font-weight: 600; }
 .chart { width: 100%; height: auto; display: block; }
 .chart text { fill: var(--muted); font-size: 11px; font-family: var(--font-body); }
 .chart .grid { stroke: var(--line); stroke-width: 1; }
@@ -198,8 +210,9 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .ficha-row .obs { grid-column: 1 / -1; }
   .ficha-row .ficha-actions { grid-column: 1 / -1; justify-content: start; }
   .m-label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
-  .reg-row { grid-template-columns: 28px minmax(0, 1fr) 1fr 1fr; }
-  .reg-row .meta { grid-column: 2 / -1; }
+  .sets, .set-legend { padding-left: 0; }
+  .set { grid-template-columns: 16px minmax(0, 1.2fr) 10px minmax(0, .8fr); padding: 6px; }
+  .set input { padding: 5px 4px; }
   .treino-head input { max-width: none; flex: 1; }
   .treino-head .row { margin-left: 0; }
 }
@@ -262,7 +275,8 @@ function exemplo() {
   [26, 21, 16, 12, 7, 2].forEach((d, i) => {
     const t = i % 2 ? tB : tA;
     sessoes.push({ id: uid(), data: diasAtras(d), treinoId: t.id, treinoNome: t.nome, rpe: 7 + (i % 3 === 0 ? 1 : 0), nota: i === 4 ? 'Reclamou de dor leve no joelho direito' : '',
-      itens: t.itens.map(it => ({ exId: it.exId, carga: +it.carga + Math.floor(i / 2) * 2.5, reps: it.reps.split('-')[0], feito: true })) });
+      itens: t.itens.map(it => { const c = +it.carga + Math.floor(i / 2) * 2.5, r = it.reps.split('-').pop();
+        return { exId: it.exId, carga: c, reps: r, feito: true, series: Array.from({ length: it.series }, (_, k) => ({ carga: k === it.series - 1 && i % 2 ? c - 2.5 : c, reps: k === it.series - 1 ? String(Math.max(+r - 2, 1)) : r })) }; }) });
   });
   const medidas = [[28, 82.4, 24.1, 92], [14, 81.3, 23.4, 90.5], [1, 80.6, 22.8, 89]].map(([d, peso, gordura, cintura]) => ({ id: uid(), data: diasAtras(d), peso, gordura, cintura, quadril: '', braco: '' }));
   const tC = { id: uid(), nome: 'Full body', itens: [
@@ -273,7 +287,8 @@ function exemplo() {
     item('Prancha', 3, '30s', '', 45, 'Tempo em segundos')
   ]};
   const sessC = [15, 11, 8, 4, 1].map((d, i) => ({ id: uid(), data: diasAtras(d), treinoId: tC.id, treinoNome: 'Treino A · Full body', rpe: 6 + (i > 2 ? 1 : 0), nota: '',
-    itens: tC.itens.map(it => ({ exId: it.exId, carga: it.carga === '' ? '' : +it.carga + (it.carga > 50 ? i * 5 : Math.floor(i / 2) * 1), reps: it.reps.split('-')[0], feito: !(i === 2 && it === tC.itens[3]) })) }));
+    itens: tC.itens.map(it => { const c = it.carga === '' ? '' : +it.carga + (it.carga > 50 ? i * 5 : Math.floor(i / 2) * 1), r = it.reps.split('-')[0];
+      return { exId: it.exId, carga: c, reps: r, feito: !(i === 2 && it === tC.itens[3]), series: Array.from({ length: it.series }, () => ({ carga: c, reps: r })) }; }) }));
   const medC = [[17, 96.8, 31.5, 108], [10, 95.1, 30.9, 106], [2, 93.9, 30.2, 104.5]].map(([d, peso, gordura, cintura]) => ({ id: uid(), data: diasAtras(d), peso, gordura, cintura, quadril: '', braco: '' }));
   return {
     exemplo: true,
@@ -490,7 +505,9 @@ function tabSessoes(a) {
       <div class="row spread"><div class="row"><b class="num">${fmtData(s.data)}</b><span class="chip accent">${esc(s.treinoNome || 'Treino')}</span>
       ${s.rpe ? `<span class="chip num" title="Percepção de esforço (0 a 10)">PSE ${esc(s.rpe)}</span>` : ''}<span class="chip ${feitos.length === s.itens.length ? 'ok' : ''} num">${feitos.length}/${s.itens.length} feitos</span></div>
       <button class="btn ghost sm danger" data-act="del-sessao" data-id="${a.id}" data-sessao="${s.id}">Excluir</button></div>
-      <ul>${s.itens.map(i => { const ex = exById(i.exId); return `<li class="${i.feito ? '' : 'muted'}">${esc(ex ? ex.nome : 'Exercício removido')}: <span class="num">${i.carga !== '' ? fmtNum(i.carga) + ' kg' : '—'} × ${esc(i.reps || '—')}</span>${i.feito ? '' : ' (não feito)'}</li>`; }).join('')}</ul>
+      <ul>${s.itens.map(i => { const ex = exById(i.exId); return `<li class="${i.feito ? '' : 'muted'}">${esc(ex ? ex.nome : 'Exercício removido')}: <span class="num">${i.series && i.series.length
+        ? i.series.map(x => `${x.carga !== '' ? fmtNum(x.carga) : '—'}×${esc(x.reps || '—')}`).join(' · ') + ' kg×reps'
+        : `${i.carga !== '' ? fmtNum(i.carga) + ' kg' : '—'} × ${esc(i.reps || '—')}`}</span>${i.feito ? '' : ' (não feito)'}</li>`; }).join('')}</ul>
       ${s.nota ? `<div class="small"><b>Obs.:</b> ${esc(s.nota)}</div>` : ''}
     </article>`;
   }).join('') : `<div class="panel empty">Nenhuma sessão registrada ainda.</div>`}`;
@@ -543,6 +560,17 @@ function tabEvolucao(a) {
         : `<p class="muted small" style="margin:0">Registre sessões com carga para acompanhar a progressão.</p>`}</div>
   </div>
   <div class="panel">
+    <div><div class="eyebrow">Pesos usados nos treinos</div><h2>Cargas por exercício</h2></div>
+    ${exIds.length ? `<div class="table-wrap"><table class="num"><thead><tr><th>Exercício</th><th class="num">Início</th><th class="num">Atual</th><th class="num">Evolução</th><th class="num">Plano</th><th class="num">Sessões</th></tr></thead>
+    <tbody>${exIds.map(id => { const arr = porEx[id], ini = arr[0].y, atu = arr[arr.length - 1].y, d = atu - ini;
+      const plano = a.treinos.flatMap(t => t.itens).find(i => i.exId === id);
+      const pct = ini ? Math.round(d / ini * 100) : 0;
+      return `<tr><td>${esc(exById(id).nome)}</td><td class="num">${fmtNum(ini)} kg</td><td class="num"><b>${fmtNum(atu)} kg</b></td>
+      <td class="num ${d > 0 ? 'kg-up' : 'muted'}">${d > 0 ? '+' : ''}${fmtNum(d)} kg${d ? ` (${d > 0 ? '+' : ''}${pct}%)` : ''}</td>
+      <td class="num">${plano && plano.carga !== '' ? fmtNum(plano.carga) + ' kg' : '—'}</td><td class="num">${arr.length}</td></tr>`; }).join('')}</tbody></table></div>`
+    : `<p class="muted" style="margin:0">Registre uma sessão para ver aqui o peso de cada exercício.</p>`}
+  </div>
+  <div class="panel">
     <div class="row spread"><h2>Medidas</h2><button class="btn primary sm" data-act="nova-medida" data-id="${a.id}">+ Nova avaliação</button></div>
     ${meds.length ? `<div class="table-wrap"><table class="num"><thead><tr><th>Data</th><th class="num">Peso kg</th><th class="num">% gordura</th><th class="num">Cintura cm</th><th class="num">Quadril cm</th><th class="num">Braço cm</th><th></th></tr></thead>
     <tbody>${meds.slice().reverse().map(m => `<tr><td>${fmtData(m.data)}</td><td class="num">${fmtNum(m.peso)}</td><td class="num">${fmtNum(m.gordura)}</td><td class="num">${fmtNum(m.cintura)}</td><td class="num">${fmtNum(m.quadril)}</td><td class="num">${fmtNum(m.braco)}</td>
@@ -564,17 +592,27 @@ function openMedida(aid) {
     <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Salvar</button></div></form>`);
 }
 
+function ultimaCarga(a, exId) {
+  const ss = a.sessoes.slice().sort((x, y) => y.data.localeCompare(x.data));
+  for (const s of ss) { const i = s.itens.find(i => i.exId === exId && i.feito && i.carga !== ''); if (i) return { carga: i.carga, data: s.data }; }
+  return null;
+}
 function openRegistrar(aid, tid) {
   const a = alunoById(aid), t = a.treinos.find(x => x.id === tid), ti = a.treinos.indexOf(t);
   openDialog(`<form id="f-sessao" data-id="${aid}" data-treino="${tid}" class="dlg" style="padding:0">
     <div><div class="eyebrow">${esc(a.nome)}</div><h2>Registrar Treino ${LETRAS[ti]}${t.nome ? ' · ' + esc(t.nome) : ''}</h2></div>
     <div class="form-grid"><label class="field">Data<input type="date" id="s-data" value="${hoje()}" required></label>
     <label class="field">PSE, esforço de 0 a 10<input type="number" min="0" max="10" id="s-rpe" class="num" placeholder="Ex.: 7"></label></div>
-    <div>${t.itens.map((it, i) => { const ex = exById(it.exId); return `<div class="reg-row">
-      <input type="checkbox" id="s-feito-${i}" checked aria-label="Feito">
-      <label for="s-feito-${i}" class="meta" style="min-width:0"><b>${esc(ex ? ex.nome : '—')}</b><div class="small muted num">${esc(it.series)} × ${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''}</div></label>
-      <label class="field">Carga kg<input type="number" step="0.5" id="s-carga-${i}" class="num" value="${esc(it.carga)}"></label>
-      <label class="field">Reps<input type="text" id="s-reps-${i}" class="num" value="${esc(String(it.reps).split('-').pop())}"></label>
+    <div class="small muted">Anote o peso (kg) e as repetições de cada série. Já vem preenchido com o plano; altere só o que mudou.</div>
+    <div>${t.itens.map((it, i) => { const ex = exById(it.exId); const n = Math.max(1, Math.min(10, +it.series || 1)); const prev = ultimaCarga(a, it.exId);
+      return `<div class="reg-ex" id="reg-${i}">
+      <label class="head"><input type="checkbox" id="s-feito-${i}" checked aria-label="Feito">
+        <span style="min-width:0"><b>${esc(ex ? ex.nome : '—')}</b><span class="small muted num"> · plano ${esc(it.series)} × ${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''}${prev ? ' · última vez ' + fmtNum(prev.carga) + ' kg' : ''}</span></span></label>
+      <div class="set-legend">Série · Peso kg × Reps</div>
+      <div class="sets">${Array.from({ length: n }, (_, j) => `<div class="set"><b>${j + 1}</b>
+        <input type="number" step="0.5" min="0" inputmode="decimal" id="s-c-${i}-${j}" class="num" value="${esc(it.carga)}" aria-label="Peso série ${j + 1} em kg">
+        <span class="x">×</span>
+        <input type="text" inputmode="numeric" id="s-r-${i}-${j}" class="num" value="${esc(String(it.reps).split('-').pop())}" aria-label="Repetições série ${j + 1}"></div>`).join('')}</div>
     </div>`; }).join('')}</div>
     <label class="field">Observações da sessão<textarea id="s-nota" placeholder="Dores, ajustes, como o aluno se sentiu…"></textarea></label>
     <label class="row small" style="gap:8px"><input type="checkbox" id="s-atualizar"> Atualizar as cargas do plano com as cargas de hoje</label>
@@ -793,7 +831,12 @@ document.addEventListener('submit', ev => {
   }
   if (f.id === 'f-sessao') {
     const a = alunoById(f.dataset.id), t = a.treinos.find(x => x.id === f.dataset.treino);
-    const itens = t.itens.map((it, i) => ({ exId: it.exId, carga: n('s-carga-' + i), reps: v('s-reps-' + i), feito: $('#s-feito-' + i, f).checked }));
+    const itens = t.itens.map((it, i) => {
+      const series = []; for (let j = 0; $('#s-c-' + i + '-' + j, f); j++) series.push({ carga: n('s-c-' + i + '-' + j), reps: v('s-r-' + i + '-' + j) });
+      const comCarga = series.filter(x => x.carga !== '' && !isNaN(x.carga));
+      const top = comCarga.length ? comCarga.reduce((m, x) => x.carga > m.carga ? x : m) : { carga: '', reps: series[0] ? series[0].reps : '' };
+      return { exId: it.exId, carga: top.carga, reps: top.reps, feito: $('#s-feito-' + i, f).checked, series };
+    });
     if ($('#s-atualizar', f).checked) itens.forEach((r, i) => { if (r.feito && r.carga !== '') t.itens[i].carga = r.carga; });
     const rpe = v('s-rpe');
     a.sessoes.push({ id: uid(), data: v('s-data'), treinoId: t.id, treinoNome: `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`, rpe, nota: v('s-nota'), itens });
