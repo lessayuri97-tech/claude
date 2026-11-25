@@ -155,7 +155,7 @@ details.faq p { margin: 0 0 14px; }
     <details class="faq"><summary>Como é a dieta?</summary><p>Simples e pra SUA rotina: metas de calorias e proteína, refeições e porções. Sem terrorismo e sem proibir os alimentos que você gosta.</p></details>
     <details class="faq"><summary>Como funciona o suporte?</summary><p>Você fala com a equipe pelo WhatsApp, direto do aplicativo, sempre que tiver dúvida sobre treino ou dieta.</p></details>
     <details class="faq"><summary>Quanto custa?</summary><p>Depois do diagnóstico, a equipe te passa as condições pelo WhatsApp, sem compromisso.</p></details>
-    <details class="faq"><summary>Como começo?</summary><p>Toque em “Começar o diagnóstico”, responda às 7 perguntas e fale com a equipe pelo botão que aparece no resultado.</p></details>
+    <details class="faq"><summary>Como começo?</summary><p>Toque em “Começar o diagnóstico”, responda às 7 perguntas e deixe o seu WhatsApp: a nossa equipe entra em contato com você.</p></details>
     <div class="cta-c" style="margin-top:26px"><button class="btn primary go">Começar o diagnóstico</button></div>
   </div></section>
 </main>
@@ -199,7 +199,7 @@ function contacto() {
   $('#tela').innerHTML = `${barra(total)}<h2>Quase lá! Como podemos te chamar?</h2>
     <form id="f"><label>O seu nome<input type="text" id="n" autocomplete="name" required value="${esc(R.nome || '')}"></label>
     <label>O seu WhatsApp<div class="tel"><button type="button" class="pais" id="pais" aria-label="Escolher país"></button><input type="tel" id="w" inputmode="tel" autocomplete="tel-national" placeholder="DDD + número" required value="${esc(R.tel || '')}"></div></label>
-    <div class="err" id="e"></div><button class="btn primary">Ver o meu resultado</button></form>
+    <div class="err" id="e"></div><button class="btn primary">Enviar e concluir</button></form>
     <button class="back" id="volta">← Voltar</button>`;
   $('#volta').onclick = () => { i = PERGUNTAS.length - 1; pergunta(); };
   desenhaPais(); $('#pais').onclick = abrePaises;
@@ -226,30 +226,16 @@ function abrePaises() {
   $('#pq').oninput = e => lista(e.target.value);
   $('#pl').onclick = e => { const b = e.target.closest('.lp[data-c]'); if (!b) return; pais = b.dataset.c; box.remove(); desenhaPais(); $('#w').focus(); };
 }
-function analise() {
-  const d = parseInt(R.dias) || 3, novo = /Nunca|Parei/.test(R.nivel), obj = R.objetivo;
-  const treino = novo ? `Comece com ${Math.min(d, 3)} treinos por semana de corpo inteiro, com cargas leves e muita atenção à técnica. Depois de 4 a 6 semanas sobe-se a carga e passa-se a dividir o treino.`
-    : d >= 4 ? `Com ${d} dias por semana encaixa bem um treino dividido (ex.: superior e inferior), com progressão de carga semana a semana.` : `Com ${d} dias por semana, treinos de corpo inteiro bem planeados dão ótimos resultados.`;
-  const comida = /Sem rotina|falho/.test(R.comida) ? 'O maior ganho está aqui: começar por 3 refeições com proteína, mais água, e um plano simples que consiga cumprir.' : 'Já tem uma base boa. Afinar calorias e proteína ao seu objetivo vai acelerar os resultados.';
-  const foco = obj === 'Emagrecer' ? 'Défice calórico moderado, passos diários e treino de força para manter o músculo.' : obj === 'Ganhar massa muscular' ? 'Pequeno superávit calórico, proteína ao longo do dia e progressão de carga.' : obj === 'Definir e tonificar' ? 'Treino de força com boa intensidade e alimentação com proteína e calorias controladas.' : 'Constância, mobilidade e uma rotina de alimentação que lhe dê energia.';
-  const cuidado = R.lesao === 'Nenhuma' ? '' : `Tem ${/Outra/.test(R.lesao) ? 'dúvidas sobre limitações' : 'uma limitação em ' + R.lesao.toLowerCase()}: o treino deve ser adaptado. Se tiver dor, procure primeiro um profissional de saúde.`;
-  return { treino, comida, foco, cuidado };
-}
 function resultado() {
   modo(false);
-  const a = analise();
-  const msg = `Olá! Fiz o diagnóstico da Squad.\nNome: ${R.nome}\nWhatsApp: ${R.whatsapp}\nObjetivo: ${R.objetivo}\nExperiência: ${R.nivel}\nDias por semana: ${R.dias}\nLocal: ${R.local}\nLimitações: ${R.lesao}\nAlimentação: ${R.comida}\nQuero saber como começar!`;
-  const wa = CFG.whatsapp ? `https://wa.me/${String(CFG.whatsapp).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}` : '';
-  $('#tela').innerHTML = `<div class="bar"><i style="width:100%"></i></div><h1>${esc(R.nome.split(' ')[0])}, <span>este é o seu ponto de partida</span></h1>
-    <div class="perfil"><span class="chip">${esc(R.objetivo)}</span><span class="chip">${esc(R.dias)} por semana</span><span class="chip">${esc(R.local)}</span></div>
-    <div class="res"><h3>Treino</h3><p>${esc(a.treino)}</p></div>
-    <div class="res"><h3>Foco do seu objetivo</h3><p>${esc(a.foco)}</p></div>
-    <div class="res"><h3>Alimentação</h3><p>${esc(a.comida)}</p></div>
-    ${a.cuidado ? `<div class="res"><h3>Atenção</h3><p>${esc(a.cuidado)}</p></div>` : ''}
-    <p>O próximo passo é ter treino e dieta pra SUA rotina, com suporte e acompanhamento na app.</p>
-    ${wa ? `<a class="btn primary" href="${wa}" target="_blank" rel="noopener">Falar com a equipe no WhatsApp</a>` : `<div class="res"><p>Obrigada! Recebemos as suas respostas e a nossa equipe vai entrar em contacto consigo pelo número que indicou.</p></div>`}
-    <div class="row"><button class="btn ghost" id="refaz">Refazer</button><a class="btn ghost" href="app">Abrir a app</a></div>`;
-  $('#refaz').onclick = () => { Object.keys(R).forEach(k => delete R[k]); inicio(); };
+  const nome = esc(R.nome.split(' ')[0]);
+  $('#tela').innerHTML = `<div class="bar"><i style="width:100%"></i></div>
+    <div style="text-align:center;padding:24px 0">
+    <div class="mark" style="margin:0 auto 18px;width:64px;height:64px;font-size:1.4rem">SQ</div>
+    <h1>Parabéns, ${nome}!<br><span>Você deu o primeiro passo.</span></h1>
+    <p style="font-size:1.1rem;max-width:460px;margin:0 auto 14px">Receber suas respostas já nos mostra o quanto você quer cuidar de você. Isso é o mais importante.</p>
+    <p style="font-size:1.1rem;max-width:460px;margin:0 auto 14px">A nossa equipe vai entrar em contato com você em breve, pelo WhatsApp que você indicou, para montar o seu começo.</p>
+    <p style="font-size:1.1rem;max-width:460px;margin:0 auto"><b>Obrigada pela confiança. Estamos juntas!</b></p></div>`;
 }
 async function guardaLead() {
   if (!CFG.url || !CFG.anonKey || !CFG.leadsPara) return;
