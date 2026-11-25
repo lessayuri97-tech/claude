@@ -154,6 +154,36 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .treino-foot { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; }
 .m-label { display: none; }
 @media (min-width: 1100px) { body:not(.modo-aluno) .wrap { max-width: 1280px; } }
+.treino { border-radius: 16px; }
+.treino-head { padding: 16px 18px; gap: 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.treino-letter { width: 46px; height: 46px; font-size: 1.7rem; border-radius: 12px; }
+.th-nome { flex: 1; min-width: 200px; display: grid; gap: 2px; }
+.th-nome input { max-width: none; font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; border-color: transparent; background: transparent; padding-inline: 6px; }
+.th-nome input:hover, .th-nome input:focus { border-color: var(--line); background: var(--surface-2); }
+.th-nome .small { padding-left: 7px; }
+.mais { position: relative; } .mais summary { list-style: none; cursor: pointer; font-size: 1.1rem; line-height: 1; } .mais summary::-webkit-details-marker { display: none; }
+.mais-menu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,.15); padding: 6px; display: grid; min-width: 220px; }
+.mais-menu button { text-align: left; background: none; border: 0; padding: 10px 12px; border-radius: 8px; font: inherit; cursor: pointer; color: var(--fg); }
+.mais-menu button:hover { background: var(--surface-2); } .mais-menu .danger { color: var(--danger); }
+.exc-lista { display: grid; gap: 12px; padding: 14px 18px; background: var(--surface-2); }
+.exc { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 12px; }
+.exc.com-tec { border-left: 4px solid var(--fg); }
+.exc-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.exc-n { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; flex: none; }
+.exc-top .ex-cell { flex: 1; min-width: 240px; }
+.ex-sel { font-weight: 600; font-size: 1rem; }
+.tec-pill { border-radius: 99px; padding: 6px 28px 6px 14px; font-size: .85rem; font-weight: 600; width: auto; border-style: dashed; color: var(--muted); background-color: transparent; }
+.tec-pill.on { background-color: var(--fg); color: var(--bg); border: 1px solid var(--fg); border-style: solid; }
+.exc-top .ficha-actions { margin-left: auto; }
+.exc-met, .exc-tec { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.met { display: grid; gap: 3px; }
+.met span { font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.exc-met .met:not(.nota) input { width: 96px; text-align: center; font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; padding: 8px; }
+.met.nota { flex: 1; min-width: 220px; }
+.exc-tec { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+.exc-tec .met input { width: 96px; text-align: center; } .exc-tec .met input[type=text] { width: 150px; }
+.exc-tec .tec-expl { flex-basis: 100%; }
+.treino-foot { padding: 12px 18px; }
 .plano-tools { margin-bottom: 4px; }
 .modelo-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .tec-cell { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); }
@@ -699,39 +729,47 @@ function tabPlano(a) {
   <section class="treino" aria-label="Treino ${LETRAS[ti]}">
     <div class="treino-head">
       <span class="treino-letter">${LETRAS[ti]}</span>
-      <input type="text" id="tn-${t.id}" value="${esc(t.nome)}" placeholder="Nome do treino (ex.: Peito e tríceps)" data-edit="treino-nome" data-aluno="${a.id}" data-treino="${t.id}" aria-label="Nome do treino ${LETRAS[ti]}">
+      <div class="th-nome"><input type="text" id="tn-${t.id}" value="${esc(t.nome)}" placeholder="Nome do treino (ex.: Peito e tríceps)" data-edit="treino-nome" data-aluno="${a.id}" data-treino="${t.id}" aria-label="Nome do treino ${LETRAS[ti]}">
+        <div class="small muted num">${t.itens.length} ${t.itens.length === 1 ? 'exercício' : 'exercícios'}${t.itens.length ? ' · cerca de ' + duracaoEstimada(t) + ' min' : ''}${t.itens.some(i => i.tecnica) ? ' · ' + t.itens.filter(i => i.tecnica).length + ' com técnica' : ''}</div></div>
       <div class="row">
-        <button class="btn sm" data-act="registrar" data-id="${a.id}" data-treino="${t.id}" ${t.itens.length ? '' : 'disabled'}>Registrar sessão</button>
-        <button class="btn ghost sm" data-act="dup-treino" data-id="${a.id}" data-treino="${t.id}">Duplicar</button>
-        <button class="btn ghost sm" data-act="copiar-treino" data-id="${a.id}" data-treino="${t.id}">Copiar para aluno</button>
-        <button class="btn ghost sm" data-act="modelo-treino" data-id="${a.id}" data-treino="${t.id}">Guardar modelo</button>
-        <button class="btn ghost sm danger" data-act="del-treino" data-id="${a.id}" data-treino="${t.id}">Excluir</button>
+        <button class="btn primary sm" data-act="registrar" data-id="${a.id}" data-treino="${t.id}" ${t.itens.length ? '' : 'disabled'}>Registrar sessão</button>
+        <details class="mais"><summary class="btn sm" aria-label="Mais ações do treino">⋯</summary><div class="mais-menu">
+          <button data-act="dup-treino" data-id="${a.id}" data-treino="${t.id}">Duplicar treino</button>
+          <button data-act="copiar-treino" data-id="${a.id}" data-treino="${t.id}">Copiar para outro aluno</button>
+          <button data-act="modelo-treino" data-id="${a.id}" data-treino="${t.id}">Guardar como modelo</button>
+          <button class="danger" data-act="del-treino" data-id="${a.id}" data-treino="${t.id}">Excluir treino</button></div></details>
       </div>
     </div>
-    ${t.itens.length ? `<div class="ficha-cols"><span>#</span><span>Exercício</span><span>Séries</span><span>Reps</span><span>Carga kg</span><span>Desc. s</span><span>Nota para o aluno</span><span></span></div>` : ''}
+    <div class="exc-lista">
     ${t.itens.map((it, i) => {
       const ex = exById(it.exId); const yt = ex && ytParse(ex.url);
       const d = `data-aluno="${a.id}" data-treino="${t.id}" data-item="${it.id}"`;
-      return `<div class="ficha-row">
-        <span class="ord num">${i + 1}</span>
-        <div class="ex-cell"><button class="play ${yt ? '' : 'novideo'}" data-act="video" data-ex="${it.exId}" ${yt ? `title="Ver vídeo" aria-label="Ver vídeo de ${esc(ex.nome)}"` : (ex ? `title="Adicionar link do YouTube" aria-label="Adicionar vídeo" ` : 'disabled')}>${PLAY}</button>
-          <select id="ex-${it.id}" data-edit="exId" ${d} aria-label="Exercício ${i + 1}">${exOptions(it.exId)}</select></div>
-        <label><span class="m-label">Séries</span><input type="number" min="1" id="se-${it.id}" class="num" value="${esc(it.series)}" data-edit="series" ${d} aria-label="Séries"></label>
-        <label><span class="m-label">Reps</span><input type="text" id="re-${it.id}" class="num" value="${esc(it.reps)}" data-edit="reps" ${d} aria-label="Repetições" placeholder="10-12"></label>
-        <label><span class="m-label">Carga kg</span><input type="number" step="0.5" min="0" id="ca-${it.id}" class="num" value="${esc(it.carga)}" data-edit="carga" ${d} aria-label="Carga em kg"></label>
-        <label><span class="m-label">Desc. s</span><input type="number" step="5" min="0" id="de-${it.id}" class="num" value="${esc(it.descanso)}" data-edit="descanso" ${d} aria-label="Descanso em segundos"></label>
-        <label class="obs"><span class="m-label">Nota para o aluno</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Nota para o aluno" placeholder="Ex.: descer até 90°, joelhos para fora"></label>
-        <div class="ficha-actions">
-          <button class="btn ghost icon" data-act="mover" data-dir="-1" ${d} aria-label="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
-          <button class="btn ghost icon" data-act="mover" data-dir="1" ${d} aria-label="Descer" ${i === t.itens.length - 1 ? 'disabled' : ''}>↓</button>
-          <button class="btn ghost icon" data-act="dup-item" ${d} aria-label="Duplicar exercício" title="Duplicar">⧉</button>
-          <button class="btn ghost icon danger" data-act="del-item" ${d} aria-label="Remover exercício">✕</button>
+      const T = it.tecnica && TECS[it.tecnica];
+      return `<div class="exc ${T ? 'com-tec' : ''}">
+        <div class="exc-top">
+          <span class="exc-n num">${i + 1}</span>
+          <div class="ex-cell"><button class="play ${yt ? '' : 'novideo'}" data-act="video" data-ex="${it.exId}" ${yt ? `title="Ver vídeo" aria-label="Ver vídeo de ${esc(ex.nome)}"` : (ex ? `title="Adicionar link do YouTube" aria-label="Adicionar vídeo" ` : 'disabled')}>${PLAY}</button>
+            <select id="ex-${it.id}" class="ex-sel" data-edit="exId" ${d} aria-label="Exercício ${i + 1}">${exOptions(it.exId)}</select></div>
+          <select class="tec-pill ${T ? 'on' : ''}" data-edit="tecnica" ${d} aria-label="Técnica avançada"><option value="">+ Técnica</option>${Object.entries(TECS).map(([k, X]) => `<option value="${k}" ${it.tecnica === k ? 'selected' : ''}>${X.nome}</option>`).join('')}</select>
+          <div class="ficha-actions">
+            <button class="btn ghost icon" data-act="mover" data-dir="-1" ${d} aria-label="Subir" title="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class="btn ghost icon" data-act="mover" data-dir="1" ${d} aria-label="Descer" title="Descer" ${i === t.itens.length - 1 ? 'disabled' : ''}>↓</button>
+            <button class="btn ghost icon" data-act="dup-item" ${d} aria-label="Duplicar exercício" title="Duplicar">⧉</button>
+            <button class="btn ghost icon danger" data-act="del-item" ${d} aria-label="Remover exercício" title="Remover">✕</button>
+          </div>
         </div>
-        <div class="tec-cell"><label><span class="m-label">Técnica</span><select data-edit="tecnica" ${d} aria-label="Técnica avançada"><option value="">Nenhuma (série normal)</option>${Object.entries(TECS).map(([k, T]) => `<option value="${k}" ${it.tecnica === k ? 'selected' : ''}>${T.nome}</option>`).join('')}</select></label>
-          ${it.tecnica && TECS[it.tecnica] ? TECS[it.tecnica].c.map(([n, lb, tp]) => `<label><span class="m-label">${lb}</span><input type="${tp}" ${tp === 'number' ? 'min="0" inputmode="numeric" class="num"' : ''} value="${esc((it.tp || {})[n] ?? '')}" data-edit="tp-${n}" ${d} aria-label="${lb}"></label>`).join('') + `<p class="tec-expl">${esc(TECS[it.tecnica].expl)}</p>` : ''}</div>
+        <div class="exc-met">
+          <label class="met"><span>Séries</span><input type="number" min="1" id="se-${it.id}" class="num" value="${esc(it.series)}" data-edit="series" ${d} aria-label="Séries"></label>
+          <label class="met"><span>Reps</span><input type="text" id="re-${it.id}" class="num" value="${esc(it.reps)}" data-edit="reps" ${d} aria-label="Repetições" placeholder="10-12"></label>
+          <label class="met"><span>Carga (kg)</span><input type="number" step="0.5" min="0" id="ca-${it.id}" class="num" value="${esc(it.carga)}" data-edit="carga" ${d} aria-label="Carga em kg"></label>
+          <label class="met"><span>Descanso (s)</span><input type="number" step="5" min="0" id="de-${it.id}" class="num" value="${esc(it.descanso)}" data-edit="descanso" ${d} aria-label="Descanso em segundos"></label>
+          <label class="met nota"><span>Nota para o aluno</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Nota para o aluno" placeholder="Ex.: descer até 90°, joelhos para fora"></label>
+        </div>
+        ${T ? `<div class="exc-tec"><span class="chip tec">${esc(T.nome)}</span>${T.c.map(([n, lb, tp]) => `<label class="met"><span>${lb}</span><input type="${tp}" ${tp === 'number' ? 'min="0" inputmode="numeric" class="num"' : ''} value="${esc((it.tp || {})[n] ?? '')}" data-edit="tp-${n}" ${d} aria-label="${lb}"></label>`).join('')}<p class="tec-expl">${esc(T.expl)}</p></div>` : ''}
       </div>`;
     }).join('')}
-    <div class="treino-foot"><button class="btn sm" data-act="add-item" data-id="${a.id}" data-treino="${t.id}">+ Exercício</button></div>
+    </div>
+    <div class="treino-foot"><button class="btn sm" data-act="add-item" data-id="${a.id}" data-treino="${t.id}">+ Adicionar exercício</button></div>
   </section>`).join('') +
   `<div><button class="btn" data-act="add-treino" data-id="${a.id}">+ Treino ${LETRAS[a.treinos.length] || ''}</button></div>`;
 }
