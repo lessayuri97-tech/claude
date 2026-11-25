@@ -138,7 +138,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .treino-letter { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; width: 36px; height: 36px; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); border-radius: 8px; flex: none; }
 .treino-head input { max-width: 320px; font-weight: 600; }
 .treino-head .row { margin-left: auto; }
-.ficha-cols, .ficha-row { display: grid; grid-template-columns: 28px minmax(0, 2.4fr) 70px 80px 80px 80px minmax(0, 1.4fr) 80px; gap: 8px; align-items: center; padding: 8px 14px; }
+.ficha-cols, .ficha-row { display: grid; grid-template-columns: 28px minmax(0, 2.4fr) 70px 80px 80px 80px minmax(0, 1.4fr) 128px; gap: 8px; align-items: center; padding: 8px 14px; }
 .ficha-cols { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--line); }
 .ficha-row { border-bottom: 1px solid var(--line); }
 .ficha-row:last-child { border-bottom: 0; }
@@ -153,6 +153,14 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .ficha-actions { display: flex; gap: 2px; justify-content: end; }
 .treino-foot { padding: 10px 14px; display: flex; gap: 8px; flex-wrap: wrap; }
 .m-label { display: none; }
+@media (min-width: 1100px) { body:not(.modo-aluno) .wrap { max-width: 1280px; } }
+.tec-cell { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 8px 10px; border-radius: 10px; background: var(--accent-soft); }
+.tec-cell label { display: grid; gap: 2px; }
+.tec-cell .m-label { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.tec-cell input[type=number] { width: 84px; } .tec-cell input[type=text] { width: 130px; } .tec-cell select { min-width: 150px; }
+.tec-expl { flex-basis: 100%; font-size: .8rem; color: var(--muted); margin: 0; }
+.chip.tec { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.dica.tec { border-left: 3px solid var(--fg); }
 
 /* Biblioteca de exercícios */
 .lib { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
@@ -249,7 +257,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .ficha-row .ord { display: none; }
   .ficha-row .ex-cell { grid-column: 1 / -1; }
   .ficha-row .obs { grid-column: 1 / -1; }
-  .ficha-row .ficha-actions { grid-column: 1 / -1; justify-content: start; }
+  .ficha-row .ficha-actions { grid-column: 1 / -1; justify-content: start; order: 9; }
   .m-label { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
   .sets, .set-legend { padding-left: 0; }
   .set { grid-template-columns: 16px minmax(0, 1.2fr) 10px minmax(0, .8fr); padding: 6px; }
@@ -656,6 +664,18 @@ function exOptions(sel) {
     + `<option value="__novo">+ Cadastrar novo exercício…</option>`;
 }
 
+const TECS = {
+  drop: { nome: 'Drop set', expl: 'Ao chegar na falha, reduza a carga e continue sem descanso.', c: [['a', 'Reduções', 'number', 2], ['b', '% de carga', 'number', 20]], f: p => `${p.a || 2} reduções de ${p.b || 20}% sem descanso` },
+  cluster: { nome: 'Cluster set', expl: 'Divida a série em mini-séries com pausas curtas entre elas, mantendo a carga alta.', c: [['a', 'Reps/mini-série', 'number', 3], ['b', 'Pausa (s)', 'number', 15]], f: p => `mini-séries de ${p.a || 3} reps, ${p.b || 15}s entre elas` },
+  restpause: { nome: 'Rest-pause', expl: 'Vá até a falha, descanse pouco e faça mais repetições com a mesma carga.', c: [['a', 'Pausa (s)', 'number', 15], ['b', 'Extras', 'number', 2]], f: p => `falha, ${p.a || 15}s de pausa, mais ${p.b || 2} rodadas até a falha` },
+  biset: { nome: 'Bi-set', expl: 'Faça este exercício e o seguinte em sequência, sem descanso entre eles.', c: [['a', 'Combinar com', 'text', 'próximo exercício']], f: p => `sem descanso, seguido de: ${p.a || 'próximo exercício'}` },
+  superset: { nome: 'Super-set', expl: 'Dois exercícios de músculos opostos em sequência, depois descanse.', c: [['a', 'Combinar com', 'text', 'próximo exercício']], f: p => `músculos opostos, seguido de: ${p.a || 'próximo exercício'}` },
+  isometria: { nome: 'Isometria', expl: 'Segure a posição mais difícil do movimento, sem mexer.', c: [['a', 'Segurar (s)', 'number', 3]], f: p => `segurar ${p.a || 3}s no ponto mais difícil` },
+  negativa: { nome: 'Negativa', expl: 'Controle bem a fase de descida do movimento, devagar.', c: [['a', 'Descida (s)', 'number', 4]], f: p => `descer em ${p.a || 4}s, controlando` },
+  cadencia: { nome: 'Cadência', expl: 'Siga o tempo indicado: descida, pausa embaixo, subida.', c: [['a', 'Tempo (desc-pausa-sub)', 'text', '3-1-1']], f: p => `tempo ${p.a || '3-1-1'} (descida-pausa-subida)` }
+};
+const tecPad = k => { const o = {}; ((TECS[k] || {}).c || []).forEach(([n, , , d]) => { o[n] = d; }); return o; };
+const tecTxt = it => { const T = it.tecnica && TECS[it.tecnica]; return T ? T.f(it.tp || {}) : ''; };
 function tabPlano(a) {
   if (!a.treinos.length) return `<div class="panel empty"><h2>Sem plano de treino</h2><p>Crie o Treino A e adicione os exercícios da biblioteca.</p>
     <button class="btn primary" data-act="add-treino" data-id="${a.id}">+ Criar Treino A</button></div>`;
@@ -682,12 +702,15 @@ function tabPlano(a) {
         <label><span class="m-label">Reps</span><input type="text" id="re-${it.id}" class="num" value="${esc(it.reps)}" data-edit="reps" ${d} aria-label="Repetições" placeholder="10-12"></label>
         <label><span class="m-label">Carga kg</span><input type="number" step="0.5" min="0" id="ca-${it.id}" class="num" value="${esc(it.carga)}" data-edit="carga" ${d} aria-label="Carga em kg"></label>
         <label><span class="m-label">Desc. s</span><input type="number" step="5" min="0" id="de-${it.id}" class="num" value="${esc(it.descanso)}" data-edit="descanso" ${d} aria-label="Descanso em segundos"></label>
-        <label class="obs"><span class="m-label">Observação</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Observação" placeholder="Técnica, cadência…"></label>
+        <label class="obs"><span class="m-label">Observação</span><input type="text" id="ob-${it.id}" value="${esc(it.obs)}" data-edit="obs" ${d} aria-label="Observação" placeholder="Dica para o aluno…"></label>
         <div class="ficha-actions">
           <button class="btn ghost icon" data-act="mover" data-dir="-1" ${d} aria-label="Subir" ${i === 0 ? 'disabled' : ''}>↑</button>
           <button class="btn ghost icon" data-act="mover" data-dir="1" ${d} aria-label="Descer" ${i === t.itens.length - 1 ? 'disabled' : ''}>↓</button>
+          <button class="btn ghost icon" data-act="dup-item" ${d} aria-label="Duplicar exercício" title="Duplicar">⧉</button>
           <button class="btn ghost icon danger" data-act="del-item" ${d} aria-label="Remover exercício">✕</button>
         </div>
+        <div class="tec-cell"><label><span class="m-label">Técnica</span><select data-edit="tecnica" ${d} aria-label="Técnica avançada"><option value="">Nenhuma (série normal)</option>${Object.entries(TECS).map(([k, T]) => `<option value="${k}" ${it.tecnica === k ? 'selected' : ''}>${T.nome}</option>`).join('')}</select></label>
+          ${it.tecnica && TECS[it.tecnica] ? TECS[it.tecnica].c.map(([n, lb, tp]) => `<label><span class="m-label">${lb}</span><input type="${tp}" ${tp === 'number' ? 'min="0" inputmode="numeric" class="num"' : ''} value="${esc((it.tp || {})[n] ?? '')}" data-edit="tp-${n}" ${d} aria-label="${lb}"></label>`).join('') + `<p class="tec-expl">${esc(TECS[it.tecnica].expl)}</p>` : ''}</div>
       </div>`;
     }).join('')}
     <div class="treino-foot"><button class="btn sm" data-act="add-item" data-id="${a.id}" data-treino="${t.id}">+ Exercício</button></div>
@@ -830,6 +853,7 @@ function textoPlano(a) {
       const ex = exById(it.exId); const yt = ex && ytParse(ex.url);
       const partes = [`${it.series}x${it.reps}`]; if (it.carga !== '' && it.carga != null) partes.push(`${fmtNum(it.carga)} kg`); if (it.descanso) partes.push(`descanso ${it.descanso}s`);
       linhas.push(`${i + 1}. ${ex ? ex.nome : '—'}: ${partes.join(' · ')}${it.obs ? ` (${it.obs})` : ''}`);
+      if (it.tecnica && TECS[it.tecnica]) linhas.push(`   Técnica: ${TECS[it.tecnica].nome} (${tecTxt(it)})`);
       if (yt) linhas.push(`   Vídeo: ${ytWatch(yt)}`);
     });
   });
@@ -934,10 +958,11 @@ document.addEventListener('click', ev => {
       break; }
     case 'tab': ui.tab[a.id] = b.dataset.tab; rerender(); break;
     case 'add-treino': a.treinos.push({ id: uid(), nome: '', itens: [] }); save(); rerender(); break;
-    case 'dup-treino': a.treinos.splice(a.treinos.indexOf(t) + 1, 0, { id: uid(), nome: t.nome ? t.nome + ' (cópia)' : '', itens: t.itens.map(i => ({ ...i, id: uid() })) }); save(); rerender(); break;
+    case 'dup-treino': a.treinos.splice(a.treinos.indexOf(t) + 1, 0, { id: uid(), nome: t.nome ? t.nome + ' (cópia)' : '', itens: t.itens.map(i => JSON.parse(JSON.stringify({ ...i, id: uid() }))) }); save(); rerender(); break;
     case 'del-treino': confirmar(`Excluir o Treino ${LETRAS[a.treinos.indexOf(t)]}?`, 'Excluir treino', () => { a.treinos = a.treinos.filter(x => x !== t); save(); rerender(); }); break;
     case 'add-item': t.itens.push({ id: uid(), exId: '', series: 3, reps: '10-12', carga: '', descanso: 60, obs: '' }); save(); rerender();
       setTimeout(() => { const s = $(`#ex-${t.itens[t.itens.length - 1].id}`); if (s) s.focus(); }, 0); break;
+    case 'dup-item': { const i = t.itens.findIndex(x => x.id === b.dataset.item); if (i < 0) break; t.itens.splice(i + 1, 0, JSON.parse(JSON.stringify({ ...t.itens[i], id: uid() }))); save(); rerender(); break; }
     case 'del-item': t.itens = t.itens.filter(i => i.id !== b.dataset.item); save(); rerender(); break;
     case 'mover': { const i = t.itens.findIndex(x => x.id === b.dataset.item), j = i + (+b.dataset.dir); if (j < 0 || j >= t.itens.length) break; [t.itens[i], t.itens[j]] = [t.itens[j], t.itens[i]]; save(); rerender(); break; }
     case 'video': showVideo(b.dataset.ex); break;
@@ -995,6 +1020,8 @@ document.addEventListener('change', ev => {
   if (k === 'treino-nome') { t.nome = el.value.trim(); save(); return; }
   const it = t.itens.find(i => i.id === el.dataset.item); if (!it) return;
   if (k === 'exId' && el.value === '__novo') { el.value = it.exId; openExForm(null, { aluno: a.id, treino: t.id, item: it.id }); return; }
+  if (k === 'tecnica') { it.tecnica = el.value; it.tp = tecPad(el.value); save(); rerender(); return; }
+  if (k.startsWith('tp-')) { it.tp = it.tp || {}; it.tp[k.slice(3)] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value; save(); return; }
   it[k] = el.type === 'number' ? (el.value === '' ? '' : +el.value) : el.value;
   save();
   if (k === 'exId') rerender();
@@ -1274,12 +1301,13 @@ function vTreino(a, t) {
     return `<article class="ex-run ${done ? 'done' : ''} ${open ? 'open' : ''}">
       <button class="ex-run-head" data-sact="abrir" data-i="${i}" aria-expanded="${open}">
         <span class="n num">${done ? '✓' : i + 1}</span>
-        <span style="min-width:0;text-align:left"><b>${esc(ex ? ex.nome : '—')}</b><span class="small muted num" style="display:block">${esc(it.series)} × ${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''} · descanso ${esc(it.descanso || 60)}s</span></span>
+        <span style="min-width:0;text-align:left"><b>${esc(ex ? ex.nome : '—')}</b><span class="small muted num" style="display:block">${esc(it.series)} × ${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''} · descanso ${esc(it.descanso || 60)}s</span>${it.tecnica && TECS[it.tecnica] ? `<span class="chip tec" style="margin-top:4px;justify-self:start">${esc(TECS[it.tecnica].nome)}</span>` : ''}</span>
         <span class="chev" aria-hidden="true">${open ? '−' : '+'}</span>
       </button>
       ${open ? `<div class="ex-run-body">
         ${yt ? `<button class="thumb" data-act="play-inline" data-ex="${it.exId}" aria-label="Reproduzir vídeo de ${esc(ex.nome)}"><img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Ver vídeo</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span></button>`
           : `<div class="small muted">O personal ainda não adicionou vídeo a este exercício.</div>`}
+        ${it.tecnica && TECS[it.tecnica] ? `<div class="dica tec"><b>${esc(TECS[it.tecnica].nome)}:</b> ${esc(tecTxt(it))}.<div class="small muted">${esc(TECS[it.tecnica].expl)}</div></div>` : ''}
         ${it.obs || (ex && ex.notas) ? `<div class="dica"><b>Dica do personal:</b> ${esc([it.obs, ex && ex.notas].filter(Boolean).join('. '))}</div>` : ''}
         ${prev ? `<div class="small muted num">Última vez: ${fmtNum(prev.carga)} kg (${fmtData(prev.data)})</div>` : ''}
         <div class="sets-run">${w.sets.map((s, j) => `<div class="set-run ${s.done ? 'ok' : ''}">

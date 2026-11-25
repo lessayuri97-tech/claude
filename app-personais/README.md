@@ -16,6 +16,7 @@ Webapp simples para personal trainers acompanharem alunos e planos de treino. Se
 - **Área do aluno** ("Ver como aluno" ou login como aluna): treino do dia, vídeo, peso/reps por série, descanso, evolução e perfil.
 - **Comentários da aluna**: por exercício (durante o treino), no fim do treino e livres (Início/Perfil). O personal vê o painel "Comentários do aluno" na ficha, as notas dentro das sessões e um aviso de novos na lista de alunos.
 - **Descanso cronometrado**: ao marcar uma série, começa a contagem com o descanso do plano; pausar, ±15s, pular, aviso no fim (vibração, som, visual) e ecrã mantido ligado durante o treino.
+- **Técnicas avançadas**: por exercício, o personal escolhe drop set, cluster, rest-pause, bi-set, super-set, isometria, negativa ou cadência, com campos próprios. A aluna vê a etiqueta e uma explicação curta; o texto do WhatsApp também leva a técnica. Duplicar e reordenar exercícios; o ecrã do personal usa a largura do computador.
 - **Enviar plano ao aluno**: texto com cargas e links dos vídeos para colar no WhatsApp.
 - **Backup**: copiar/colar ou baixar/abrir ficheiro JSON.
 
