@@ -2350,7 +2350,7 @@ const SB = {
   guarda() { try { sbS ? localStorage.setItem(SBK, JSON.stringify(sbS)) : localStorage.removeItem(SBK); } catch (e) {} },
   async req(path, o = {}) {
     if (sbS && !o.anon && !o.semRefresh && sbS.expires_at && sbS.expires_at - 30 < Date.now() / 1000 && sbS.refresh_token) await SB.refresca();
-    const h = Object.assign({ apikey: SBC.anonKey, 'Content-Type': 'application/json', Authorization: 'Bearer ' + ((o.anon || !sbS) ? SBC.anonKey : sbS.access_token) }, o.headers || {});
+    const h = Object.assign({ apikey: SBC.anonKey, 'Content-Type': 'application/json', }, ((o.anon || !sbS) ? (/^eyJ/.test(SBC.anonKey) ? { Authorization: 'Bearer ' + SBC.anonKey } : {}) : { Authorization: 'Bearer ' + sbS.access_token }), o.headers || {});
     const r = await fetch(SBC.url + path, { method: o.method || 'GET', headers: h, body: o.body ? JSON.stringify(o.body) : undefined });
     let j = null; try { j = await r.json(); } catch (e) {}
     return { ok: r.ok, status: r.status, j };

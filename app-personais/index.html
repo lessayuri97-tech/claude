@@ -253,12 +253,12 @@ function resultado() {
 }
 async function guardaLead() {
   if (!CFG.url || !CFG.anonKey || !CFG.leadsPara) return;
-  try { await fetch(CFG.url + '/rest/v1/leads', { method: 'POST', headers: { apikey: CFG.anonKey, Authorization: 'Bearer ' + CFG.anonKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ personal_id: CFG.leadsPara, nome: R.nome, whatsapp: R.whatsapp, respostas: R }) }); } catch (e) {}
+  try { await fetch(CFG.url + '/rest/v1/leads', { method: 'POST', headers: Object.assign({ apikey: CFG.anonKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, /^eyJ/.test(CFG.anonKey) ? { Authorization: 'Bearer ' + CFG.anonKey } : {}), body: JSON.stringify({ personal_id: CFG.leadsPara, nome: R.nome, whatsapp: R.whatsapp, respostas: R }) }).then(r => { if (!r.ok) r.text().then(t => console.warn('lead não gravado', r.status, t)); }); } catch (e) { console.warn('lead não gravado', e); }
 }
 async function carregaSite() {
   if (!CFG.url || !CFG.anonKey || !CFG.leadsPara) return;
   try {
-    const r = await fetch(CFG.url + '/rest/v1/site_publico?select=dados&personal_id=eq.' + encodeURIComponent(CFG.leadsPara), { headers: { apikey: CFG.anonKey, Authorization: 'Bearer ' + CFG.anonKey } });
+    const r = await fetch(CFG.url + '/rest/v1/site_publico?select=dados&personal_id=eq.' + encodeURIComponent(CFG.leadsPara), { headers: Object.assign({ apikey: CFG.anonKey }, /^eyJ/.test(CFG.anonKey) ? { Authorization: 'Bearer ' + CFG.anonKey } : {}) });
     const j = await r.json(); const d = j && j[0] && j[0].dados; if (!d) return;
     if (d.tel) CFG.whatsapp = d.tel;
     if (Array.isArray(d.fotos) && d.fotos.length) { const f = $('#fotos-p'); f.hidden = false; f.innerHTML = d.fotos.slice(0, 6).map(x => `<figure><img src="${esc(x.img)}" alt="Resultado de uma aluna"><figcaption>${esc(x.leg || '')}</figcaption></figure>`).join(''); }
