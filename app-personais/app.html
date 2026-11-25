@@ -744,11 +744,12 @@ function viewAlunos() {
   return `${bannerExemplo()}
   <div class="page-head"><div><div class="eyebrow">${lista.length} ${lista.length === 1 ? 'aluno' : 'alunos'}</div><h1>Alunos</h1></div>
   <div class="row"><a class="btn" href="#meu-inicio">Ver como aluno</a><button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div></div>
-  ${lista.length ? `<div class="cards">${lista.map(a => {
+  ${lista.length > 4 ? `<input id="al-busca" type="search" placeholder="Procurar aluno pelo nome…" aria-label="Procurar aluno" style="max-width:360px;margin-bottom:12px">` : ''}
+  ${lista.length ? `<div class="cards" id="al-cards">${lista.map(a => {
     const u = ultimaSessao(a);
     const dias = u ? Math.round((Date.now() - new Date(u.data + 'T12:00').getTime()) / 864e5) : null;
     const nEx = a.treinos.reduce((s, t) => s + t.itens.length, 0);
-    return `<a class="card-aluno" href="#aluno-${a.id}">
+    return `<a class="card-aluno" data-n="${esc(chaveBusca(a.nome))}" href="#aluno-${a.id}">
       <div class="top"><span class="avatar-ini" aria-hidden="true">${esc(iniciais(a.nome))}</span>
       <div style="min-width:0"><h3>${esc(a.nome)}</h3>${a.objetivo ? `<span class="chip">${esc(a.objetivo)}</span>` : ''}</div></div>
       <div class="stats num">
@@ -756,7 +757,7 @@ function viewAlunos() {
         ${(a.comentarios || []).some(c => !c.lido) ? `<span><span class="chip accent num">💬 ${a.comentarios.filter(c => !c.lido).length} ${a.comentarios.filter(c => !c.lido).length > 1 ? 'comentários novos' : 'comentário novo'}</span></span>` : ''}<span>${u ? `Último treino: <b>${dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : 'há ' + dias + ' dias'}</b>` : 'Sem sessões ainda'}</span>
       </div></a>`;
   }).join('')}</div>`
-  : `<div class="panel empty"><h2>Nenhum aluno ainda</h2><p>Cadastre o primeiro aluno para montar o plano de treino.</p><button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div>`}`;
+  : `<div class="panel empty"><h2>Nenhum aluno ainda</h2><p>Toque em <b>+ Novo aluno</b>, escreva só o nome e pronto. Depois monta o treino (e a alimentação, se quiser) e envia o convite pelo WhatsApp.</p><button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div>`}`;
 }
 
 function openAlunoForm(id) {
@@ -1069,11 +1070,17 @@ function viewCentral() {
   });
   const treinaram = info.filter(x => x.hoje.length), parados = info.filter(x => x.u && x.dias >= cfg.diasParado).sort((x, y) => y.dias - x.dias);
   const nunca = info.filter(x => !x.u), rever = info.filter(x => x.rev.precisa);
+  const nutriInfo = db.alunos.filter(a => a.nutri && a.nutri.refeicoes.length).map(a => { const ds = Array.from({ length: 30 }, (_, k) => isoDe(new Date(Date.now() - k * 864e5))); const ult = ds.find(d => a.nutri.refeicoes.some(r => refFeita(a, d, r.id))); return { a, dias: ult ? diasEntre(ult) : null }; });
+  const semComida = nutriInfo.filter(x => x.dias === null || x.dias >= cfg.diasParado);
   const porRever = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
   const lnk = x => `<a class="cc-l" href="#aluno-${x.a.id}"><span class="avatar-ini" style="width:34px;height:34px;font-size:.85rem" aria-hidden="true">${esc(iniciais(x.a.nome))}</span>`;
   const painel = (tit, n, cls, corpo, vazio) => `<section class="panel cc-p"><div class="row spread"><h3>${tit}</h3><span class="chip ${cls} num">${n}</span></div>${n ? corpo : `<div class="small muted">${vazio}</div>`}</section>`;
   const tile = (n, t, cls) => `<div class="cc-tile ${cls || ''}"><b class="num">${n}</b><span>${t}</span></div>`;
-  return `${bannerExemplo()}
+  const reais = db.alunos;
+  const passos = [[!!(db.marca && (db.marca.nome || db.marca.logo)), 'Põe o teu nome e a tua cor na app', '#definicoes', 'Definições'], [reais.length > 0, 'Cria o primeiro aluno', '#alunos', 'Alunos'], [reais.some(a => a.treinos.some(t => t.itens.length)), 'Monta o primeiro treino', '#alunos', 'Alunos'], [reais.some(a => a.acesso), 'Envia o convite ao aluno (WhatsApp)', '#alunos', 'Alunos']];
+  const feitosP = passos.filter(x => x[0]).length;
+  const primeiros = (feitosP < passos.length && !db.onbFechado) ? `<section class="panel" style="margin-bottom:14px"><div class="row spread"><h3>Primeiros passos · ${feitosP} de ${passos.length}</h3><button class="btn ghost sm" data-act="onb-fechar">Esconder</button></div>${passos.map(x => `<div class="row" style="gap:10px;padding:6px 0">${x[0] ? '<span class="chip ok">feito</span>' : '<span class="chip">falta</span>'}<a href="${x[2]}" style="${x[0] ? 'text-decoration:line-through;opacity:.6' : ''}">${x[1]}</a></div>`).join('')}</section>` : '';
+  return `${bannerExemplo()}${primeiros}
   <div class="page-head"><div><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Central de clientes</h1></div>
     <div class="row">${porRever ? `<a class="btn primary" href="#rever">${porRever} ${porRever === 1 ? 'treino' : 'treinos'} por rever</a>` : ''}<button class="btn" data-act="limites">Limites</button></div></div>
   <div class="cc-tiles">${tile(treinaram.length, 'treinaram hoje', 'ok')}${tile(parados.length, `parados há ${cfg.diasParado}+ dias`, parados.length ? 'alerta' : '')}${tile(nunca.length, 'nunca treinaram', nunca.length ? 'alerta' : '')}${tile(rever.length, 'podem precisar de nova revisão do plano', rever.length ? 'info' : '')}</div>
@@ -1081,6 +1088,7 @@ function viewCentral() {
     ${painel('Treinaram hoje', treinaram.length, 'ok', treinaram.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join(''), 'Ainda ninguém treinou hoje.')}
     ${painel(`Parados há ${cfg.diasParado} ou mais dias`, parados.length, 'accent', parados.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">há ${x.dias} dias · último: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})</span></span></a>`).join(''), 'Todos treinaram recentemente.')}
     ${painel('Nunca treinaram', nunca.length, 'accent', nunca.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.a.treinos.length ? x.a.treinos.length + ' treino(s) no plano' : 'sem plano ainda'}${x.a.inicio ? ' · aluno desde ' + fmtData(x.a.inicio) : ''}</span></span></a>`).join(''), 'Todos já fizeram pelo menos um treino.')}
+    ${painel('Sem registar comida há ' + cfg.diasParado + '+ dias', semComida.length, 'accent', semComida.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.dias === null ? 'ainda não marcou nenhuma refeição' : 'há ' + x.dias + ' dias'}</span></span></a>`).join(''), nutriInfo.length ? 'Todos os alunos com plano alimentar estão a registar.' : 'Quando montares um plano alimentar, vês aqui quem não está a seguir.')}
     ${painel('Podem precisar de nova revisão do plano', rever.length, 'tec', rever.map(x => `<div class="cc-rev">${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.rev.motivos.concat(x.rev.geral).slice(0, 3).map(m => esc(m.txt)).join(' · ')}</span></span></a>
       <button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button></div>`).join(''), 'Ninguém com sinais de progressão por agora.')}
   </div>`;
@@ -1218,6 +1226,7 @@ document.addEventListener('click', ev => {
   switch (act) {
     case 'close': closeDialog(); break;
     case 'cor-marca': db.marca = Object.assign({}, db.marca || {}, { cor: b.dataset.cor }); save(); aplicaMarca(); rerender(); break;
+    case 'onb-fechar': db.onbFechado = true; save(); rerender(); break;
     case 'tirar-logo': db.marca = Object.assign({}, db.marca || {}, { logo: '' }); save(); aplicaMarca(); rerender(); break;
     case 'sugerir-metas': { const g = sugestaoMetas(a); if (g) { Object.assign(nutri(a).metas, g); save(); rerender(); toast('Metas sugeridas. Pode ajustar.'); } break; }
     case 'nu-padrao': nutri(a).refeicoes = REFEICOES_PADRAO.map(([nome, hora]) => ({ id: uid(), nome, hora, itens: [], nota: '' })); save(); rerender(); break;
@@ -1404,6 +1413,7 @@ document.addEventListener('submit', ev => {
 });
 document.addEventListener('input', ev => {
   const el = ev.target;
+  if (el.id === 'al-busca') { const q = chaveBusca(el.value); document.querySelectorAll('#al-cards .card-aluno').forEach(c => { c.style.display = c.dataset.n.includes(q) ? '' : 'none'; }); return; }
   if (el.id === 'busca') { ui.busca = el.value; const m = viewExercicios().match(/<div id="lib-list">([\s\S]*)<\/div>$/); $('#lib-list').innerHTML = m[1]; }
   if (el.id === 'e-url') {
     clearTimeout(el._t); el._t = setTimeout(() => { $('#e-preview').innerHTML = previewHtml(el.value); }, 350);
@@ -1470,14 +1480,15 @@ function mergeRemoto(local, remote) {
   const uniaoCom = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) y.lido = !!(y.lido || x.lido); else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
   const uniaoSess = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) { if (x.revisto === true) y.revisto = true; } else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
   const uniao = (a = [], b = []) => { const ids = new Set(a.map(x => x.id)); return a.concat(b.filter(x => !ids.has(x.id))); };
+  const uniaoTS = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, x])); b.forEach(x => { const y = m.get(x.id); if (!y || (x.ts || 0) > (y.ts || 0)) m.set(x.id, x); }); return [...m.values()]; };
   const par = (lista, a) => lista.find(x => x.id === a.id) || lista.find(x => norm(x.nome) === norm(a.nome));
   if (meuPapel() === 'aluno') { // a aluna só acrescenta sessões e medidas; o resto vem do personal
     const out = JSON.parse(JSON.stringify(remote));
-    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniaoSess(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); } });
+    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniaoSess(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); ra.nutriReg = uniaoTS(ra.nutriReg, la.nutriReg); ra.agua = uniaoTS(ra.agua, la.agua); } });
     out.alunoAtivo = local.alunoAtivo; return out;
   }
   const out = JSON.parse(JSON.stringify(local)); // o personal manda no plano; recebe as sessões e medidas da aluna
-  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniaoSess(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); } });
+  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniaoSess(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); la.nutriReg = uniaoTS(la.nutriReg, ra.nutriReg); la.agua = uniaoTS(la.agua, ra.agua); } });
   return out;
 }
 function rerenderSeguro() {
@@ -1826,6 +1837,7 @@ function vInicio(a) {
     <div><b>${u ? fmtData(u.data).slice(0, 5) : '—'}</b><span>último treino</span></div>
     <div><b>${meds.length ? fmtNum(meds[meds.length - 1].peso) : '—'}</b><span>peso atual (kg)</span></div>
   </div>
+  ${(a.nutri && a.nutri.refeicoes.length) ? `<a class="panel" href="#minha-nutricao" style="display:block;text-decoration:none;color:inherit"><div class="row spread"><h3>Comida de hoje</h3><span class="chip num">${a.nutri.refeicoes.filter(r => refFeita(a, hoje(), r.id)).length} de ${a.nutri.refeicoes.length} refeições</span></div><div class="small muted">Toque para ver o que comer e marcar o que já comeu.</div></a>` : ''}
   <button class="btn" data-sact="comentar" style="justify-content:center">💬 Deixar comentário para o personal</button>
   ${ultimas.length ? `<div class="panel"><div class="row spread"><h3>Últimos treinos</h3><a class="small" href="#minha-evolucao">Ver evolução</a></div>
     ${ultimas.map(s => `<div class="hist-row"><div><b>${esc(s.treinoNome || 'Treino')}</b><div class="small muted num">${fmtData(s.data)}${s.rpe ? ' · esforço ' + esc(s.rpe) + '/10' : ''}</div></div>
