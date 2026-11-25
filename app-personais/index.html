@@ -60,56 +60,11 @@ input:focus { outline: 2px solid var(--a); outline-offset: 1px; }
 .lp span:last-child { margin-left: auto; color: var(--muted); }
 /* Página de venda */
 [hidden] { display: none !important; }
-.wrap.home { max-width: 760px; text-align: center; }
 .entrar { margin-left: auto; border: 2px solid var(--a); color: var(--a); background: transparent; border-radius: 99px; padding: 10px 18px; font: 600 .98rem 'Hanken Grotesk', sans-serif; text-decoration: none; white-space: nowrap; }
 .entrar:active, .entrar:hover { background: var(--a); color: #fff; }
-.wrap.home h1 { font-size: 2.6rem; }
-.wrap.home .btn.primary { max-width: 420px; margin: 0 auto; }
-.eyebrow { font: 600 .78rem 'Hanken Grotesk', sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
-.lead { font-size: 1.1rem; max-width: 560px; margin: 0 auto 22px; }
-.selo { display: inline-block; margin-top: 18px; padding: 8px 16px; border-radius: 99px; background: var(--greige); color: var(--a); font-weight: 600; font-size: .95rem; }
-.sec { padding: 56px 16px; }
-.sec.alt { background: #fff; }
-.sec.navy { background: var(--a); color: #fff; }
-.sec.navy p, .sec.navy .eyebrow { color: #d9d7e6; }
-.in { max-width: 980px; margin: 0 auto; }
-.sec h2 { font: italic 400 2rem/1.15 'Instrument Serif', Georgia, serif; text-align: center; margin: 0 0 8px; }
-.sec .sub { text-align: center; max-width: 560px; margin: 0 auto 30px; }
-.grid { display: grid; gap: 14px; }
-.g3 { grid-template-columns: repeat(3, 1fr); }
-.g2 { grid-template-columns: repeat(2, 1fr); }
-.cartao { background: var(--bg); border: 1px solid var(--line); border-radius: 18px; padding: 22px; }
-.alt .cartao { background: var(--bg); }
-.cartao h3 { font: italic 400 1.3rem 'Instrument Serif', Georgia, serif; color: var(--a); margin: 0 0 6px; }
-.cartao p { margin: 0; color: var(--fg); }
-.num-c { width: 42px; height: 42px; border-radius: 50%; background: var(--greige); color: #fff; display: grid; place-items: center; font: italic 400 1.2rem 'Instrument Serif', Georgia, serif; margin-bottom: 12px; }
-.mito { border-left: 4px solid var(--greige); }
-.mito small { display: block; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-.mito b { display: block; font: italic 400 1.2rem/1.25 'Instrument Serif', Georgia, serif; margin-bottom: 8px; }
-.grande { font: italic 400 4rem/1 'Instrument Serif', Georgia, serif; text-align: center; }
-details.faq { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; margin-bottom: 10px; }
-.alt details.faq { background: var(--bg); }
-details.faq summary { cursor: pointer; font-weight: 600; padding: 14px 0; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
-details.faq summary::after { content: '+'; font-size: 1.4rem; line-height: 1; color: var(--muted); }
-details.faq[open] summary::after { content: '–'; }
-details.faq p { margin: 0 0 14px; }
-.cta-c { text-align: center; }
-.cta-c .btn { max-width: 420px; margin: 0 auto; }
-.sec.navy .btn.primary { background: #fff; color: var(--a); border-color: #fff; }
-.dep { font-style: italic; }
-.dep b { display: block; font-style: normal; margin-top: 10px; color: var(--muted); font-size: .9rem; }
-.fotos-p { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.fotos-p figure { margin: 0; } .fotos-p img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px; } .fotos-p figcaption { font-size: .85rem; color: var(--muted); margin-top: 6px; text-align: center; }
-@media (max-width: 700px) { .g3, .g2 { grid-template-columns: 1fr; } .wrap.home h1 { font-size: 2.1rem; } .sec { padding: 42px 16px; } .sec h2 { font-size: 1.65rem; } }
 @media (min-width: 700px) { h1 { font-size: 3rem; } }
 .logo { height: 34px; width: auto; display: block; }
-.cab3 { display: flex; justify-content: space-between; font: 700 .72rem 'Hanken Grotesk', sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--a); max-width: 980px; margin: 0 auto 38px; }
-.cab3 i { font-style: italic; }
-.sec.alt { background: var(--greige); }
-.sec.alt .cartao, .sec.alt details.faq { background: var(--bg); }
-.sec h2 em, h1 em { font-style: italic; }
 .btn.primary::after { content: ' →'; font-weight: 400; }
-.sec .eyebrow { color: var(--a); opacity: .75; }
 .sub-q { margin: -6px 0 14px; color: var(--muted, #6b6d80); font-size: .95rem; }
 #tela textarea { width: 100%; font: inherit; padding: 12px 14px; border: 1.5px solid var(--line, #CDC9C0); border-radius: 12px; background: #fff; color: inherit; resize: vertical; margin-bottom: 8px; }
 #tela form input[type=text] { margin-bottom: 8px; }
@@ -121,57 +76,7 @@ details.faq p { margin: 0 0 14px; }
   <div class="top"><img class="logo" src="logo-navy.png" alt="Squad"><a class="entrar" href="app">Já tenho login</a></div>
   <div id="tela"></div>
 </div>
-<main id="venda" hidden>
-  <section class="sec alt"><div class="in"><div class="cab3"><span>O</span><span>Método</span><span><i>Squad</i></span></div>
-    <div class="eyebrow" style="text-align:center">Como funciona</div><h2>Do primeiro passo ao resultado, em 3 passos</h2><p class="sub">Sem complicação e sem treino copiado da internet.</p>
-    <div class="grid g3">
-      <div class="cartao"><div class="num-c">1</div><h3>Faça o diagnóstico</h3><p>12 perguntas sobre você, o seu objetivo e o seu momento. Leva poucos minutos.</p></div>
-      <div class="cartao"><div class="num-c">2</div><h3>Receba o seu plano</h3><p>Treino e dieta pra SUA rotina, no aplicativo, com vídeo de cada exercício e as refeições do dia.</p></div>
-      <div class="cartao"><div class="num-c">3</div><h3>Evolua com acompanhamento</h3><p>Registre treinos, medidas e fotos, e tire dúvidas com a equipe pelo WhatsApp sempre que precisar.</p></div>
-    </div>
-    <div class="cta-c" style="margin-top:28px"><button class="btn primary go">Quero fazer o diagnóstico</button></div>
-  </div></section>
 
-  <section class="sec"><div class="in">
-    <div class="eyebrow" style="text-align:center">O que está incluído</div><h2>Tudo o que você precisa num só lugar</h2><p class="sub">Uma consultoria feita pro corpo da mulher.</p>
-    <div class="grid g2">
-      <div class="cartao"><h3>Treino pra SUA rotina</h3><p>Planos A, B, C… adaptados aos seus dias, ao seu nível e ao seu local de treino, com vídeo de cada exercício e técnicas avançadas quando fizer sentido.</p></div>
-      <div class="cartao"><h3>Dieta simples de seguir</h3><p>Metas de calorias e proteína, refeições e porções do seu dia a dia. Você marca o que comeu e conta a água no aplicativo.</p></div>
-      <div class="cartao"><h3>Suporte 24h</h3><p>Dúvida, dor ou bateu o desânimo? Chame a equipe pelo WhatsApp direto do aplicativo.</p></div>
-      <div class="cartao"><h3>Acompanhamento de verdade</h3><p>Medidas, peso, cargas e fotos de antes e depois lado a lado, pra você ver a recomposição corporal, não só a balança.</p></div>
-    </div>
-  </div></section>
-
-  <section class="sec alt" id="prova"><div class="in">
-    <div class="eyebrow" style="text-align:center">Resultados</div><div class="grande">+500</div><h2 style="margin-top:8px">mulheres transformadas</h2><p class="sub">É o número do método Squad.</p>
-  </div></section>
-
-  <section class="sec"><div class="in">
-    <div class="eyebrow" style="text-align:center">Mitos</div><h2>MAS CALMA, que eu posso explicar</h2><p class="sub">O que mais atrapalha o seu resultado não é falta de esforço.</p>
-    <div class="grid g3">
-      <div class="cartao mito"><small>Mito</small><b>“Preciso fazer HIIT todo dia pra emagrecer.”</b><p>Treino intenso demais, todo dia, cansa, atrapalha a recuperação e pode custar músculo. O que muda o corpo é treino de força bem progressivo, alimentação certa e cardio na dose certa.</p></div>
-      <div class="cartao mito"><small>Mito</small><b>“Dá pra copiar o treino da internet.”</b><p>Um treino copiado não conhece a sua rotina, o seu nível, as suas lesões nem o tempo que você tem. O treino bom é o que cabe em você e que você consegue cumprir.</p></div>
-      <div class="cartao mito"><small>Mito</small><b>“Preciso de um dia do lixo.”</b><p>Quando a dieta é só proibição, vem a culpa e o exagero. Um plano com flexibilidade planejada e refeições que você gosta é o que dá pra manter, sem culpa.</p></div>
-    </div>
-  </div></section>
-
-  <section class="sec navy"><div class="in cta-c">
-    <h2 style="color:#fff">Pronta pra começar?</h2><p class="sub">Responda ao diagnóstico e veja o seu ponto de partida. É gratuito e leva menos de 1 minuto.</p>
-    <button class="btn primary go">Começar o diagnóstico</button>
-  </div></section>
-
-  <section class="sec alt"><div class="in" style="max-width:720px">
-    <div class="eyebrow" style="text-align:center">Perguntas frequentes</div><h2>Ficou com dúvida?</h2><p class="sub">As respostas mais comuns.</p>
-    <details class="faq"><summary>Preciso de academia?</summary><p>Não necessariamente. No diagnóstico você escolhe onde treina (academia, casa ou ao ar livre) e o plano é feito pra isso.</p></details>
-    <details class="faq"><summary>Quanto tempo por dia vou precisar?</summary><p>Depende dos dias que você consegue treinar. O plano é montado pra caber na sua rotina, sem exigir o que você não consegue cumprir.</p></details>
-    <details class="faq"><summary>Tenho lesão ou dor. Posso fazer?</summary><p>Pode, e o treino é adaptado. Conte tudo no diagnóstico. Se tiver dor, procure também um profissional de saúde.</p></details>
-    <details class="faq"><summary>Como é a dieta?</summary><p>Simples e pra SUA rotina: metas de calorias e proteína, refeições e porções. Sem terrorismo e sem proibir os alimentos que você gosta.</p></details>
-    <details class="faq"><summary>Como funciona o suporte?</summary><p>Você fala com a equipe pelo WhatsApp, direto do aplicativo, sempre que tiver dúvida sobre treino ou dieta.</p></details>
-    <details class="faq"><summary>Quanto custa?</summary><p>Depois do diagnóstico, a equipe te passa as condições pelo WhatsApp, sem compromisso.</p></details>
-    <details class="faq"><summary>Como começo?</summary><p>Toque em “Começar o diagnóstico”, responda às 12 perguntas, com o seu WhatsApp,: a nossa equipe entra em contato com você.</p></details>
-    <div class="cta-c" style="margin-top:26px"><button class="btn primary go">Começar o diagnóstico</button></div>
-  </div></section>
-</main>
 <div class="foot">Este diagnóstico é uma orientação geral e não substitui avaliação médica. · <a href="app" style="opacity:.6">Equipe</a></div>
 <script src="config.js"></script>
 <script src="telefone.js"></script>
@@ -198,24 +103,14 @@ const $ = s => document.querySelector(s);
 const esc = v => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const total = PERGUNTAS.length;
 const barra = n => `<div class="bar"><i style="width:${Math.round((n - 1) / total * 100)}%"></i></div><div class="step">Pergunta ${n} de ${total}</div>`;
-function modo(home) { $('#wrap').classList.toggle('home', home); $('#venda').hidden = !home; if (!home) window.scrollTo(0, 0); }
-function inicio() {
-  modo(true);
-  $('#tela').innerHTML = `<div class="eyebrow">Consultoria fitness · corpo da mulher</div>
-    <h1>Treino e dieta <span>pra SUA rotina</span></h1>
-    <p class="lead">A 1ª consultoria fitness com suporte 24h focada no corpo da mulher. Responda a ${total} perguntas e descubra o seu ponto de partida.</p>
-    <button class="btn primary go" id="go">Começar o diagnóstico</button>
-    <div class="selo">Método com +500 mulheres transformadas</div>`;
-  document.querySelectorAll('.go').forEach(b => b.onclick = () => { i = 0; boasVindas(); });
-}
 function boasVindas() {
-  modo(false);
+  limpaTimer(); window.scrollTo(0, 0);
   $('#tela').innerHTML = `<div class="bar"><i style="width:0%"></i></div>
     <h1>Seja bem-vinda ao <span>SQUAD!</span></h1>
     <p style="font-size:1.08rem"><b>Em poucos minutos, você vai responder algumas perguntas para entendermos melhor seu momento atual e como podemos ajudar.</b> Levamos nosso trabalho muito a <b>sério</b> — por isso, é de suma importância que sejas sincera em cada detalhe para que assim possamos <b>traçar juntos um plano estratégico</b> de evolução.</p>
     <button class="btn primary" id="comeca">Começar</button>
-    <button class="back" id="volta">← Voltar</button>`;
-  $('#comeca').onclick = () => { i = 0; pergunta(); }; $('#volta').onclick = inicio;
+    `;
+  $('#comeca').onclick = () => { i = 0; pergunta(); };
 }
 const instaLimpo = v => { v = v.trim().replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@+/, '').replace(/\s+/g, ''); return v ? '@' + v : ''; };
 function anterior() { limpaTimer(); i--; i < 0 ? boasVindas() : pergunta(); }
@@ -259,7 +154,7 @@ function pergunta() {
 }
 function concluir() { if (!R._salvo) { R._salvo = 1; guardaLead(); } resultado(); }
 function resultado() {
-  modo(false);
+  window.scrollTo(0, 0);
   const nome = esc((R.nome || '').split(' ')[0]);
   $('#tela').innerHTML = `<div class="bar"><i style="width:100%"></i></div>
     <div style="text-align:center;padding:24px 0">
@@ -272,7 +167,7 @@ async function guardaLead() {
   if (!CFG.url || !CFG.anonKey || !CFG.leadsPara) return;
   try { await fetch(CFG.url + '/rest/v1/leads', { method: 'POST', headers: Object.assign({ apikey: CFG.anonKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, /^eyJ/.test(CFG.anonKey) ? { Authorization: 'Bearer ' + CFG.anonKey } : {}), body: JSON.stringify({ personal_id: CFG.leadsPara, nome: R.nome, whatsapp: R.whatsapp, respostas: Object.fromEntries(Object.entries(R).filter(([k]) => k[0] !== '_')) }) }).then(r => { if (!r.ok) r.text().then(t => console.warn('lead não gravado', r.status, t)); }); } catch (e) { console.warn('lead não gravado', e); }
 }
-inicio();
+boasVindas();
 })();
 </script>
 </body>
