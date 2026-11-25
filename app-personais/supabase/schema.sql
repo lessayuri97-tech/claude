@@ -106,4 +106,29 @@ end $$;
 revoke all on function public.aceitar_convite(text) from public, anon;
 grant execute on function public.aceitar_convite(text) to authenticated;
 
+-- =====================================================================
+-- Diagnóstico da página inicial: pessoas interessadas (leads)
+-- =====================================================================
+create table if not exists public.leads (
+  id          uuid primary key default gen_random_uuid(),
+  personal_id uuid not null references auth.users(id) on delete cascade,
+  nome        text not null check (char_length(nome) <= 120),
+  whatsapp    text not null check (char_length(whatsapp) <= 30),
+  respostas   jsonb not null default '{}'::jsonb check (pg_column_size(respostas) < 4000),
+  contactado  boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+create index if not exists leads_personal_idx on public.leads(personal_id, created_at desc);
+alter table public.leads enable row level security;
+drop policy if exists leads_inserir on public.leads;
+create policy leads_inserir on public.leads for insert to anon, authenticated
+  with check (exists (select 1 from public.espacos e where e.personal_id = leads.personal_id));
+drop policy if exists leads_dono on public.leads;
+create policy leads_dono on public.leads for all to authenticated
+  using (personal_id = auth.uid()) with check (personal_id = auth.uid());
+revoke all on public.leads from anon, authenticated;
+grant insert on public.leads to anon, authenticated;
+grant select, delete on public.leads to authenticated;
+grant update (contactado) on public.leads to authenticated;
+
 -- Fim. Nunca coloque a "service_role key" na app nem no GitHub.

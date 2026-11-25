@@ -1089,6 +1089,8 @@ function viewCentral() {
     ${painel('Treinaram hoje', treinaram.length, 'ok', treinaram.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join(''), 'Ainda ninguém treinou hoje.')}
     ${painel(`Parados há ${cfg.diasParado} ou mais dias`, parados.length, 'accent', parados.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">há ${x.dias} dias · último: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})</span></span></a>`).join(''), 'Todos treinaram recentemente.')}
     ${painel('Nunca treinaram', nunca.length, 'accent', nunca.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.a.treinos.length ? x.a.treinos.length + ' treino(s) no plano' : 'sem plano ainda'}${x.a.inicio ? ' · aluno desde ' + fmtData(x.a.inicio) : ''}</span></span></a>`).join(''), 'Todos já fizeram pelo menos um treino.')}
+    ${(typeof SB !== 'undefined' && SB.leads.length) ? painel('Diagnósticos recebidos', SB.leads.filter(l => !l.contactado).length, 'accent', SB.leads.slice(0, 8).map(l => `<div class="cc-rev"><span><b>${esc(l.nome)}</b><span class="small muted">${esc((l.respostas || {}).objetivo || '')} · ${esc((l.respostas || {}).dias || '')} · ${fmtData(String(l.created_at).slice(0, 10))}${l.contactado ? ' · contactado' : ''}</span></span>
+      <a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${String(l.whatsapp).replace(/\D/g, '')}">WhatsApp</a>${l.contactado ? '' : `<button class="btn ghost sm" data-act="lead-ok" data-id="${l.id}">Contactado</button>`}</div>`).join(''), '') : ''}
     ${painel('Sem registar comida há ' + cfg.diasParado + '+ dias', semComida.length, 'accent', semComida.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.dias === null ? 'ainda não marcou nenhuma refeição' : 'há ' + x.dias + ' dias'}</span></span></a>`).join(''), nutriInfo.length ? 'Todos os alunos com plano alimentar estão a registar.' : 'Quando montares um plano alimentar, vês aqui quem não está a seguir.')}
     ${painel('Podem precisar de nova revisão do plano', rever.length, 'tec', rever.map(x => `<div class="cc-rev">${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.rev.motivos.concat(x.rev.geral).slice(0, 3).map(m => esc(m.txt)).join(' · ')}</span></span></a>
       <button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button></div>`).join(''), 'Ninguém com sinais de progressão por agora.')}
@@ -1227,6 +1229,7 @@ document.addEventListener('click', ev => {
   switch (act) {
     case 'close': closeDialog(); break;
     case 'cor-marca': db.marca = Object.assign({}, db.marca || {}, { cor: b.dataset.cor }); save(); aplicaMarca(); rerender(); break;
+    case 'lead-ok': { const l = SB.leads.find(x => x.id === b.dataset.id); if (l) { l.contactado = true; SB.req('/rest/v1/leads?id=eq.' + l.id, { method: 'PATCH', body: { contactado: true }, headers: { Prefer: 'return=minimal' } }); rerender(); } break; }
     case 'onb-fechar': db.onbFechado = true; save(); rerender(); break;
     case 'tirar-logo': db.marca = Object.assign({}, db.marca || {}, { logo: '' }); save(); aplicaMarca(); rerender(); break;
     case 'sugerir-metas': { const g = sugestaoMetas(a); if (g) { Object.assign(nutri(a).metas, g); save(); rerender(); toast('Metas sugeridas. Pode ajustar.'); } break; }
@@ -2220,6 +2223,7 @@ const SB = {
     try {
       const desde = (!forcar && sbS.desde) ? '&updated_at=gt.' + encodeURIComponent(sbS.desde) : '';
       const pers = sbS.papel === 'personal';
+      if (pers && (forcar || Date.now() - SB.leadsT > 300000)) SB.carregaLeads();
       const [ra, re] = await Promise.all([
         SB.req('/rest/v1/alunos_docs?select=id,dados,updated_at' + (pers ? '' : '&user_id=eq.' + sbS.uid) + desde),
         SB.req('/rest/v1/espacos?select=dados,updated_at' + (pers ? '&personal_id=eq.' + sbS.uid : '') + desde)]);
@@ -2272,6 +2276,12 @@ const SB = {
     } catch (e) { sync.status = 'erro'; }
     emVoo = false; mostraStatus();
     if (sync.dirty && sync.status === 'ativa') agendaPush();
+  },
+  leads: [], leadsT: 0,
+  async carregaLeads() {
+    SB.leadsT = Date.now();
+    const r = await SB.req('/rest/v1/leads?select=id,nome,whatsapp,respostas,contactado,created_at&order=created_at.desc&limit=50');
+    if (r.ok) { SB.leads = r.j; rerenderSeguro(); }
   },
   async novoConvite(a) {
     sync.dirty = true; await SB.push();
