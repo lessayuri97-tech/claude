@@ -448,8 +448,13 @@ function load() {
   db = exemplo();
 }
 function migra() { if (db.exemplo) db.alunos.forEach(a => { if (a.nome === 'Mariana Souza') a.nome = 'Mariana Ribeiro'; }); }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
-load(); migra(); save();
+const SYNCKEY = KEY + ':sync';
+let sync = { rev: 0, dirty: false, v: 0, status: 'inicio' }; // status: inicio | ativa | desligada | erro
+try { const r = JSON.parse(localStorage.getItem(SYNCKEY) || 'null'); if (r) { sync.rev = r.rev || 0; sync.dirty = !!r.dirty; } } catch (e) {}
+function saveSync() { try { localStorage.setItem(SYNCKEY, JSON.stringify({ rev: sync.rev, dirty: sync.dirty })); } catch (e) {} }
+function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+function save() { saveLocal(); sync.v++; sync.dirty = true; saveSync(); agendaPush(); }
+load(); migra(); saveLocal();
 
 /* ---------- Utilidades ---------- */
 const $ = (s, el = document) => el.querySelector(s);
@@ -532,6 +537,7 @@ function route() {
   else app.innerHTML = viewAlunos();
 }
 function rerender() { const y = window.scrollY; route(); window.scrollTo(0, y); }
+new MutationObserver(() => mostraStatus()).observe(document.getElementById('app'), { childList: true });
 window.addEventListener('hashchange', () => { route(); window.scrollTo(0, 0); });
 
 function bannerExemplo() {
@@ -843,7 +849,9 @@ function previewHtml(url) {
 /* ---------- Vista: backup ---------- */
 function viewBackup() {
   return `<div class="page-head"><div><div class="eyebrow">Seus dados</div><h1>Backup</h1></div></div>
-  <div class="panel"><p style="margin:0;max-width:65ch">Os dados ficam salvos <b>neste navegador</b>, neste aparelho. Para passar para outro aparelho ou guardar uma cópia, copie o backup abaixo e cole no outro aparelho em “Restaurar”.</p></div>
+  <div class="panel"><p style="margin:0;max-width:65ch">Nesta demonstração, os dados são guardados neste aparelho e, quando a sincronização está ativa, também na nuvem, para a aluna ver as alterações do personal em outro aparelho. Para guardar uma cópia, copie o backup abaixo.</p>
+    <div class="small muted sync-status"></div>
+    <div class="row"><button class="btn sm" data-sact="forcar-envio">Enviar os dados deste aparelho para a nuvem</button><button class="btn sm" data-sact="forcar-recebimento">Receber os dados da nuvem</button></div></div>
   <div class="grid-2">
     <div class="panel"><h2>Copiar backup</h2><textarea class="share" id="bk-out" readonly>${esc(JSON.stringify(db))}</textarea>
       <div class="row"><button class="btn primary" data-act="copiar" data-src="bk-out">Copiar</button><button class="btn" data-act="baixar">Baixar arquivo</button></div></div>
@@ -994,6 +1002,79 @@ document.addEventListener('submit', ev => {
   }
 });
 
+/* ================= SINCRONIZAÇÃO ENTRE APARELHOS (demo) ================= */
+const API = '/api/dados';
+let pushTimer = null, emVoo = false;
+const meuPapel = () => { const se = getSessao(); return se ? se.papel : ''; };
+function dadosRemotos() { const c = JSON.parse(JSON.stringify(db)); delete c.alunoAtivo; return c; }
+async function api(method, body) {
+  const r = await fetch(API, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+  let j = null; try { j = await r.json(); } catch (e) {}
+  return { status: r.status, j };
+}
+function agendaPush() { if (sync.status === 'desligada') return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 500); }
+function mergeRemoto(local, remote) {
+  const uniao = (a = [], b = []) => { const ids = new Set(a.map(x => x.id)); return a.concat(b.filter(x => !ids.has(x.id))); };
+  const par = (lista, a) => lista.find(x => x.id === a.id) || lista.find(x => norm(x.nome) === norm(a.nome));
+  if (meuPapel() === 'aluno') { // a aluna só acrescenta sessões e medidas; o resto vem do personal
+    const out = JSON.parse(JSON.stringify(remote));
+    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniao(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); } });
+    out.alunoAtivo = local.alunoAtivo; return out;
+  }
+  const out = JSON.parse(JSON.stringify(local)); // o personal manda no plano; recebe as sessões e medidas da aluna
+  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniao(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); } });
+  return out;
+}
+function rerenderSeguro() {
+  const ae = document.activeElement;
+  if (dlg.open) return;
+  if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && !ae.closest('#f-login')) return;
+  rerender();
+}
+function mostraStatus() {
+  const t = { ativa: 'Sincronização entre aparelhos: ativa', desligada: 'Sincronização não configurada: os dados ficam só neste aparelho', erro: 'Sem ligação ao servidor: a tentar de novo', inicio: 'Sincronização: a ligar…' }[sync.status];
+  document.querySelectorAll('.sync-status').forEach(el => { el.textContent = t; el.dataset.estado = sync.status; });
+}
+async function push() {
+  if (emVoo || sync.status === 'desligada' || !sync.dirty) return;
+  if (meuPapel() === '') return;
+  emVoo = true;
+  try {
+    for (let tent = 0; tent < 3 && sync.dirty; tent++) {
+      const v = sync.v;
+      const r = await api('PUT', { baseRev: sync.rev, data: dadosRemotos() });
+      if (r.status === 200) { sync.rev = r.j.rev; if (sync.v === v) sync.dirty = false; saveSync(); sync.status = 'ativa'; break; }
+      if (r.status === 409 && r.j && r.j.data) { db = mergeRemoto(db, r.j.data); sync.rev = r.j.rev; sync.v++; saveLocal(); saveSync(); sync.status = 'ativa'; continue; }
+      sync.status = (r.status === 503 || r.status === 404) ? 'desligada' : 'erro'; break;
+    }
+  } catch (e) { sync.status = 'erro'; }
+  emVoo = false; mostraStatus();
+  if (sync.dirty && sync.status === 'ativa') agendaPush();
+}
+async function pull(forcar) {
+  if (sync.status === 'desligada' || emVoo) return;
+  try {
+    const r = await api('GET');
+    if (r.status === 503 || r.status === 404) { sync.status = 'desligada'; mostraStatus(); return; }
+    if (r.status !== 200 || !r.j) { sync.status = 'erro'; mostraStatus(); return; }
+    sync.status = 'ativa';
+    const rem = r.j;
+    if (!rem.data) { if (meuPapel() === 'personal') { sync.dirty = true; sync.v++; saveSync(); push(); } mostraStatus(); return; }
+    if (rem.rev > sync.rev || forcar) {
+      if (sync.dirty && !forcar) { db = mergeRemoto(db, rem.data); sync.rev = rem.rev; sync.v++; saveLocal(); saveSync(); push(); }
+      else { const ativo = db.alunoAtivo; db = rem.data; if (ativo) db.alunoAtivo = ativo; migra(); sync.rev = rem.rev; sync.dirty = false; saveLocal(); saveSync(); }
+      rerenderSeguro();
+    }
+    mostraStatus();
+  } catch (e) { sync.status = 'erro'; mostraStatus(); }
+}
+setInterval(() => { if (!document.hidden) pull(); }, 6000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pull(); else if (sync.dirty) push(); });
+window.addEventListener('focus', () => pull());
+window.addEventListener('storage', e => { // outra aba do mesmo navegador guardou alterações
+  if (e.key === KEY && e.newValue) { try { db = JSON.parse(e.newValue); migra(); rerenderSeguro(); } catch (err) {} }
+});
+
 /* ================= LOGIN DEMO (sem servidor; só para demonstração) ================= */
 const SKEY = KEY + ':sessao';
 const USERS = { personal: { senha: 'personal', papel: 'personal' }, 'mariana ribeiro': { senha: 'alunateste', papel: 'aluno', nome: 'Mariana Ribeiro' } };
@@ -1012,7 +1093,8 @@ function renderLogin() {
       <button class="btn primary" style="justify-content:center">Entrar</button>
     </form>
     <div class="demo-box"><div><span class="chip accent">Demonstração</span></div>
-      <div class="small">Esta é uma versão de demonstração, sem servidor. Use os acessos de teste abaixo (toque para preencher).</div>
+      <div class="small">Esta é uma versão de demonstração. Use os acessos de teste abaixo (toque para preencher).</div>
+      <div class="small muted sync-status"></div>
       <button class="cred btn" type="button" data-fill="personal|personal" style="text-align:left"><span><b>Personal</b><br><code>personal</code> · <code>personal</code></span><span class="small">Usar</span></button>
       <button class="cred btn" type="button" data-fill="Mariana Ribeiro|alunateste" style="text-align:left"><span><b>Aluna</b><br><code>Mariana Ribeiro</code> · <code>alunateste</code></span><span class="small">Usar</span></button>
     </div></div>`;
@@ -1021,25 +1103,27 @@ document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-fill]'); if (!b) return;
   const [u, pw] = b.dataset.fill.split('|'); $('#l-user').value = u; $('#l-senha').value = pw; $('#f-login button.primary').focus();
 });
-document.addEventListener('submit', ev => {
+document.addEventListener('submit', async ev => {
   if (ev.target.id !== 'f-login') return;
   ev.preventDefault();
   const u = USERS[norm($('#l-user').value)];
   if (!u || u.senha !== $('#l-senha').value) { $('#l-err').textContent = 'Usuário ou senha incorretos.'; return; }
-  if (u.papel === 'personal') { setSessao({ papel: 'personal' }); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'alunos'; }
+  if (u.papel === 'aluno') { try { await pull(); } catch (e) {} }
+  if (u.papel === 'personal') { setSessao({ papel: 'personal' }); pull(); const h = location.hash.slice(1); location.hash = /^(meu-|meus-|minha-)/.test(h) ? h : 'alunos'; }
   else {
     let a = db.alunos.find(x => norm(x.nome) === norm(u.nome));
     if (!a) { a = { id: uid(), nome: u.nome, objetivo: 'Condicionamento', telefone: '', inicio: hoje(), notas: '', treinos: [], sessoes: [], medidas: [] }; db.alunos.push(a); save(); }
-    setSessao({ papel: 'aluno', alunoId: a.id }); location.hash = 'meu-inicio';
+    setSessao({ papel: 'aluno', alunoId: a.id, nome: a.nome }); location.hash = 'meu-inicio';
   }
-  route();
+  route(); pull();
 });
 
 /* ================= ÁREA DO ALUNO ================= */
 const WKEY = KEY + ':treino-em-curso';
 const DIAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 const isoDe = d => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 6e4); return z.toISOString().slice(0, 10); };
-function alunoAtivo() { const se = getSessao(); if (se && se.papel === 'aluno' && alunoById(se.alunoId)) return alunoById(se.alunoId);
+function alunoAtivo() { const se = getSessao();
+  if (se && se.papel === 'aluno') { const a = (se.nome && db.alunos.find(x => norm(x.nome) === norm(se.nome))) || alunoById(se.alunoId); if (a) return a; }
   return alunoById(db.alunoAtivo) || db.alunos.find(a => a.treinos.some(t => t.itens.length)) || db.alunos[0]; }
 function treinoLabel(a, t) { return `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`; }
 function proximoTreino(a) {
@@ -1182,6 +1266,7 @@ function vPerfil(a) {
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
   <div class="panel"><div class="eyebrow">Medidas</div><p style="margin:0" class="small muted">Registre seu peso para acompanhar a evolução.</p>
     <button class="btn" data-act="nova-medida" data-id="${a.id}">+ Registrar peso e medidas</button></div>
+  <div class="small muted sync-status" style="text-align:center"></div>
   <button class="btn" data-sact="logout" style="justify-content:center">Sair da conta</button>
   <div class="panel"><div class="eyebrow">Instalar no celular</div><p style="margin:0" class="small">No Android: menu ⋮ do navegador, <b>Instalar app</b>. No iPhone: botão Compartilhar, <b>Adicionar à Tela de Início</b>.</p></div>`, 'perfil');
 }
@@ -1213,6 +1298,10 @@ document.addEventListener('click', ev => {
   switch (act) {
     case 'sair': document.body.classList.remove('modo-aluno'); break;
     case 'logout': setSessao(null); wk = null; saveWk(); location.hash = ''; route(); break;
+    case 'forcar-envio': (async () => { try { const g = await api('GET'); if (g.status !== 200) { toast('Sincronização indisponível'); return; }
+      const r = await api('PUT', { baseRev: g.j.rev || 0, data: dadosRemotos() });
+      if (r.status === 200) { sync.rev = r.j.rev; sync.dirty = false; saveSync(); sync.status = 'ativa'; mostraStatus(); toast('Dados enviados para a nuvem'); } else toast('Não foi possível enviar'); } catch (e) { toast('Sem ligação'); } })(); break;
+    case 'forcar-recebimento': pull(true).then(() => toast('Dados recebidos da nuvem')); break;
     case 'iniciar': if (t) { iniciarTreino(a, t); } break;
     case 'abrir': ev.preventDefault(); { const i = +b.dataset.i; wk.aberto = wk.aberto === i ? -1 : i; saveWk(); rerender(); } break;
     case 'peso': { const s = wk.itens[b.dataset.i].sets[b.dataset.j]; s.carga = Math.max(0, (+s.carga || 0) + (+b.dataset.d)); saveWk();
@@ -1271,6 +1360,7 @@ document.addEventListener('submit', ev => {
 });
 
 route();
+pull();
 })();
 </script>
 </body>

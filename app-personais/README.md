@@ -19,6 +19,14 @@ Webapp simples para personal trainers acompanharem alunos e planos de treino. Se
 
 ## Limitações desta versão
 
-- Os dados ficam no navegador (localStorage) do aparelho; não há servidor. O login é só de demonstração (usuário `personal` / senha `personal`; aluna `Mariana Ribeiro` / senha `alunateste`), as senhas estão no código e a separação personal/aluno acontece só no navegador. Para uso real é preciso login e banco de dados.
+- Os dados ficam no navegador (localStorage). Com a sincronização ativa (`api/dados.js` + Vercel Blob), o personal e a aluna veem os mesmos dados em aparelhos diferentes: o personal manda no plano, a aluna acrescenta sessões e medidas. Sem Blob configurado, a app funciona só neste aparelho. O login é só de demonstração (usuário `personal` / senha `personal`; aluna `Mariana Ribeiro` / senha `alunateste`), as senhas estão no código e a separação personal/aluno acontece só no navegador. Para uso real é preciso login e banco de dados.
 - Abre com dados de exemplo; o botão "Começar do zero" apaga-os (mantém a biblioteca de exercícios).
 - Os exercícios de exemplo não têm vídeo: cole os links em "Exercícios".
+
+## Sincronização (Vercel Blob)
+
+1. No painel da Vercel: projeto `pt-example` > Storage > Create > Blob e ligar ao projeto (cria `BLOB_READ_WRITE_TOKEN`).
+2. Publicar de novo (`publicar.bat`).
+3. Abrir primeiro como personal; a app envia os dados para a nuvem. Em Backup há botões para enviar ou receber à força.
+
+Nota: os dados são fictícios e a rota `/api/dados` não tem autenticação (só demonstração).
