@@ -14,14 +14,17 @@ Demora uns 10 minutos, mais o tempo da internet "aprender" o endereço (de minut
 
 Se o Vercel mostrar valores diferentes, **use os do Vercel** (são os certos para o seu projeto).
 
-## 2. No Registro.br (se o domínio foi comprado lá)
-1. Entre em registro.br → **Painel** → clique em `vemprosquad.com.br`.
-2. Em **DNS**, confirme que usa os **servidores DNS do Registro.br**. Depois toque em **Configurar zona DNS** → **Modo avançado**.
-3. **Nova entrada**: tipo **A**, nome vazio (ou `@`), dados `76.76.21.21` → Salvar.
-4. **Nova entrada**: tipo **CNAME**, nome `www`, dados `cname.vercel-dns.com` → Salvar.
-5. Se já existirem entradas A ou CNAME antigas para o mesmo nome, apague-as primeiro.
+## 2. No Registro.br (opção A, a mais simples: registos A e CNAME)
+1. Entre em **registro.br** com o seu login e toque em `vemprosquad.com.br`.
+2. Na secção **DNS**, toque em **Editar zona** (ou **Configurar zona DNS**). Se pedir, escolha usar os servidores DNS do Registro.br.
+3. **Nova entrada**: tipo **A**, nome **em branco**, dados `76.76.21.21` → **Salvar**.
+4. **Nova entrada**: tipo **CNAME**, nome `www`, dados `cname.vercel-dns.com.` (com o ponto no fim, se o Registro.br pedir) → **Salvar**.
+5. Se já existirem entradas A ou CNAME antigas com o mesmo nome, apague-as antes.
+6. Toque em **Salvar alterações** no fim da página.
 
-*Se comprou noutro sítio (GoDaddy, Hostinger, Cloudflare…), o passo é o mesmo: abra a gestão de **DNS** do domínio e crie os dois registos da tabela.*
+**Opção B (alternativa): usar os servidores do Vercel.** Em **DNS** toque em **Alterar servidores DNS**, escolha **Usar outros servidores** e escreva `ns1.vercel-dns.com` e `ns2.vercel-dns.com`. Só use esta opção se o Vercel lhe pedir isso em Domains; a opção A é a normal.
+
+O Registro.br pode demorar de alguns minutos até 24 horas a propagar.
 
 ## 3. Confirmar
 Volte a **Settings → Domains** no Vercel. Quando aparecer **Valid Configuration** (visto verde), o site já abre em https://vemprosquad.com.br. O certificado (cadeado) é automático.
