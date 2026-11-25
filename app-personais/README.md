@@ -23,17 +23,21 @@ Webapp simples para personal trainers acompanharem alunos e planos de treino. Se
 - **Central de clientes (personal)**: página inicial com quem treinou hoje, parados há N dias, quem nunca treinou e quem pode precisar de nova revisão do plano (carga ou reps a subir nas últimas sessões seguidas, ou esforço baixo). Limites ajustáveis em "Limites"; "Plano revisto" reinicia a verificação.
 - **Enviar plano ao aluno**: texto com cargas e links dos vídeos para colar no WhatsApp.
 - **Backup**: copiar/colar ou baixar/abrir ficheiro JSON.
+- **Nutrição**: por aluno, metas diárias (kcal, proteína, hidratos, gordura, água) com sugestão automática, refeições com alimentos (~60 de base, macros automáticos por gramas) e nota. A aluna vê a aba "Comida", marca as refeições feitas, conta copos de água e comenta. A Central mostra quem não regista comida há N dias.
+- **Marca e convites**: em "Definições" o personal escolhe nome, logótipo, cor, WhatsApp e boas-vindas. Na ficha do aluno, "Convidar para a app" gera a mensagem para WhatsApp.
+- **Primeiros passos** na Central (4 passos), busca de alunos e dica de instalar a app no telemóvel.
 
-## Limitações desta versão
+## Dois modos
 
-- Os dados ficam no navegador (localStorage). Com a sincronização ativa (`api/dados.js` + Vercel Blob), o personal e a aluna veem os mesmos dados em aparelhos diferentes: o personal manda no plano, a aluna acrescenta sessões e medidas. Sem Blob configurado, a app funciona só neste aparelho. O login é só de demonstração (usuário `personal` / senha `personal`; aluna `Mariana Ribeiro` / senha `alunateste`), as senhas estão no código e a separação personal/aluno acontece só no navegador. Para uso real é preciso login e banco de dados.
-- Abre com dados de exemplo; o botão "Começar do zero" apaga-os (mantém a biblioteca de exercícios).
-- Os exercícios de exemplo não têm vídeo: cole os links em "Exercícios".
+- **Demonstração** (`config.js` vazio): dados só no aparelho; logins de teste `personal`/`personal` e `Mariana Ribeiro`/`alunateste`. Se `api/dados.js` + Vercel Blob existirem, a demo sincroniza entre aparelhos (sem segurança; só para mostrar).
+- **Real com Supabase**: preencher `config.js` (URL e chave anon, nunca a service_role). Cada personal cria conta com e-mail/senha, convida alunos por link, e as regras de segurança (RLS) em `supabase/schema.sql` garantem que cada personal só vê os seus alunos e cada aluno só o seu registo. Passo a passo: `supabase/GUIA-SUPABASE.md`. Com Supabase configurado a demo fica só local e o Blob deixa de ser usado.
 
-## Sincronização (Vercel Blob)
+## Limitações
 
-1. No painel da Vercel: projeto `pt-example` > Storage > Create > Blob e ligar ao projeto (cria `BLOB_READ_WRITE_TOKEN`).
-2. Publicar de novo (`publicar.bat`).
-3. Abrir primeiro como personal; a app envia os dados para a nuvem. Em Backup há botões para enviar ou receber à força.
+- Abre com dados de exemplo na demo; "Começar do zero" apaga-os (mantém a biblioteca).
+- Conflitos: se personal e aluno editarem ao mesmo tempo, o plano é do personal e a aluna acrescenta sessões, medidas, comentários, refeições e água (união por id).
+- Ainda não há: pagamentos/assinaturas, termos e privacidade (dados de saúde = RGPD), domínio próprio, e-mails com a marca, cópias de segurança automáticas.
 
-Nota: os dados são fictícios e a rota `/api/dados` não tem autenticação (só demonstração).
+## Uso do Blob (demo)
+
+A app consulta no máximo 1 vez por minuto com o ecrã aberto, só pergunta se mudou algo (`?rev=`), o servidor guarda em cache 30 s e as gravações são agrupadas (8 s).

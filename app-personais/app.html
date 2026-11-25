@@ -501,6 +501,7 @@ body.papel-aluno .aluno-bar { display: none; }
 <div id="rest" class="rest" hidden role="timer" aria-label="Cronômetro de descanso"></div>
 <dialog id="dlg"><div class="dlg" id="dlg-body"></div></dialog>
 
+<script src="config.js"></script>
 <script>
 (() => {
 'use strict';
@@ -1243,6 +1244,7 @@ document.addEventListener('click', ev => {
         <p class="small muted" style="margin:0">Substitui o plano alimentar do outro aluno (as metas ficam em branco para ajustar).</p>
         <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Copiar</button></div></form>`); break; }
     case 'convidar': abreConvite(a.id); break;
+    case 'sb-esqueci': { const e = $('#l-user').value.trim(); if (!e.includes('@')) { $('#l-err').textContent = 'Escreva primeiro o seu e-mail na caixa de cima.'; break; } SB.recuperar(e); $('#l-err').textContent = 'Se este e-mail tiver conta, enviámos um link para escolher uma senha nova.'; break; }
     case 'nova-senha': a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); abreConvite(a.id); toast('Senha nova gerada'); break;
     case 'plano-revisto': a.revisaoPlano = hoje(); save(); rerender(); toast('Plano marcado como revisto'); break;
     case 'limites': { const c = cfgC(); openDialog(`<form id="f-config" class="dlg" style="padding:0"><div><div class="eyebrow">Central de clientes</div><h2>Limites dos avisos</h2></div>
@@ -1502,6 +1504,7 @@ function mostraStatus() {
   document.querySelectorAll('.sync-status').forEach(el => { el.textContent = t; el.dataset.estado = sync.status; });
 }
 async function push() {
+  if (SBC) return SB.push();
   if (emVoo || sync.status === 'desligada' || !sync.dirty) return;
   if (meuPapel() === '') return;
   emVoo = true;
@@ -1518,6 +1521,7 @@ async function push() {
   if (sync.dirty && sync.status === 'ativa') agendaPush();
 }
 async function pull(forcar) {
+  if (SBC) return SB.pull(forcar);
   if (sync.status === 'desligada' || emVoo) return;
   try {
     ultimoPull = Date.now();
@@ -1679,13 +1683,24 @@ function aplicaMarca() {
 const slugNome = n => norm(n).replace(/[^a-z0-9 ]/g, '').trim();
 const pinNovo = () => String(Math.floor(1000 + Math.random() * 9000));
 function acessoDe(a) { if (!a.acesso) { a.acesso = { usuario: norm(a.nome), senha: pinNovo() }; save(); } return a.acesso; }
-function urlApp() { return location.origin && location.origin !== 'null' ? location.origin + '/app' : 'https://pt-example.vercel.app/app'; }
+function urlApp() { return /^https?:/.test(location.origin) ? location.origin + '/app' : 'https://pt-example.vercel.app/app'; }
 function textoConvite(a) {
   const m = marca(), ac = acessoDe(a);
   return `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\n1) Abre este link no telemóvel: ${urlApp()}\n2) Utilizador: ${ac.usuario}\n3) Senha: ${ac.senha}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao ecrã principal" (no Android: menu ⋮ e "Instalar app"). Assim fica como uma app normal.${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
 }
-function abreConvite(id) {
+async function abreConvite(id) {
   const a = alunoById(id), m = marca(), tel = String(a.telefone || '').replace(/\D/g, '');
+  if (SBC && SB.ativo()) {
+    toast('A preparar o convite…'); let link;
+    try { link = await SB.novoConvite(a); } catch (e) { toast('Não foi possível criar o convite. Confira a internet.'); return; }
+    const tx = `Olá ${a.nome.split(' ')[0]}! 👋\nO teu treino já está pronto na app da ${m.nome}.\n\nAbre este link no telemóvel e cria a tua conta (é só uma vez):\n${link}\n\nDica: depois de entrares, no iPhone toca em Partilhar e "Adicionar ao ecrã principal" (no Android: menu ⋮ e "Instalar app").${m.boasVindas ? '\n\n' + m.boasVindas : ''}`;
+    openDialog(`<div class="row spread"><h2>Convidar ${esc(a.nome.split(' ')[0])}</h2><button class="btn ghost" data-act="close">Fechar</button></div>
+      <p class="muted" style="margin:0">Copie esta mensagem e cole no WhatsApp. O link serve para uma só pessoa e uma só vez.</p>
+      <textarea class="share" id="share-txt" readonly>${esc(tx)}</textarea>
+      <div class="row"><button class="btn primary" data-act="copiar" data-src="share-txt">Copiar mensagem</button>
+        ${tel.length >= 9 ? `<a class="btn" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(tx)}">Abrir no WhatsApp</a>` : ''}</div>`);
+    return;
+  }
   openDialog(`<div class="row spread"><h2>Convidar ${esc(a.nome.split(' ')[0])}</h2><button class="btn ghost" data-act="close">Fechar</button></div>
     <p class="muted" style="margin:0">Copie esta mensagem e cole no WhatsApp. Ela já leva o link, o utilizador e a senha.</p>
     <textarea class="share" id="share-txt" readonly>${esc(textoConvite(a))}</textarea>
@@ -1719,30 +1734,69 @@ function getSessao() { try { return JSON.parse(localStorage.getItem(SKEY) || 'nu
 function setSessao(v) { try { v ? localStorage.setItem(SKEY, JSON.stringify(v)) : localStorage.removeItem(SKEY); } catch (e) {} }
 function renderLogin() {
   document.body.classList.add('sem-login'); document.body.classList.remove('modo-aluno', 'papel-aluno');
-  $('#app').innerHTML = `<div class="login">
-    <div class="login-brand">${marcaMark(52)}
-      <div><div class="eyebrow">${esc(marca().nome)}</div><h1>Entrar</h1></div></div>
-    <form class="login-card" id="f-login" autocomplete="off">
-      <label class="field">Usuário<input type="text" id="l-user" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
+  const conv = (location.hash.match(/^#convite=(\w+)/) || [])[1], rec = typeof sbRec !== 'undefined' && sbRec;
+  const cab = `<div class="login-brand">${marcaMark(52)}<div><div class="eyebrow">${esc(marca().nome)}</div><h1>${conv ? 'Criar a sua conta' : rec ? 'Nova senha' : 'Entrar'}</h1></div></div>`;
+  if (SBC && conv) { $('#app').innerHTML = `<div class="login">${cab}
+    <form class="login-card" id="f-convite" data-token="${conv}" autocomplete="on">
+      <p class="small" style="margin:0">O seu personal convidou-o. Escolha o seu e-mail e uma senha. Só precisa de fazer isto uma vez.</p>
+      <label class="field">O seu e-mail<input type="email" id="l-user" autocapitalize="none" required></label>
+      <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="l-senha" minlength="6" required></label>
+      <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar conta e entrar</button></form>
+    <p class="small muted" style="margin:0">Já tem conta? <a href="#">Entrar</a></p></div>`; return; }
+  if (SBC && rec) { $('#app').innerHTML = `<div class="login">${cab}
+    <form class="login-card" id="f-novasenha"><label class="field">Escolha a nova senha<input type="password" id="l-senha" minlength="6" required></label>
+      <div class="login-err" id="l-err" role="alert"></div><button class="btn primary" style="justify-content:center">Guardar nova senha</button></form></div>`; return; }
+  $('#app').innerHTML = `<div class="login">${cab}
+    <form class="login-card" id="f-login" autocomplete="on">
+      <label class="field">${SBC ? 'E-mail' : 'Usuário'}<input type="${SBC ? 'email' : 'text'}" id="l-user" autocapitalize="none" autocorrect="off" spellcheck="false" required></label>
       <label class="field">Senha<input type="password" id="l-senha" autocapitalize="none" required></label>
       <div class="login-err" id="l-err" role="alert"></div>
       <button class="btn primary" style="justify-content:center">Entrar</button>
+      ${SBC ? '<button type="button" class="btn ghost sm" data-act="sb-esqueci" style="justify-content:center">Esqueci a minha senha</button>' : ''}
     </form>
-    <p class="small muted" style="margin:0">Recebeu um convite do seu personal? Escreva o utilizador e a senha que ele lhe enviou.</p>
+    <p class="small muted" style="margin:0">${SBC ? 'Recebeu um convite do seu personal? Abra o link que ele lhe enviou.' : 'Recebeu um convite do seu personal? Escreva o utilizador e a senha que ele lhe enviou.'}</p>
+    ${SBC ? `<details class="demo-box"><summary><span class="chip accent">Sou personal e quero criar a minha conta</span></summary>
+      <form id="f-signup" style="display:grid;gap:10px;margin-top:10px"><label class="field">O seu e-mail<input type="email" id="s-email" autocapitalize="none" required></label>
+      <label class="field">Escolha uma senha (6 ou mais letras/números)<input type="password" id="s-senha" minlength="6" required></label>
+      <div class="login-err" id="s-err" role="alert"></div><button class="btn primary" style="justify-content:center">Criar a minha conta</button></form></details>` : ''}
     <details class="demo-box"><summary><span class="chip accent">Quero só experimentar</span></summary>
-      <div class="small" style="margin-top:8px">Versão de demonstração: toque num acesso de teste para preencher.</div>
+      <div class="small" style="margin-top:8px">Versão de demonstração: toque num acesso de teste para preencher. Os dados ficam só neste aparelho.</div>
       <div class="small muted sync-status"></div>
       <button class="cred btn" type="button" data-fill="personal|personal" style="text-align:left"><span><b>Personal</b><br><code>personal</code> · <code>personal</code></span><span class="small">Usar</span></button>
       <button class="cred btn" type="button" data-fill="Mariana Ribeiro|alunateste" style="text-align:left"><span><b>Aluna</b><br><code>Mariana Ribeiro</code> · <code>alunateste</code></span><span class="small">Usar</span></button>
     </details></div>`;
 }
+let sbRec = (location.hash.match(/access_token=([^&]+).*type=recovery/) || [])[1] || '';
+if (sbRec) history.replaceState(null, '', location.pathname);
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-fill]'); if (!b) return;
   const [u, pw] = b.dataset.fill.split('|'); $('#l-user').value = u; $('#l-senha').value = pw; $('#f-login button.primary').focus();
 });
+async function entraComSB(papel) {
+  await pull(true);
+  if (papel === 'personal') { setSessao({ papel: 'personal' }); location.hash = 'central'; }
+  else { const a = db.alunos[0]; if (!a) throw new Error('Ainda não há dados. Tente outra vez daqui a pouco.'); setSessao({ papel: 'aluno', alunoId: a.id, nome: a.nome }); location.hash = 'meu-inicio'; }
+  route();
+}
 document.addEventListener('submit', async ev => {
-  if (ev.target.id !== 'f-login') return;
+  const fid = ev.target.id;
+  if (SBC && (fid === 'f-convite' || fid === 'f-signup' || fid === 'f-novasenha')) {
+    ev.preventDefault(); const er = $(fid === 'f-signup' ? '#s-err' : '#l-err'), btn = ev.target.querySelector('button.primary'); er.textContent = ''; btn.disabled = true;
+    try {
+      if (fid === 'f-convite') { await SB.criarAluno($('#l-user').value.trim(), $('#l-senha').value, ev.target.dataset.token); sync.dirty = false; await entraComSB('aluno'); }
+      else if (fid === 'f-signup') { await SB.criarPersonal($('#s-email').value.trim(), $('#s-senha').value); sync.dirty = true; sync.v++; saveSync(); setSessao({ papel: 'personal' }); location.hash = 'central'; route(); SB.push(); }
+      else { const r = await SB.novaSenha(sbRec, $('#l-senha').value); if (!r.ok) throw new Error(SB.erro(r)); sbRec = ''; toast('Senha alterada. Já pode entrar.'); renderLogin(); }
+    } catch (e) { er.textContent = e.message; btn.disabled = false; }
+    return;
+  }
+  if (fid !== 'f-login') return;
   ev.preventDefault();
+  if (SBC && $('#l-user').value.includes('@')) {
+    const er = $('#l-err'), btn = ev.target.querySelector('button.primary'); er.textContent = 'A entrar…'; btn.disabled = true;
+    try { const papel = await SB.entrar($('#l-user').value.trim(), $('#l-senha').value); sync.dirty = false; await entraComSB(papel); }
+    catch (e) { er.textContent = e.message; btn.disabled = false; }
+    return;
+  }
   const un = norm($('#l-user').value), sn = $('#l-senha').value.trim();
   let u = USERS[un]; if (u && u.senha !== sn) u = null;
   if (!u) { // aluno convidado: procura nos dados deste aparelho e, se preciso, na nuvem
@@ -1817,6 +1871,12 @@ function semanaHtml(a) {
     return `<div class="dia ${feitos.has(iso) ? 'feito' : ''} ${iso === hoje() ? 'hoje' : ''}"><span>${DIAS[i]}</span><b class="num">${d.getDate()}</b><i aria-label="${feitos.has(iso) ? 'treinou' : ''}"></i></div>`; }).join('')}</div>`;
 }
 
+function dicaInstalar() {
+  let fechada = false, app = false; try { fechada = localStorage.getItem(KEY + ':dica') === '1'; app = matchMedia('(display-mode: standalone)').matches || navigator.standalone; } catch (e) {}
+  if (fechada || app) return '';
+  return `<div class="panel" style="padding:12px 16px"><div class="row spread"><b>Deixe a app no ecrã do telemóvel</b><button class="btn ghost sm" data-sact="fechar-dica">Já sei</button></div>
+    <div class="small muted">iPhone: toque em Partilhar e depois em "Adicionar ao ecrã principal". Android: toque no menu ⋮ e depois em "Instalar app".</div></div>`;
+}
 function vInicio(a) {
   const prox = proximoTreino(a), u = ultimaSessao(a);
   const mes = hoje().slice(0, 7), noMes = a.sessoes.filter(s => s.data.startsWith(mes)).length;
@@ -1826,6 +1886,7 @@ function vInicio(a) {
   return shell(`
   <div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Olá, ${esc(a.nome.split(' ')[0])}</h1></div>
   ${semanaHtml(a)}
+  ${dicaInstalar()}
   ${marca().boasVindas ? `<div class="panel" style="padding:12px 16px"><div class="small">${esc(marca().boasVindas)}</div></div>` : ''}
   ${emCurso ? `<a class="hoje-card" href="#meu-treino-${emCurso.id}"><div class="eyebrow">Treino em andamento</div><h2>${esc(treinoLabel(a, emCurso))}</h2>
      <div class="small">${wk.itens.filter(i => i.sets.every(s => s.done)).length} de ${wk.itens.length} exercícios feitos</div><span class="btn primary">Continuar treino</span></a>`
@@ -1995,7 +2056,7 @@ document.addEventListener('click', ev => {
   const t = b.dataset.treino && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
     case 'sair': document.body.classList.remove('modo-aluno'); stopRest(); soltaWake(); break;
-    case 'logout': setSessao(null); wk = null; saveWk(); stopRest(); soltaWake(); location.hash = ''; route(); break;
+    case 'logout': if (SBC && SB.ativo()) { SB.sair(); location.hash = ''; location.reload(); break; } setSessao(null); wk = null; saveWk(); stopRest(); soltaWake(); location.hash = ''; route(); break;
     case 'forcar-envio': (async () => { try { const g = await api('GET'); if (g.status !== 200) { toast('Sincronização indisponível'); return; }
       const r = await api('PUT', { baseRev: g.j.rev || 0, data: dadosRemotos() });
       if (r.status === 200) { sync.rev = r.j.rev; sync.dirty = false; saveSync(); sync.status = 'ativa'; mostraStatus(); toast('Dados enviados para a nuvem'); } else toast('Não foi possível enviar'); } catch (e) { toast('Sem ligação'); } })(); break;
@@ -2027,6 +2088,7 @@ document.addEventListener('click', ev => {
     case 'rest-start': { liberaAudio(); const tr = a.treinos.find(x => x.id === wk.treinoId); const ex = exById(tr.itens[+b.dataset.i].exId); startRest(+tr.itens[+b.dataset.i].descanso || 60, 'Descanso · ' + (ex ? ex.nome : '')); break; }
     case 'comentar': abreComentario(b.dataset.ctx || ''); break;
     case 'agua': { const x = (a.agua = a.agua || []).find(q => q.id === hoje()), c = Math.max(0, (x ? x.copos : 0) + (+b.dataset.d)); if (x) { x.copos = c; x.ts = Date.now(); } else a.agua.push({ id: hoje(), data: hoje(), copos: c, ts: Date.now() }); save(); rerender(); break; }
+    case 'fechar-dica': try { localStorage.setItem(KEY + ':dica', '1'); } catch (e) {} rerender(); break;
     case 'refeicao': { const id = hoje() + '|' + b.dataset.ref, reg = (a.nutriReg = a.nutriReg || []), x = reg.find(q => q.id === id); if (x) { x.feito = !x.feito; x.ts = Date.now(); } else reg.push({ id, data: hoje(), refId: b.dataset.ref, feito: true, ts: Date.now() }); save(); rerender(); break; }
     case 'cancelar':
       confirmar('Cancelar este treino?', 'Cancelar treino', () => { wk = null; saveWk(); stopRest(); soltaWake(); location.hash = 'meus-treinos'; }); break;
@@ -2080,6 +2142,147 @@ document.addEventListener('submit', ev => {
     <p class="small muted" style="margin:0">Treino salvo no histórico. Na versão completa, o personal recebe este treino na hora.</p>
     <button class="btn primary" data-act="close">Fechar</button></div>`), 50);
 });
+
+/* ================= SUPABASE (login real + base de dados) ================= */
+const SBC = (window.PT_SUPABASE && window.PT_SUPABASE.url && window.PT_SUPABASE.anonKey) ? window.PT_SUPABASE : null;
+const SBK = KEY + ':sb';
+let sbS = null; try { sbS = JSON.parse(localStorage.getItem(SBK) || 'null'); } catch (e) {}
+const estavel = o => JSON.stringify(o, (k, v) => (v && typeof v === 'object' && !Array.isArray(v)) ? Object.keys(v).sort().reduce((r, x) => (r[x] = v[x], r), {}) : v);
+const sbH = {}; let sbHEsp = '';
+const SB = {
+  ativo: () => !!(SBC && sbS && sbS.access_token && sbS.papel),
+  guarda() { try { sbS ? localStorage.setItem(SBK, JSON.stringify(sbS)) : localStorage.removeItem(SBK); } catch (e) {} },
+  async req(path, o = {}) {
+    if (sbS && !o.anon && !o.semRefresh && sbS.expires_at && sbS.expires_at - 30 < Date.now() / 1000 && sbS.refresh_token) await SB.refresca();
+    const h = Object.assign({ apikey: SBC.anonKey, 'Content-Type': 'application/json', Authorization: 'Bearer ' + ((o.anon || !sbS) ? SBC.anonKey : sbS.access_token) }, o.headers || {});
+    const r = await fetch(SBC.url + path, { method: o.method || 'GET', headers: h, body: o.body ? JSON.stringify(o.body) : undefined });
+    let j = null; try { j = await r.json(); } catch (e) {}
+    return { ok: r.ok, status: r.status, j };
+  },
+  sessao(j) {
+    sbS = Object.assign({}, sbS, { access_token: j.access_token, refresh_token: j.refresh_token || (sbS && sbS.refresh_token), expires_at: j.expires_at || Math.floor(Date.now() / 1000) + (j.expires_in || 3600), uid: (j.user && j.user.id) || (sbS && sbS.uid) });
+    SB.guarda();
+  },
+  async refresca() {
+    const r = await SB.req('/auth/v1/token?grant_type=refresh_token', { method: 'POST', body: { refresh_token: sbS.refresh_token }, anon: true, semRefresh: true });
+    if (r.ok && r.j && r.j.access_token) SB.sessao(r.j); else if (r.status === 400 || r.status === 401) SB.sair(false);
+  },
+  erro(r) {
+    const m = String((r.j && (r.j.msg || r.j.error_description || r.j.message || r.j.error)) || '').toLowerCase();
+    if (r.status === 429 || /rate|too many/.test(m)) return 'Muitas tentativas seguidas. Espere um minuto e tente outra vez.';
+    if (/invalid login|invalid credentials/.test(m)) return 'E-mail ou senha errados. Confira e tente outra vez.';
+    if (/already|registered/.test(m)) return 'Este e-mail já tem conta. Volte atrás e toque em "Entrar".';
+    if (/password/.test(m)) return 'A senha precisa de ter pelo menos 6 caracteres.';
+    if (/email/.test(m)) return 'Esse e-mail não parece certo. Confira.';
+    if (/convite/.test(m)) return 'Este convite não é válido ou já foi usado. Peça um novo ao seu personal.';
+    return 'Não foi possível. Confira a internet e tente outra vez.';
+  },
+  async entrar(email, senha) {
+    const r = await SB.req('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password: senha }, anon: true });
+    if (!r.ok) throw new Error(SB.erro(r));
+    SB.sessao(r.j); return SB.descobrePapel();
+  },
+  async registar(email, senha) {
+    const r = await SB.req('/auth/v1/signup', { method: 'POST', body: { email, password: senha }, anon: true });
+    if (!r.ok) throw new Error(SB.erro(r));
+    if (!r.j || !r.j.access_token) throw new Error('Enviámos um e-mail para confirmar a conta. Abra-o, toque no link e depois volte aqui e entre.');
+    SB.sessao(r.j);
+  },
+  async criarPersonal(email, senha) {
+    await SB.registar(email, senha);
+    const r = await SB.req('/rest/v1/espacos', { method: 'POST', body: { personal_id: sbS.uid, dados: {} }, headers: { Prefer: 'resolution=merge-duplicates' } });
+    if (!r.ok) throw new Error(SB.erro(r));
+    sbS.papel = 'personal'; SB.guarda();
+    db.alunos = []; db.exemplo = false; saveLocal(); // conta nova: começa vazia
+  },
+  async criarAluno(email, senha, token) {
+    await SB.registar(email, senha);
+    const r = await SB.req('/rest/v1/rpc/aceitar_convite', { method: 'POST', body: { p_token: token } });
+    if (!r.ok) throw new Error(SB.erro({ status: r.status, j: { msg: 'convite' } }));
+    sbS.papel = 'aluno'; sbS.alunoId = r.j; SB.guarda();
+  },
+  async descobrePapel() {
+    const a = await SB.req('/rest/v1/espacos?select=personal_id&personal_id=eq.' + sbS.uid);
+    if (a.ok && a.j.length) { sbS.papel = 'personal'; SB.guarda(); return 'personal'; }
+    const b = await SB.req('/rest/v1/alunos_docs?select=id&user_id=eq.' + sbS.uid);
+    if (b.ok && b.j.length) { sbS.papel = 'aluno'; sbS.alunoId = b.j[0].id; SB.guarda(); return 'aluno'; }
+    SB.sair(false); throw new Error('Esta conta ainda não está ligada a nenhum personal ou aluno. Use o link de convite que recebeu.');
+  },
+  async recuperar(email) { return SB.req('/auth/v1/recover', { method: 'POST', body: { email }, anon: true }); },
+  async novaSenha(token, senha) { return SB.req('/auth/v1/user', { method: 'PUT', body: { password: senha }, anon: true, headers: { Authorization: 'Bearer ' + token } }); },
+  sair(recarrega = true) {
+    sbS = null; SB.guarda();
+    if (recarrega) { try { [KEY, KEY + ':sync', KEY + ':sessao', KEY + ':treino-em-curso'].forEach(k => localStorage.removeItem(k)); } catch (e) {} }
+  },
+  espDados() { const c = JSON.parse(JSON.stringify(db)); delete c.alunos; delete c.alunoAtivo; return c; },
+  async pull(forcar) {
+    if (!SB.ativo()) return;
+    try {
+      const desde = (!forcar && sbS.desde) ? '&updated_at=gt.' + encodeURIComponent(sbS.desde) : '';
+      const pers = sbS.papel === 'personal';
+      const [ra, re] = await Promise.all([
+        SB.req('/rest/v1/alunos_docs?select=id,dados,updated_at' + (pers ? '' : '&user_id=eq.' + sbS.uid) + desde),
+        SB.req('/rest/v1/espacos?select=dados,updated_at' + (pers ? '&personal_id=eq.' + sbS.uid : '') + desde)]);
+      if (ra.status === 401 || re.status === 401) { SB.sair(); setSessao(null); sync.status = 'erro'; mostraStatus(); route(); return; }
+      if (!ra.ok || !re.ok) throw new Error('pull');
+      sync.status = 'ativa';
+      const rows = ra.j, esp = re.j[0];
+      if (!rows.length && !esp) { mostraStatus(); return; }
+      let max = sbS.desde || '';
+      rows.concat(esp ? [esp] : []).forEach(x => { if (x.updated_at > max) max = x.updated_at; });
+      rows.forEach(r => { sbH[r.id] = estavel(r.dados); });
+      if (esp) sbHEsp = estavel(esp.dados);
+      const ativo = db.alunoAtivo;
+      if (!sync.dirty || forcar) {
+        const al = (forcar || !pers) ? rows.map(r => r.dados) : db.alunos.map(a => { const r = rows.find(x => x.id === a.id); return r ? r.dados : a; }).concat(rows.filter(r => !db.alunos.some(a => a.id === r.id)).map(r => r.dados));
+        db = Object.assign({}, db, esp ? esp.dados : {}, { alunos: al });
+      } else {
+        rows.filter(r => !db.alunos.some(a => a.id === r.id) && pers).forEach(r => db.alunos.push(r.dados));
+        db = mergeRemoto(db, Object.assign({}, esp ? esp.dados : {}, { alunos: rows.map(r => r.dados) }));
+        sync.v++;
+      }
+      if (ativo) db.alunoAtivo = ativo;
+      if (!pers && !db.alunos.length) { mostraStatus(); return; }
+      sbS.desde = max; SB.guarda(); migra(); saveLocal(); saveSync();
+      aplicaMarca(); rerenderSeguro();
+      if (sync.dirty) SB.push();
+      mostraStatus();
+    } catch (e) { sync.status = 'erro'; mostraStatus(); }
+  },
+  async push() {
+    if (emVoo || !SB.ativo() || !sync.dirty) return;
+    emVoo = true;
+    try {
+      const v = sync.v; let ok = true;
+      if (sbS.papel === 'personal') {
+        const e = estavel(SB.espDados());
+        if (e !== sbHEsp) { const r = await SB.req('/rest/v1/espacos?personal_id=eq.' + sbS.uid, { method: 'PATCH', body: { dados: SB.espDados() }, headers: { Prefer: 'return=minimal' } }); ok = ok && r.ok; if (r.ok) sbHEsp = e; }
+        for (const a of db.alunos) {
+          const s = estavel(a); if (sbH[a.id] === s) continue;
+          const r = await SB.req('/rest/v1/rpc/pt_gravar_aluno', { method: 'POST', body: { p_id: a.id, p_dados: a } });
+          if (r.ok) sbH[a.id] = s; else ok = false;
+        }
+        const ids = new Set(db.alunos.map(a => a.id));
+        for (const id of Object.keys(sbH)) if (!ids.has(id)) { const r = await SB.req('/rest/v1/alunos_docs?id=eq.' + encodeURIComponent(id), { method: 'DELETE' }); if (r.ok) delete sbH[id]; else ok = false; }
+      } else {
+        const a = db.alunos.find(x => x.id === sbS.alunoId) || db.alunos[0];
+        if (a) { const r = await SB.req('/rest/v1/alunos_docs?id=eq.' + encodeURIComponent(a.id), { method: 'PATCH', body: { dados: a }, headers: { Prefer: 'return=minimal' } }); ok = r.ok; }
+      }
+      if (ok) { if (sync.v === v) sync.dirty = false; sync.status = 'ativa'; saveSync(); } else sync.status = 'erro';
+    } catch (e) { sync.status = 'erro'; }
+    emVoo = false; mostraStatus();
+    if (sync.dirty && sync.status === 'ativa') agendaPush();
+  },
+  async novoConvite(a) {
+    sync.dirty = true; await SB.push();
+    const token = uid() + uid() + uid();
+    const r = await SB.req('/rest/v1/convites', { method: 'POST', body: { token, aluno_id: a.id, personal_id: sbS.uid }, headers: { Prefer: 'return=minimal' } });
+    if (!r.ok) throw new Error('convite');
+    return urlApp() + '#convite=' + token;
+  }
+};
+if (SBC && !SB.ativo()) sync.status = 'desligada'; // com Supabase configurado, só quem entrou com conta sincroniza
+if (SB.ativo()) sync.status = 'ativa';
 
 aplicaMarca();
 route();
