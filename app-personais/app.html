@@ -229,7 +229,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .btn.sm { padding: 8px 12px; min-height: 38px; font-size: .9rem; }
   .btn.icon { width: 40px; height: 40px; min-height: 40px; }
   .play { width: 40px; height: 40px; }
-  .page-head > .btn.primary { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 24; border-radius: 999px; box-shadow: 0 10px 24px rgba(0, 0, 0, .25); padding: 12px 20px; }
+  .page-head .btn.primary[data-act^=novo] { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 24; border-radius: 999px; box-shadow: 0 10px 24px rgba(0, 0, 0, .25); padding: 12px 20px; }
   dialog { width: 100vw; max-width: 100vw; max-height: 92vh; margin: auto 0 0; border-radius: 18px 18px 0 0; }
   .dlg { padding: 18px max(16px, env(safe-area-inset-left, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)); }
   .cards { grid-template-columns: minmax(0, 1fr); }
@@ -255,6 +255,86 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .treino-head input { max-width: none; flex: 1; }
   .treino-head .row { margin-left: 0; }
 }
+
+/* ---------- Área do aluno ---------- */
+.tabbar-aluno { display: none; }
+body.modo-aluno .topbar .nav, body.modo-aluno .tabbar { display: none !important; }
+body.modo-aluno main.wrap { max-width: 600px; padding-block: 12px calc(100px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
+body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+  padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+.tabbar-aluno a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; max-width: 140px; width: 100%; margin: 0 auto; }
+.tabbar-aluno svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabbar-aluno a.on { color: var(--fg); background: var(--accent-soft); }
+body.modo-aluno [data-act=del-medida], body.modo-aluno [data-act=del-sessao] { display: none; }
+body.modo-aluno .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+.aluno-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 8px 10px; }
+.aluno-bar .btn { margin-left: auto; }
+.ola h1 { font-size: 2.1rem; }
+.ola .eyebrow::first-letter { text-transform: uppercase; }
+.semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.dia { display: grid; justify-items: center; gap: 2px; padding: 8px 0; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: .75rem; color: var(--muted); }
+.dia b { font-size: 1rem; color: var(--fg); }
+.dia i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.dia.feito i { background: var(--fg); }
+.dia.hoje { border-color: var(--fg); }
+.hoje-card { display: grid; gap: 8px; text-decoration: none; color: var(--accent-ink); background: var(--accent); border-radius: 16px; padding: 20px; }
+.hoje-card .eyebrow { color: inherit; opacity: .7; }
+.hoje-card h2 { font-size: 1.8rem; }
+.hoje-card .btn { justify-self: start; background: var(--accent-ink); color: var(--accent); border-color: var(--accent-ink); margin-top: 6px; }
+.mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mini-stats > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 2px; }
+.mini-stats b { font-family: var(--font-display); font-size: 1.6rem; line-height: 1; }
+.mini-stats span { font-size: .75rem; color: var(--muted); }
+.hist-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.plano-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; }
+.ex-lista { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: .95rem; }
+.ex-lista li { padding-left: 4px; }
+.ex-lista li { display: list-item; }
+.ex-lista li span:last-child { float: right; margin-left: 8px; }
+.treino-top { display: grid; gap: 6px; }
+.treino-top h1 { font-size: 1.8rem; }
+.prog { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.prog div { height: 100%; background: var(--fg); border-radius: 99px; transition: width .3s; }
+.ex-run { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.ex-run.open { border-color: var(--fg); }
+.ex-run-head { width: 100%; display: grid; grid-template-columns: 36px minmax(0, 1fr) 24px; gap: 12px; align-items: center; padding: 14px; background: none; border: 0; cursor: pointer; text-align: left; }
+.ex-run-head .n { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; }
+.ex-run.done .ex-run-head .n { background: var(--ok); color: #fff; }
+.ex-run.done .ex-run-head b { color: var(--muted); }
+.chev { font-size: 1.4rem; color: var(--muted); text-align: center; }
+.ex-run-body { padding: 0 14px 14px; display: grid; gap: 12px; }
+.ex-run-body .thumb { border-radius: 10px; }
+.dica { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.sets-run { display: grid; gap: 8px; }
+.set-run { display: grid; grid-template-columns: 30px minmax(0, 1fr) 64px 48px; gap: 8px; align-items: center; padding: 6px; border-radius: 12px; background: var(--surface-2); }
+.set-run.ok { background: var(--ok-soft); }
+.set-run .sn { font-family: var(--font-display); font-weight: 700; color: var(--muted); text-align: center; }
+.stepper { display: grid; grid-template-columns: 40px minmax(0, 1fr) 40px; gap: 4px; align-items: center; }
+.stepper button { height: 44px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-size: 1.3rem; font-weight: 600; cursor: pointer; color: var(--fg); }
+.stepper label, .set-run .reps { position: relative; display: block; }
+.stepper input, .set-run .reps input { width: 100%; height: 44px; text-align: center; font-weight: 600; font-size: 1.05rem; padding: 0 4px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); -moz-appearance: textfield; appearance: textfield; }
+.stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.stepper small, .set-run .reps small { position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font-size: .62rem; color: var(--muted); pointer-events: none; text-transform: uppercase; letter-spacing: .06em; }
+.check { height: 44px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-size: 1.2rem; font-weight: 700; color: var(--muted); cursor: pointer; }
+.check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+.concluir { justify-content: center; padding: 14px; font-size: 1.05rem; }
+.rest { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); z-index: 26; max-width: 576px; margin: 0 auto;
+  background: var(--fg); color: var(--bg); border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, .3); }
+.rest[hidden] { display: none; }
+.rest .eyebrow { color: inherit; opacity: .7; }
+.rest b { font-family: var(--font-display); font-size: 2rem; line-height: 1; }
+.rest .btn { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 40%, transparent); }
+.rest .btn.primary { background: var(--bg); color: var(--fg); border-color: var(--bg); }
+.pse { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; }
+.pse legend { margin-bottom: 8px; }
+.pse label { position: relative; }
+.pse input { position: absolute; opacity: 0; }
+.pse span { display: grid; place-items: center; height: 40px; border-radius: 8px; border: 1px solid var(--line); font-weight: 600; cursor: pointer; }
+.pse input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.pse input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.perfil-top { display: flex; gap: 16px; align-items: center; }
+.evo-aluno { display: grid; gap: 14px; }
+body.modo-aluno .evo-aluno .grid-2 { grid-template-columns: minmax(0, 1fr); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
@@ -318,7 +398,7 @@ function exemplo() {
   const sessoes = [];
   [26, 21, 16, 12, 7, 2].forEach((d, i) => {
     const t = i % 2 ? tB : tA;
-    sessoes.push({ id: uid(), data: diasAtras(d), treinoId: t.id, treinoNome: t.nome, rpe: 7 + (i % 3 === 0 ? 1 : 0), nota: i === 4 ? 'Reclamou de dor leve no joelho direito' : '',
+    sessoes.push({ id: uid(), data: diasAtras(d), treinoId: t.id, treinoNome: (t === tA ? 'Treino A · ' : 'Treino B · ') + t.nome, rpe: 7 + (i % 3 === 0 ? 1 : 0), nota: i === 4 ? 'Reclamou de dor leve no joelho direito' : '',
       itens: t.itens.map(it => { const c = +it.carga + Math.floor(i / 2) * 2.5, r = it.reps.split('-').pop();
         return { exId: it.exId, carga: c, reps: r, feito: true, series: Array.from({ length: it.series }, (_, k) => ({ carga: k === it.series - 1 && i % 2 ? c - 2.5 : c, reps: k === it.series - 1 ? String(Math.max(+r - 2, 1)) : r })) }; }) });
   });
@@ -415,6 +495,8 @@ function showVideo(exId) {
 const ui = { tab: {}, busca: '', grupo: '' };
 function route() {
   const h = location.hash.slice(1) || 'alunos';
+  if (/^(meu-|meus-|minha-)/.test(h)) { renderAluno(h); return; }
+  document.body.classList.remove('modo-aluno');
   let view = h, arg = null;
   if (h.startsWith('aluno-')) { view = 'aluno'; arg = h.slice(6); }
   document.querySelectorAll('[data-nav]').forEach(a => a.toggleAttribute('aria-current', false));
@@ -441,7 +523,7 @@ function viewAlunos() {
   const lista = db.alunos.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
   return `${bannerExemplo()}
   <div class="page-head"><div><div class="eyebrow">${lista.length} ${lista.length === 1 ? 'aluno' : 'alunos'}</div><h1>Alunos</h1></div>
-  <button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div>
+  <div class="row"><a class="btn" href="#meu-inicio">Ver como aluno</a><button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div></div>
   ${lista.length ? `<div class="cards">${lista.map(a => {
     const u = ultimaSessao(a);
     const dias = u ? Math.round((Date.now() - new Date(u.data + 'T12:00').getTime()) / 864e5) : null;
@@ -484,7 +566,7 @@ function viewAluno(a) {
     <div class="row" style="gap:14px"><span class="avatar-ini" style="width:56px;height:56px;font-size:1.4rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
     <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}
       ${a.inicio ? `<span>Desde ${fmtData(a.inicio)}</span>` : ''}${a.telefone ? `<span>${esc(a.telefone)}</span>` : ''}</div></div></div>
-    <div class="row"><button class="btn" data-act="compartilhar" data-id="${a.id}">Enviar plano ao aluno</button><button class="btn" data-act="editar-aluno" data-id="${a.id}">Editar</button></div>
+    <div class="row"><a class="btn primary" href="#meu-inicio" data-act="ver-aluno" data-id="${a.id}">Ver como aluno</a><button class="btn" data-act="compartilhar" data-id="${a.id}">Enviar plano ao aluno</button><button class="btn" data-act="editar-aluno" data-id="${a.id}">Editar</button></div>
   </div>
   ${a.notas ? `<div class="panel" style="padding:12px 16px"><div class="eyebrow">Observações</div><div>${esc(a.notas)}</div></div>` : ''}
   <div class="tabs" role="tablist">${t('plano', 'Plano de treino')}${t('sessoes', `Sessões (${a.sessoes.length})`)}${t('evolucao', 'Evolução')}</div>
@@ -547,7 +629,7 @@ function tabSessoes(a) {
     const feitos = s.itens.filter(i => i.feito);
     return `<article class="sessao">
       <div class="row spread"><div class="row"><b class="num">${fmtData(s.data)}</b><span class="chip accent">${esc(s.treinoNome || 'Treino')}</span>
-      ${s.rpe ? `<span class="chip num" title="Percepção de esforço (0 a 10)">PSE ${esc(s.rpe)}</span>` : ''}<span class="chip ${feitos.length === s.itens.length ? 'ok' : ''} num">${feitos.length}/${s.itens.length} feitos</span></div>
+      ${s.rpe ? `<span class="chip num" title="Percepção de esforço (0 a 10)">PSE ${esc(s.rpe)}</span>` : ''}<span class="chip ${feitos.length === s.itens.length ? 'ok' : ''} num">${feitos.length}/${s.itens.length} feitos</span>${s.peloAluno ? '<span class="chip">registrado pelo aluno</span>' : ''}</div>
       <button class="btn ghost sm danger" data-act="del-sessao" data-id="${a.id}" data-sessao="${s.id}">Excluir</button></div>
       <ul>${s.itens.map(i => { const ex = exById(i.exId); return `<li class="${i.feito ? '' : 'muted'}">${esc(ex ? ex.nome : 'Exercício removido')}: <span class="num">${i.series && i.series.length
         ? i.series.map(x => `${x.carga !== '' ? fmtNum(x.carga) : '—'}×${esc(x.reps || '—')}`).join(' · ') + ' kg×reps'
@@ -767,6 +849,7 @@ document.addEventListener('click', ev => {
         db = { exemplo: false, alunos: [], exercicios: db.exercicios.map(e => ({ ...e })) }; save(); rerender(); toast('Pronto. A biblioteca de exercícios foi mantida.');
       }); break;
     case 'novo-aluno': openAlunoForm(); break;
+    case 'ver-aluno': db.alunoAtivo = a.id; save(); break;
     case 'editar-aluno': openAlunoForm(a.id); break;
     case 'excluir-aluno': {
       const id = b.dataset.id; closeDialog();
@@ -886,6 +969,238 @@ document.addEventListener('submit', ev => {
     a.sessoes.push({ id: uid(), data: v('s-data'), treinoId: t.id, treinoNome: `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`, rpe, nota: v('s-nota'), itens });
     ui.tab[a.id] = 'sessoes'; save(); closeDialog(); rerender(); toast('Sessão registrada');
   }
+});
+
+/* ================= ÁREA DO ALUNO ================= */
+const WKEY = KEY + ':treino-em-curso';
+const DIAS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+const isoDe = d => { const z = new Date(d.getTime() - d.getTimezoneOffset() * 6e4); return z.toISOString().slice(0, 10); };
+function alunoAtivo() { return alunoById(db.alunoAtivo) || db.alunos.find(a => a.treinos.some(t => t.itens.length)) || db.alunos[0]; }
+function treinoLabel(a, t) { return `Treino ${LETRAS[a.treinos.indexOf(t)]}${t.nome ? ' · ' + t.nome : ''}`; }
+function proximoTreino(a) {
+  const ts = a.treinos.filter(t => t.itens.length); if (!ts.length) return null;
+  const u = ultimaSessao(a); if (!u) return ts[0];
+  const i = ts.findIndex(t => t.id === u.treinoId); return ts[(i + 1) % ts.length] || ts[0];
+}
+function duracaoEstimada(t) { return Math.max(10, Math.round(t.itens.reduce((s, it) => s + (+it.series || 3) * (40 + (+it.descanso || 60)), 0) / 60 / 5) * 5); }
+function volume(s) { return s.itens.reduce((v, i) => v + (i.series && i.series.length ? i.series : [{ carga: i.carga, reps: i.reps }]).reduce((x, se) => x + ((+se.carga || 0) * (parseInt(se.reps) || 0)), 0), 0); }
+
+let wk = null; // treino em curso
+try { const r = localStorage.getItem(WKEY); if (r) wk = JSON.parse(r); } catch (e) {}
+function saveWk() { try { wk ? localStorage.setItem(WKEY, JSON.stringify(wk)) : localStorage.removeItem(WKEY); } catch (e) {} }
+function iniciarTreino(a, t) {
+  if (wk && wk.treinoId === t.id && wk.alunoId === a.id) return;
+  const prevSess = {};
+  a.sessoes.slice().sort((x, y) => x.data.localeCompare(y.data)).forEach(s => s.itens.forEach(i => { if (i.feito && i.series) prevSess[i.exId] = i.series; }));
+  wk = { alunoId: a.id, treinoId: t.id, inicio: Date.now(), aberto: 0,
+    itens: t.itens.map(it => {
+      const n = Math.max(1, Math.min(10, +it.series || 3)), prev = prevSess[it.exId];
+      return { exId: it.exId, sets: Array.from({ length: n }, (_, j) => ({
+        carga: prev && prev[j] && prev[j].carga !== '' ? prev[j].carga : it.carga,
+        reps: String(it.reps).split('-').pop(), done: false })) };
+    }) };
+  saveWk();
+}
+
+function shell(content, aba) {
+  const a = alunoAtivo();
+  const t = (k, href, label, icon) => `<a href="#${href}" class="${aba === k ? 'on' : ''}" ${aba === k ? 'aria-current="page"' : ''}>${icon}<span>${label}</span></a>`;
+  return `<div class="aluno-bar"><span class="chip accent">Visão do aluno</span><b class="small">${esc(a.nome.split(' ')[0])}</b>
+    <a class="btn sm" href="#aluno-${a.id}" data-sact="sair">Voltar ao personal</a></div>
+  ${content}
+  <nav class="tabbar-aluno" aria-label="Área do aluno">
+    ${t('inicio', 'meu-inicio', 'Início', '<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>')}
+    ${t('treinar', 'meus-treinos', 'Treinar', '<svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>')}
+    ${t('evolucao', 'minha-evolucao', 'Evolução', '<svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M5 15l4-4 4 3 6-7"/><path d="M15 7h4v4"/></svg>')}
+    ${t('perfil', 'meu-perfil', 'Perfil', '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>')}
+  </nav>`;
+}
+
+function semanaHtml(a) {
+  const hojeD = new Date(); const ini = new Date(hojeD); ini.setDate(hojeD.getDate() - hojeD.getDay());
+  const feitos = new Set(a.sessoes.map(s => s.data));
+  return `<div class="semana">${Array.from({ length: 7 }, (_, i) => { const d = new Date(ini); d.setDate(ini.getDate() + i); const iso = isoDe(d);
+    return `<div class="dia ${feitos.has(iso) ? 'feito' : ''} ${iso === hoje() ? 'hoje' : ''}"><span>${DIAS[i]}</span><b class="num">${d.getDate()}</b><i aria-label="${feitos.has(iso) ? 'treinou' : ''}"></i></div>`; }).join('')}</div>`;
+}
+
+function vInicio(a) {
+  const prox = proximoTreino(a), u = ultimaSessao(a);
+  const mes = hoje().slice(0, 7), noMes = a.sessoes.filter(s => s.data.startsWith(mes)).length;
+  const emCurso = wk && wk.alunoId === a.id && a.treinos.find(t => t.id === wk.treinoId);
+  const meds = a.medidas.slice().sort((x, y) => x.data.localeCompare(y.data)).filter(m => m.peso !== '');
+  const ultimas = a.sessoes.slice().sort((x, y) => y.data.localeCompare(x.data)).slice(0, 3);
+  return shell(`
+  <div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Olá, ${esc(a.nome.split(' ')[0])}</h1></div>
+  ${semanaHtml(a)}
+  ${emCurso ? `<a class="hoje-card" href="#meu-treino-${emCurso.id}"><div class="eyebrow">Treino em andamento</div><h2>${esc(treinoLabel(a, emCurso))}</h2>
+     <div class="small">${wk.itens.filter(i => i.sets.every(s => s.done)).length} de ${wk.itens.length} exercícios feitos</div><span class="btn primary">Continuar treino</span></a>`
+  : prox ? `<a class="hoje-card" href="#meu-treino-${prox.id}" data-sact="iniciar" data-treino="${prox.id}"><div class="eyebrow">Treino de hoje</div><h2>${esc(treinoLabel(a, prox))}</h2>
+     <div class="small num">${prox.itens.length} exercícios · cerca de ${duracaoEstimada(prox)} min</div><span class="btn primary">Começar treino</span></a>`
+  : `<div class="panel empty">Seu personal ainda não montou seu plano.</div>`}
+  <div class="mini-stats num">
+    <div><b>${noMes}</b><span>treinos este mês</span></div>
+    <div><b>${u ? fmtData(u.data).slice(0, 5) : '—'}</b><span>último treino</span></div>
+    <div><b>${meds.length ? fmtNum(meds[meds.length - 1].peso) : '—'}</b><span>peso atual (kg)</span></div>
+  </div>
+  ${ultimas.length ? `<div class="panel"><div class="row spread"><h3>Últimos treinos</h3><a class="small" href="#minha-evolucao">Ver evolução</a></div>
+    ${ultimas.map(s => `<div class="hist-row"><div><b>${esc(s.treinoNome || 'Treino')}</b><div class="small muted num">${fmtData(s.data)}${s.rpe ? ' · esforço ' + esc(s.rpe) + '/10' : ''}</div></div>
+      <div class="num small" style="text-align:right"><b>${fmtNum(volume(s))} kg</b><div class="muted">volume</div></div></div>`).join('')}</div>` : ''}`, 'inicio');
+}
+
+function vTreinos(a) {
+  const ts = a.treinos.filter(t => t.itens.length);
+  return shell(`<div class="ola"><div class="eyebrow">Seu plano</div><h1>Treinar</h1></div>
+  ${ts.length ? ts.map(t => `<article class="plano-card">
+    <div class="row" style="gap:12px"><span class="treino-letter">${LETRAS[a.treinos.indexOf(t)]}</span><div style="min-width:0"><h3>${esc(t.nome || 'Treino ' + LETRAS[a.treinos.indexOf(t)])}</h3>
+    <div class="small muted num">${t.itens.length} exercícios · cerca de ${duracaoEstimada(t)} min</div></div></div>
+    <ol class="ex-lista">${t.itens.map(it => { const ex = exById(it.exId); return `<li><span>${esc(ex ? ex.nome : '—')}</span><span class="num muted">${esc(it.series)}×${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''}</span></li>`; }).join('')}</ol>
+    <a class="btn primary" href="#meu-treino-${t.id}" data-sact="iniciar" data-treino="${t.id}" style="justify-content:center">${wk && wk.treinoId === t.id ? 'Continuar' : 'Começar'} treino ${LETRAS[a.treinos.indexOf(t)]}</a>
+  </article>`).join('') : `<div class="panel empty">Seu personal ainda não montou seu plano.</div>`}`, 'treinar');
+}
+
+function vTreino(a, t) {
+  if (!wk || wk.treinoId !== t.id || wk.alunoId !== a.id) iniciarTreino(a, t);
+  const feitos = wk.itens.filter(i => i.sets.every(s => s.done)).length;
+  const setsFeitos = wk.itens.reduce((s, i) => s + i.sets.filter(x => x.done).length, 0), setsTot = wk.itens.reduce((s, i) => s + i.sets.length, 0);
+  return shell(`
+  <div class="treino-top"><a href="#meus-treinos" class="small">← Treinos</a>
+    <h1>${esc(treinoLabel(a, t))}</h1>
+    <div class="prog"><div style="width:${Math.round(setsFeitos / setsTot * 100)}%"></div></div>
+    <div class="small muted num">${feitos} de ${wk.itens.length} exercícios · ${setsFeitos}/${setsTot} séries</div></div>
+  ${t.itens.map((it, i) => {
+    const ex = exById(it.exId), yt = ex && ytParse(ex.url), w = wk.itens[i]; if (!w) return '';
+    const done = w.sets.every(s => s.done), open = wk.aberto === i;
+    const prev = ultimaCarga(a, it.exId);
+    return `<article class="ex-run ${done ? 'done' : ''} ${open ? 'open' : ''}">
+      <button class="ex-run-head" data-sact="abrir" data-i="${i}" aria-expanded="${open}">
+        <span class="n num">${done ? '✓' : i + 1}</span>
+        <span style="min-width:0;text-align:left"><b>${esc(ex ? ex.nome : '—')}</b><span class="small muted num" style="display:block">${esc(it.series)} × ${esc(it.reps)}${it.carga !== '' ? ' · ' + fmtNum(it.carga) + ' kg' : ''} · descanso ${esc(it.descanso || 60)}s</span></span>
+        <span class="chev" aria-hidden="true">${open ? '−' : '+'}</span>
+      </button>
+      ${open ? `<div class="ex-run-body">
+        ${yt ? `<button class="thumb" data-act="video" data-ex="${it.exId}" aria-label="Ver vídeo de ${esc(ex.nome)}"><img src="${ytThumb(yt.id)}" alt="" loading="lazy" onerror="this.remove()"><span class="ph">Ver vídeo</span><span class="bigplay" style="z-index:1"><svg viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg></span></button>`
+          : `<div class="small muted">O personal ainda não adicionou vídeo a este exercício.</div>`}
+        ${it.obs || (ex && ex.notas) ? `<div class="dica"><b>Dica do personal:</b> ${esc([it.obs, ex && ex.notas].filter(Boolean).join('. '))}</div>` : ''}
+        ${prev ? `<div class="small muted num">Última vez: ${fmtNum(prev.carga)} kg (${fmtData(prev.data)})</div>` : ''}
+        <div class="sets-run">${w.sets.map((s, j) => `<div class="set-run ${s.done ? 'ok' : ''}">
+          <span class="sn num">${j + 1}ª</span>
+          <div class="stepper"><button data-sact="peso" data-i="${i}" data-j="${j}" data-d="-2.5" aria-label="Menos peso">−</button>
+            <label><input type="number" inputmode="decimal" step="0.5" min="0" id="w-c-${i}-${j}" class="num" value="${esc(s.carga)}" data-sedit="carga" data-i="${i}" data-j="${j}" aria-label="Peso em kg, série ${j + 1}"><small>kg</small></label>
+            <button data-sact="peso" data-i="${i}" data-j="${j}" data-d="2.5" aria-label="Mais peso">+</button></div>
+          <label class="reps"><input type="text" inputmode="numeric" id="w-r-${i}-${j}" class="num" value="${esc(s.reps)}" data-sedit="reps" data-i="${i}" data-j="${j}" aria-label="Repetições, série ${j + 1}"><small>reps</small></label>
+          <button class="check" data-sact="check" data-i="${i}" data-j="${j}" aria-pressed="${s.done}" aria-label="${s.done ? 'Desmarcar' : 'Marcar'} série ${j + 1} como feita">✓</button>
+        </div>`).join('')}</div>
+      </div>` : ''}
+    </article>`;
+  }).join('')}
+  <button class="btn primary concluir" data-sact="concluir" data-treino="${t.id}">Concluir treino</button>
+  <button class="btn ghost" data-sact="cancelar" style="justify-self:center">Cancelar treino</button>
+  <div id="rest" class="rest" hidden></div>`, 'treinar');
+}
+
+function vEvolucao(a) {
+  return shell(`<div class="ola"><div class="eyebrow">Seus resultados</div><h1>Evolução</h1></div>
+  <div class="evo-aluno">${tabEvolucao(a)}</div>
+  <h2 style="margin-top:8px">Histórico de treinos</h2>
+  <div class="evo-aluno">${tabSessoes(a).replace(/<div class="panel"><div class="row spread"><h2>Registrar sessão[\s\S]*?<\/div><\/div>\n?/, '')}</div>`, 'evolucao');
+}
+
+function vPerfil(a) {
+  const nEx = a.treinos.reduce((s, t) => s + t.itens.length, 0);
+  return shell(`<div class="perfil-top"><span class="avatar-ini" style="width:72px;height:72px;font-size:1.8rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
+    <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Aluno desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
+  <div class="panel"><div class="eyebrow">Meu personal</div>
+    <div class="row" style="gap:12px"><span class="brand-mark" aria-hidden="true" style="width:44px;height:44px"><span style="font-family:var(--font-display);font-weight:700;color:var(--accent-ink)">PT</span></span>
+    <div><b>PT example</b><div class="small muted">Personal Trainer</div></div></div>
+    <div class="small muted">Dúvidas sobre o treino? Fale com seu personal pelo WhatsApp.</div></div>
+  <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
+    <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
+  <div class="panel"><div class="eyebrow">Medidas</div><p style="margin:0" class="small muted">Registre seu peso para acompanhar a evolução.</p>
+    <button class="btn" data-act="nova-medida" data-id="${a.id}">+ Registrar peso e medidas</button></div>
+  <div class="panel"><div class="eyebrow">Instalar no celular</div><p style="margin:0" class="small">No Android: menu ⋮ do navegador, <b>Instalar app</b>. No iPhone: botão Compartilhar, <b>Adicionar à Tela de Início</b>.</p></div>`, 'perfil');
+}
+
+function renderAluno(h) {
+  document.body.classList.add('modo-aluno');
+  const a = alunoAtivo(); const app = $('#app');
+  if (!a) { app.innerHTML = `<div class="panel empty">Cadastre um aluno primeiro.</div>`; return; }
+  if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); tickRest(); return; }
+  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
+}
+
+/* descanso */
+let restEnd = 0, restTimer = null;
+function startRest(seg) { restEnd = Date.now() + seg * 1000; clearInterval(restTimer); restTimer = setInterval(tickRest, 250); tickRest(); }
+function tickRest() {
+  const el = $('#rest'); if (!el) return;
+  const left = Math.ceil((restEnd - Date.now()) / 1000);
+  if (left <= 0) { if (restEnd) { try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {} } restEnd = 0; clearInterval(restTimer); el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<div><div class="eyebrow">Descanso</div><b class="num">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</b></div>
+    <div class="row"><button class="btn sm" data-sact="rest-mais">+15s</button><button class="btn sm primary" data-sact="rest-fim">Pular</button></div>`;
+}
+
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-sact]'); if (!b) return;
+  const a = alunoAtivo(); const act = b.dataset.sact;
+  const t = b.dataset.treino && a.treinos.find(x => x.id === b.dataset.treino);
+  switch (act) {
+    case 'sair': document.body.classList.remove('modo-aluno'); break;
+    case 'iniciar': if (t) { iniciarTreino(a, t); } break;
+    case 'abrir': ev.preventDefault(); { const i = +b.dataset.i; wk.aberto = wk.aberto === i ? -1 : i; saveWk(); rerender(); } break;
+    case 'peso': { const s = wk.itens[b.dataset.i].sets[b.dataset.j]; s.carga = Math.max(0, (+s.carga || 0) + (+b.dataset.d)); saveWk();
+      const inp = $(`#w-c-${b.dataset.i}-${b.dataset.j}`); if (inp) inp.value = s.carga; break; }
+    case 'check': {
+      const i = +b.dataset.i, j = +b.dataset.j, w = wk.itens[i], s = w.sets[j];
+      s.done = !s.done; saveWk();
+      const tr = a.treinos.find(x => x.id === wk.treinoId);
+      if (s.done) {
+        if (w.sets.every(x => x.done)) { const nx = wk.itens.findIndex((x, k) => k > i && !x.sets.every(y => y.done)); wk.aberto = nx; saveWk(); }
+        else startRest(+tr.itens[i].descanso || 60);
+      }
+      rerender(); break; }
+    case 'rest-mais': restEnd += 15000; tickRest(); break;
+    case 'rest-fim': restEnd = 1; tickRest(); break;
+    case 'cancelar':
+      confirmar('Cancelar este treino?', 'Cancelar treino', () => { wk = null; saveWk(); location.hash = 'meus-treinos'; }); break;
+    case 'concluir': {
+      const tr = a.treinos.find(x => x.id === wk.treinoId);
+      const nSets = wk.itens.reduce((s, i) => s + i.sets.filter(x => x.done).length, 0);
+      openDialog(`<form id="f-concluir" class="dlg" style="padding:0">
+        <div><div class="eyebrow">${esc(treinoLabel(a, tr))}</div><h2>Como foi o treino?</h2></div>
+        ${nSets ? '' : '<div class="small" style="color:var(--danger)">Você ainda não marcou nenhuma série como feita.</div>'}
+        <fieldset class="pse"><legend class="small muted">Esforço de 0 (muito leve) a 10 (máximo)</legend>
+          ${Array.from({ length: 11 }, (_, k) => `<label><input type="radio" name="pse" value="${k}" ${k === 7 ? 'checked' : ''}><span class="num">${k}</span></label>`).join('')}</fieldset>
+        <label class="field">Recado para o personal (opcional)<textarea id="c-nota" placeholder="Ex.: senti o joelho no agachamento"></textarea></label>
+        <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Voltar</button><button class="btn primary">Salvar treino</button></div></form>`);
+      break; }
+  }
+});
+document.addEventListener('change', ev => {
+  const el = ev.target; const k = el.dataset.sedit; if (!k || !wk) return;
+  const s = wk.itens[el.dataset.i].sets[el.dataset.j];
+  s[k] = k === 'carga' ? (el.value === '' ? '' : +el.value) : el.value; saveWk();
+});
+document.addEventListener('submit', ev => {
+  if (ev.target.id !== 'f-concluir') return;
+  ev.preventDefault();
+  const a = alunoById(wk.alunoId), t = a.treinos.find(x => x.id === wk.treinoId);
+  const pse = (ev.target.querySelector('input[name=pse]:checked') || {}).value || '';
+  const itens = wk.itens.map(w => {
+    const done = w.sets.filter(s => s.done), base = done.length ? done : w.sets;
+    const top = base.reduce((m, s) => (+s.carga || 0) > (+m.carga || 0) ? s : m, base[0]);
+    return { exId: w.exId, carga: top.carga, reps: top.reps, feito: done.length > 0, series: done.map(s => ({ carga: s.carga, reps: s.reps })) };
+  });
+  const sess = { id: uid(), data: hoje(), treinoId: t.id, treinoNome: treinoLabel(a, t), rpe: pse, nota: $('#c-nota').value.trim(), itens, peloAluno: true,
+    minutos: Math.max(1, Math.round((Date.now() - wk.inicio) / 6e4)) };
+  a.sessoes.push(sess); save(); wk = null; saveWk(); closeDialog();
+  const vol = volume(sess), nS = itens.reduce((s, i) => s + i.series.length, 0);
+  location.hash = 'meu-inicio';
+  setTimeout(() => openDialog(`<div style="text-align:center;display:grid;gap:10px;justify-items:center">
+    <div class="eyebrow">Treino concluído</div><h2>Bom trabalho, ${esc(a.nome.split(' ')[0])}!</h2>
+    <div class="mini-stats num" style="width:100%"><div><b>${nS}</b><span>séries</span></div><div><b>${fmtNum(vol)}</b><span>kg de volume</span></div><div><b>${sess.minutos || '—'}</b><span>minutos</span></div></div>
+    <p class="small muted" style="margin:0">Seu personal já consegue ver este treino.</p>
+    <button class="btn primary" data-act="close">Fechar</button></div>`), 50);
 });
 
 route();
