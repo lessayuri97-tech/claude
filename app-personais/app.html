@@ -660,6 +660,66 @@ function migraCatalogo() {
   });
   db.catalogo = 2; save();
 }
+
+/* ---------- Modelos de treino prontos (exemplos Squad) ---------- */
+const DROP = { a: 2, b: 20, u: '%' }, RP = { a: 15, b: 2 };
+// item: [exercício, séries, reps, descanso(s), observação, técnica, parâmetros]
+const MODELOS_PADRAO = [
+  { id: 'pad-gluteos-pernas-4x', nome: 'Glúteos e pernas · 4x por semana', desc: 'Foco em glúteos, com pernas completas. Para quem quer volume e definição na parte de baixo.', treinos: [
+    { nome: 'A · Glúteos', itens: [['Elevação pélvica', 4, '10-12', 90, 'Pausa de 1 segundo no topo, apertando o glúteo.'], ['Agachamento búlgaro', 3, '10 por perna', 75, 'Tronco levemente inclinado para frente.'], ['Stiff com halteres', 3, '10-12', 75, 'Quadril para trás, coluna neutra.'], ['Abdução de quadril na polia', 3, '15', 45, 'Sem balançar o corpo.'], ['Cadeira abdutora', 3, '15', 45, 'Última série com drop set.', 'drop', DROP], ['Prancha', 3, '30-40s', 45, 'Barriga firme, respirando.']] },
+    { nome: 'B · Quadríceps', itens: [['Leg press 45°', 4, '10-12', 90, 'Pés um pouco mais baixos na plataforma.'], ['Hack squat', 3, '10-12', 90, 'Descer controlando.'], ['Cadeira extensora', 3, '12-15', 60, 'Última série em rest-pause.', 'restpause', RP], ['Avanço caminhando', 3, '12 passos', 75, 'Passos longos para puxar o glúteo.'], ['Panturrilha em pé', 4, '15', 45, 'Subir alto e descer alongando.']] },
+    { nome: 'C · Glúteos e posteriores', itens: [['Terra romeno', 4, '8-10', 90, 'Barra perto das pernas.'], ['Ponte de glúteos unilateral', 3, '12 por perna', 60, 'Quadril sempre nivelado.'], ['Mesa flexora', 3, '12', 60, 'Descida em 3 segundos.', 'negativa', { a: 3 }], ['Coice na polia', 3, '12-15', 45, 'Movimento curto, sem arquear a lombar.'], ['Caminhada lateral com elástico', 3, '15 passos', 45, 'Joelhos levemente flexionados.'], ['Abdominal infra', 3, '15', 45, '']] },
+    { nome: 'D · Pernas completas', itens: [['Agachamento livre', 4, '8-10', 90, 'Descer até onde a técnica permitir.'], ['Passada lateral', 3, '12', 60, ''], ['Cadeira flexora', 3, '12', 60, ''], ['Step-up', 3, '10 por perna', 60, 'Empurrar com o calcanhar.'], ['Panturrilha sentado', 3, '15', 45, ''], ['Dead bug', 3, '10', 45, 'Lombar colada no chão.']] }
+  ] },
+  { id: 'pad-fullbody-iniciante-3x', nome: 'Full body iniciante · 3x por semana', desc: 'Para quem está começando ou voltando. Corpo inteiro, cargas leves e foco na técnica.', treinos: [
+    { nome: 'A · Corpo inteiro', itens: [['Agachamento goblet', 3, '12', 75, 'Carga leve, técnica primeiro.'], ['Supino reto com halteres', 3, '12', 75, ''], ['Remada baixa', 3, '12', 75, 'Ombros longe das orelhas.'], ['Elevação pélvica', 3, '12', 60, ''], ['Elevação lateral', 2, '15', 45, ''], ['Prancha', 3, '20-30s', 45, '']] },
+    { nome: 'B · Corpo inteiro', itens: [['Leg press 45°', 3, '12', 75, ''], ['Puxada frontal', 3, '12', 75, ''], ['Desenvolvimento com halteres', 3, '12', 60, ''], ['Stiff com halteres', 3, '12', 60, 'Quadril para trás.'], ['Rosca alternada', 2, '12', 45, ''], ['Tríceps na polia', 2, '12', 45, '']] },
+    { nome: 'C · Corpo inteiro', itens: [['Afundo com halteres', 3, '10 por perna', 60, 'Use apoio se precisar.'], ['Flexão inclinada', 3, '8-12', 60, ''], ['Remada unilateral com halter', 3, '12 por lado', 60, ''], ['Ponte de glúteos', 3, '15', 45, ''], ['Face pull', 3, '15', 45, ''], ['Dead bug', 3, '10', 45, '']] }
+  ] },
+  { id: 'pad-upper-lower-4x', nome: 'Upper e lower · 4x por semana', desc: 'Dois dias de superiores e dois de inferiores. Boa frequência para hipertrofia e definição.', treinos: [
+    { nome: 'Upper A', itens: [['Supino inclinado com halteres', 4, '8-10', 90, ''], ['Puxada frontal', 4, '8-10', 90, ''], ['Desenvolvimento com halteres', 3, '10', 75, ''], ['Remada baixa', 3, '10-12', 75, ''], ['Tríceps na polia', 3, '12', 45, '', 'biset', { a: 'Rosca direta' }], ['Rosca direta', 3, '12', 45, '']] },
+    { nome: 'Lower A', itens: [['Agachamento livre', 4, '8-10', 90, ''], ['Stiff com halteres', 3, '10', 90, ''], ['Leg press 45°', 3, '12', 75, ''], ['Elevação pélvica', 3, '10-12', 75, ''], ['Panturrilha em pé', 4, '15', 45, '']] },
+    { nome: 'Upper B', itens: [['Supino reto com halteres', 4, '8-10', 90, ''], ['Remada curvada com barra', 4, '8-10', 90, ''], ['Elevação lateral', 3, '15', 45, 'Cotovelos levemente flexionados.'], ['Crucifixo inverso', 3, '15', 45, ''], ['Tríceps francês', 3, '12', 45, ''], ['Rosca martelo', 3, '12', 45, '']] },
+    { nome: 'Lower B', itens: [['Leg press 45°', 4, '10-12', 90, ''], ['Terra romeno', 4, '8-10', 90, ''], ['Afundo com halteres', 3, '10 por perna', 60, ''], ['Mesa flexora', 3, '12', 60, ''], ['Cadeira extensora', 3, '15', 45, ''], ['Abdominal na máquina', 3, '15', 45, '']] }
+  ] },
+  { id: 'pad-hipertrofia-abc', nome: 'Hipertrofia ABC · 3 a 5x por semana', desc: 'Divisão clássica ABC. Faça 3 dias seguidos ou repita o ciclo até 5x por semana.', treinos: [
+    { nome: 'A · Peito, ombros e tríceps', itens: [['Supino inclinado com halteres', 4, '8-10', 90, ''], ['Supino na máquina', 3, '10-12', 75, ''], ['Desenvolvimento com halteres', 3, '10', 75, ''], ['Elevação lateral', 4, '12-15', 45, 'Última série com drop set.', 'drop', DROP], ['Tríceps na polia', 3, '12', 45, ''], ['Tríceps francês', 3, '12', 45, '']] },
+    { nome: 'B · Costas e bíceps', itens: [['Puxada frontal', 4, '8-10', 90, ''], ['Remada baixa', 4, '10', 75, ''], ['Remada unilateral com halter', 3, '10-12', 60, ''], ['Face pull', 3, '15', 45, ''], ['Rosca direta', 3, '10-12', 45, ''], ['Rosca martelo', 3, '12', 45, '']] },
+    { nome: 'C · Pernas e glúteos', itens: [['Agachamento livre', 4, '8-10', 90, ''], ['Leg press 45°', 4, '10-12', 90, ''], ['Stiff com halteres', 3, '10', 75, ''], ['Elevação pélvica', 3, '10-12', 75, ''], ['Cadeira extensora', 3, '12-15', 60, ''], ['Panturrilha em pé', 4, '15', 45, '']] }
+  ] },
+  { id: 'pad-emagrecimento-casa-3x', nome: 'Emagrecimento em casa · 3x por semana', desc: 'Sem academia: peso do corpo e elástico. Circuitos que queimam energia e mantêm o músculo.', treinos: [
+    { nome: 'A · Circuito de pernas', itens: [['Agachamento com peso corporal', 4, '15', 30, 'Faça em circuito, com pouco descanso.'], ['Avanço caminhando', 3, '12 passos', 30, ''], ['Ponte de glúteos', 3, '15', 30, ''], ['Mountain climber', 3, '30s', 30, ''], ['Prancha', 3, '30s', 30, ''], ['Polichinelo', 3, '40s', 30, 'Para fechar com ritmo.']] },
+    { nome: 'B · Circuito de superiores', itens: [['Flexão inclinada', 3, '10-12', 30, 'No sofá ou na bancada.'], ['Remada invertida', 3, '10', 30, 'Em uma mesa firme ou barra baixa.'], ['Mergulho no banco', 3, '10-12', 30, ''], ['Prancha com toque no ombro', 3, '10 por lado', 30, ''], ['Abdominal bicicleta', 3, '20', 30, ''], ['Burpee', 3, '8-10', 45, 'Sem pressa, com técnica.']] },
+    { nome: 'C · Glúteos com elástico', itens: [['Abdução com elástico', 3, '15', 30, ''], ['Clam shell com elástico', 3, '15 por lado', 30, ''], ['Caminhada lateral com elástico', 3, '15 passos', 30, ''], ['Ponte de glúteos unilateral', 3, '12 por perna', 30, ''], ['Agachamento sumô', 3, '15', 30, ''], ['Corda de pular', 4, '40s', 30, 'Ou polichinelo, se não tiver corda.']] }
+  ] },
+  { id: 'pad-avancadas-tecnicas-4x', nome: 'Avançadas com técnicas · 4x por semana', desc: 'Para quem já treina bem. Usa drop set, rest-pause, bi-set, cluster, negativa e isometria.', treinos: [
+    { nome: 'A · Glúteos e posteriores', itens: [['Elevação pélvica', 4, '8-10', 90, 'Última série com isometria no topo.', 'isometria', { a: 3 }], ['Terra romeno', 4, '8-10', 90, ''], ['Mesa flexora', 3, '10-12', 60, 'Última série em rest-pause.', 'restpause', RP], ['Coice na polia', 3, '12-15', 45, '', 'drop', DROP], ['Abdução de quadril na polia', 3, '15', 45, '']] },
+    { nome: 'B · Superiores (costas e ombros)', itens: [['Puxada frontal', 4, '8-10', 75, '', 'cadencia', { a: '3-1-1' }], ['Remada baixa', 3, '10-12', 60, ''], ['Elevação lateral', 3, '12-15', 45, '', 'biset', { a: 'Crucifixo inverso' }], ['Crucifixo inverso', 3, '12-15', 45, ''], ['Rosca direta', 3, '10-12', 45, '', 'superset', { a: 'Tríceps na polia' }], ['Tríceps na polia', 3, '10-12', 45, '']] },
+    { nome: 'C · Quadríceps e glúteos', itens: [['Agachamento livre', 4, '6-8', 120, 'Carga alta, com cluster na última série.', 'cluster', { a: 3, b: 15 }], ['Leg press 45°', 3, '10-12', 90, '', 'drop', DROP], ['Agachamento búlgaro', 3, '10 por perna', 75, ''], ['Cadeira extensora', 3, '12-15', 60, '', 'negativa', { a: 4 }], ['Panturrilha em pé', 4, '15', 45, '']] },
+    { nome: 'D · Peito, braços e core', itens: [['Supino inclinado com halteres', 4, '8-10', 90, ''], ['Crossover na polia alta', 3, '12-15', 45, '', 'restpause', RP], ['Tríceps testa', 3, '10-12', 45, ''], ['Rosca martelo', 3, '10-12', 45, ''], ['Elevação de pernas suspenso', 3, '12', 45, ''], ['Prancha', 3, '40-50s', 45, '']] }
+  ] }
+];
+function migraModelos() {
+  let papel = ''; try { papel = meuPapel(); } catch (e) {}
+  if (papel !== 'personal') return;
+  const feitos = new Set(db.modelosPadraoIds || []), chave = n => String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+  const base = catalogoBase(); let mudou = false;
+  const exId = n => {
+    let e = db.exercicios.find(x => chave(x.nome) === chave(n)); if (e) return e.id;
+    const c = base.find(x => chave(x.nome) === chave(n)); if (!c) return null;
+    e = { id: uid(), nome: c.nome, grupo: c.grupo, equip: c.equip, url: '', notas: '' }; db.exercicios.push(e); return e.id;
+  };
+  MODELOS_PADRAO.forEach(m => {
+    if (feitos.has(m.id)) return;
+    const treinos = m.treinos.map(t => ({ id: uid(), nome: t.nome, itens: t.itens.map(([n, series, reps, descanso, obs, tecnica, tp]) => {
+      const id = exId(n); if (!id) return null;
+      return { id: uid(), exId: id, series, reps, carga: '', descanso, obs: obs || '', tecnica: tecnica || '', tp: tp ? { ...tp } : null };
+    }).filter(Boolean) }));
+    (db.modelos = db.modelos || []).push({ id: m.id, nome: m.nome, desc: m.desc, padrao: true, treinos });
+    feitos.add(m.id); mudou = true;
+  });
+  if (mudou) { db.modelosPadraoIds = [...feitos]; save(); }
+}
 function migra() { if (db.exemplo) db.alunos.forEach(a => { if (a.nome === 'Mariana Souza') a.nome = 'Mariana Ribeiro'; }); }
 const SYNCKEY = KEY + ':sync';
 let sync = { rev: 0, dirty: false, v: 0, status: 'inicio' }; // status: inicio | ativa | desligada | erro
@@ -747,7 +807,7 @@ function showVideo(exId) {
 /* ---------- Roteamento ---------- */
 const ui = { tab: {}, busca: '', grupo: '', equip: '', video: '', uso: '' };
 function route() {
-  migraCatalogo(); migraRever();
+  migraCatalogo(); migraModelos(); migraRever();
   const h = location.hash.slice(1) || 'central';
   const sess = getSessao();
   if (!sess) { renderLogin(); return; }
@@ -880,7 +940,7 @@ function abreModelos(aid) {
   const ms = db.modelos || [];
   openDialog(`<div class="row spread"><h2>Modelos de treino</h2><button class="btn ghost" data-act="close">Fechar</button></div>
     ${ms.length ? `<label class="row small"><input type="checkbox" id="md-subst"> Substituir o plano atual (senão, acrescenta)</label>
-      <div>${ms.map(m => `<div class="modelo-row"><div><b>${esc(m.nome)}</b><div class="small muted num">${m.treinos.length} ${m.treinos.length === 1 ? 'treino' : 'treinos'} · ${m.treinos.reduce((x, t) => x + t.itens.length, 0)} exercícios</div></div>
+      <div>${ms.map(m => `<div class="modelo-row"><div><b>${esc(m.nome)}</b>${m.desc ? `<div class="small muted">${esc(m.desc)}</div>` : ''}<div class="small muted num">${m.treinos.length} ${m.treinos.length === 1 ? 'treino' : 'treinos'} · ${m.treinos.reduce((x, t) => x + t.itens.length, 0)} exercícios</div></div>
         <div class="row"><button class="btn sm primary" data-act="usar-modelo" data-id="${aid}" data-modelo="${m.id}">Aplicar</button><button class="btn sm ghost danger" data-act="del-modelo" data-id="${aid}" data-modelo="${m.id}">Excluir</button></div></div>`).join('')}</div>`
     : `<p class="muted" style="margin:0">Ainda não há modelos. Use "Guardar modelo" num treino, ou "Guardar programação como modelo", e depois aplique a qualquer aluna.</p>`}`);
 }
