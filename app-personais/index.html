@@ -46,6 +46,15 @@ input:focus { outline: 2px solid var(--a); outline-offset: 1px; }
 .foot { text-align: center; color: var(--muted); font-size: .8rem; padding: 0 16px 24px; }
 .foot a { color: var(--muted); }
 .err { color: #ff8f8f; min-height: 1.2em; font-size: .95rem; }
+.tel { display: flex; gap: 8px; margin-top: 6px; position: relative; }
+.tel input { margin-top: 0 !important; flex: 1; min-width: 0; }
+.pais { display: flex; align-items: center; gap: 8px; background: var(--card); color: var(--fg); border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; font: 600 1.05rem Barlow; cursor: pointer; min-height: 54px; }
+.pais img, .lp img { width: 28px; height: 21px; object-fit: cover; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.15); }
+.lista { position: absolute; z-index: 5; top: 60px; left: 0; right: 0; background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; max-height: 300px; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+.lista input { margin: 8px !important; width: calc(100% - 16px) !important; flex: none !important; }
+.lp { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; background: none; border: 0; color: var(--fg); font: 500 1rem Barlow; text-align: left; cursor: pointer; }
+.lp:hover, .lp:active { background: #2a2a1c; }
+.lp span:last-child { margin-left: auto; color: var(--muted); }
 @media (min-width: 700px) { h1 { font-size: 3rem; } }
 </style>
 </head>
@@ -89,13 +98,33 @@ function pergunta() {
 function contacto() {
   $('#tela').innerHTML = `${barra(total)}<h2>Quase lá! Como o devemos chamar?</h2>
     <form id="f"><label>O seu nome<input type="text" id="n" autocomplete="name" required value="${esc(R.nome || '')}"></label>
-    <label>O seu WhatsApp (com indicativo)<input type="tel" id="w" inputmode="tel" autocomplete="tel" placeholder="Ex.: 351912345678" required value="${esc(R.whatsapp || '')}"></label>
+    <label>O seu WhatsApp<div class="tel"><button type="button" class="pais" id="pais" aria-label="Escolher país"></button><input type="tel" id="w" inputmode="tel" autocomplete="tel-national" placeholder="DDD + número" required value="${esc(R.tel || '')}"></div></label>
     <div class="err" id="e"></div><button class="btn primary">Ver o meu resultado</button></form>
     <button class="back" id="volta">← Voltar</button>`;
   $('#volta').onclick = () => { i = PERGUNTAS.length - 1; pergunta(); };
-  $('#f').onsubmit = ev => { ev.preventDefault(); R.nome = $('#n').value.trim(); R.whatsapp = $('#w').value.trim();
-    if (R.whatsapp.replace(/\D/g, '').length < 9) { $('#e').textContent = 'Confira o número: precisa do indicativo e de pelo menos 9 números.'; return; }
+  desenhaPais(); $('#pais').onclick = abrePaises;
+  $('#f').onsubmit = ev => { ev.preventDefault(); R.nome = $('#n').value.trim(); R.tel = $('#w').value.trim();
+    let d = R.tel.replace(/\D/g, ''); const dial = PAISES.find(x => x[0] === pais)[2];
+    if (R.tel.startsWith('+') && d.startsWith(dial)) d = d.slice(dial.length);
+    d = d.replace(/^0+/, '');
+    if (d.length < 6 || d.length > 12) { $('#e').textContent = 'Confira o número: escreva só o número, sem o prefixo do país.'; return; }
+    R.whatsapp = '+' + dial + d; R.pais = pais;
     guardaLead(); resultado(); };
+}
+const PAISES = [['br', 'Brasil', '55'], ['pt', 'Portugal', '351'], ['us', 'Estados Unidos', '1'], ['gb', 'Reino Unido', '44'], ['es', 'Espanha', '34'], ['fr', 'França', '33'], ['de', 'Alemanha', '49'], ['it', 'Itália', '39'], ['ao', 'Angola', '244'], ['mz', 'Moçambique', '258'], ['cv', 'Cabo Verde', '238'], ['gw', 'Guiné-Bissau', '245'], ['st', 'São Tomé e Príncipe', '239'], ['tl', 'Timor-Leste', '670'], ['ch', 'Suíça', '41'], ['lu', 'Luxemburgo', '352'], ['be', 'Bélgica', '32'], ['nl', 'Países Baixos', '31'], ['ie', 'Irlanda', '353'], ['ca', 'Canadá', '1'], ['ar', 'Argentina', '54'], ['uy', 'Uruguai', '598'], ['py', 'Paraguai', '595'], ['cl', 'Chile', '56'], ['co', 'Colômbia', '57'], ['mx', 'México', '52'], ['pe', 'Peru', '51'], ['ve', 'Venezuela', '58'], ['au', 'Austrália', '61'], ['jp', 'Japão', '81'], ['ae', 'Emirados Árabes Unidos', '971'], ['za', 'África do Sul', '27']];
+let pais = 'br';
+const flag = c => `<img src="https://flagcdn.com/w40/${c}.png" srcset="https://flagcdn.com/w80/${c}.png 2x" alt="" width="28" height="21" loading="lazy">`;
+function desenhaPais() { const x = PAISES.find(y => y[0] === pais); $('#pais').innerHTML = `${flag(x[0])}<span>+${x[2]}</span><span aria-hidden="true">▾</span>`; }
+function abrePaises() {
+  if ($('.lista')) { $('.lista').remove(); return; }
+  const box = document.createElement('div'); box.className = 'lista';
+  box.innerHTML = `<input type="text" id="pq" placeholder="Procurar país…" autocomplete="off"><div id="pl"></div>`;
+  $('.tel').appendChild(box);
+  const nm = v => String(v).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const lista = q => { $('#pl').innerHTML = PAISES.filter(x => !q || nm(x[1]).includes(nm(q)) || x[2].startsWith(q.replace('+', ''))).map(x => `<button type="button" class="lp" data-c="${x[0]}">${flag(x[0])}<span>${x[1]}</span><span>+${x[2]}</span></button>`).join('') || '<div class="lp">Nenhum país encontrado</div>'; };
+  lista(''); $('#pq').focus();
+  $('#pq').oninput = e => lista(e.target.value);
+  $('#pl').onclick = e => { const b = e.target.closest('.lp[data-c]'); if (!b) return; pais = b.dataset.c; box.remove(); desenhaPais(); $('#w').focus(); };
 }
 function analise() {
   const d = parseInt(R.dias) || 3, novo = /Nunca|Parei/.test(R.nivel), obj = R.objetivo;
@@ -108,7 +137,7 @@ function analise() {
 }
 function resultado() {
   const a = analise();
-  const msg = `Olá! Fiz o diagnóstico da Squad.\nNome: ${R.nome}\nObjetivo: ${R.objetivo}\nExperiência: ${R.nivel}\nDias por semana: ${R.dias}\nLocal: ${R.local}\nLimitações: ${R.lesao}\nAlimentação: ${R.comida}\nQuero saber como começar!`;
+  const msg = `Olá! Fiz o diagnóstico da Squad.\nNome: ${R.nome}\nWhatsApp: ${R.whatsapp}\nObjetivo: ${R.objetivo}\nExperiência: ${R.nivel}\nDias por semana: ${R.dias}\nLocal: ${R.local}\nLimitações: ${R.lesao}\nAlimentação: ${R.comida}\nQuero saber como começar!`;
   const wa = CFG.whatsapp ? `https://wa.me/${String(CFG.whatsapp).replace(/\D/g, '')}?text=${encodeURIComponent(msg)}` : '';
   $('#tela').innerHTML = `<div class="bar"><i style="width:100%"></i></div><h1>${esc(R.nome.split(' ')[0])}, <span>este é o seu ponto de partida</span></h1>
     <div class="perfil"><span class="chip">${esc(R.objetivo)}</span><span class="chip">${esc(R.dias)} por semana</span><span class="chip">${esc(R.local)}</span></div>
