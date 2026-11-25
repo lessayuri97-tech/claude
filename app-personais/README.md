@@ -14,6 +14,8 @@ Webapp simples para personal trainers acompanharem alunos e planos de treino. Se
 - **Registo de sessão**: peso (kg) e repetições de cada série, já preenchidos com o plano; mostra a carga da última vez; opção de atualizar as cargas do plano.
 - **Evolução**: gráfico de peso corporal e de carga máxima por exercício, tabela de cargas (início, atual, evolução) e avaliações (peso, % gordura, cintura, quadril, braço).
 - **Área do aluno** ("Ver como aluno" ou login como aluna): treino do dia, vídeo, peso/reps por série, descanso, evolução e perfil.
+- **Comentários da aluna**: por exercício (durante o treino), no fim do treino e livres (Início/Perfil). O personal vê o painel "Comentários do aluno" na ficha, as notas dentro das sessões e um aviso de novos na lista de alunos.
+- **Descanso cronometrado**: ao marcar uma série, começa a contagem com o descanso do plano; pausar, ±15s, pular, aviso no fim (vibração, som, visual) e ecrã mantido ligado durante o treino.
 - **Enviar plano ao aluno**: texto com cargas e links dos vídeos para colar no WhatsApp.
 - **Backup**: copiar/colar ou baixar/abrir ficheiro JSON.
 

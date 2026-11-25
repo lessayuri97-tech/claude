@@ -320,13 +320,28 @@ body.modo-aluno .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); 
 .check { height: 44px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--surface); font-size: 1.2rem; font-weight: 700; color: var(--muted); cursor: pointer; }
 .check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
 .concluir { justify-content: center; padding: 14px; font-size: 1.05rem; }
-.rest { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); z-index: 26; max-width: 576px; margin: 0 auto;
-  background: var(--fg); color: var(--bg); border-radius: 14px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, .3); }
-.rest[hidden] { display: none; }
+.rest { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 26; max-width: 576px; margin: 0 auto;
+  background: var(--fg); color: var(--bg); border-radius: 16px; padding: 12px 14px 14px; display: grid; gap: 10px; box-shadow: 0 12px 30px rgba(0, 0, 0, .35); }
+.rest[hidden], body:not(.modo-aluno) .rest { display: none; }
+.rest .rest-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .rest .eyebrow { color: inherit; opacity: .7; }
-.rest b { font-family: var(--font-display); font-size: 2rem; line-height: 1; }
-.rest .btn { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 40%, transparent); }
+.rest #rest-t { font-family: var(--font-display); font-size: 2.6rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.rest .rest-barra { height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--bg) 25%, transparent); overflow: hidden; }
+.rest .rest-barra i { display: block; height: 100%; width: 100%; background: var(--bg); border-radius: 99px; }
+.rest .rest-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rest .btn { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 40%, transparent); justify-content: center; padding-inline: 4px; min-height: 44px; }
 .rest .btn.primary { background: var(--bg); color: var(--fg); border-color: var(--bg); }
+.rest.fim { animation: restpisca .5s ease 6; background: var(--ok); color: #fff; }
+.rest.fim .btn { color: #fff; border-color: rgba(255,255,255,.5); }
+.rest.fim .btn.primary { background: #fff; color: var(--ok); }
+@keyframes restpisca { 50% { transform: scale(1.03); } }
+body.rest-on main.wrap { padding-bottom: calc(230px + env(safe-area-inset-bottom, 0px)); }
+body.rest-on .toast { bottom: calc(240px + env(safe-area-inset-bottom, 0px)); }
+.coment { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; display: grid; gap: 2px; }
+.coment.novo { border-left-color: var(--accent); }
+.nota-ex { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+.nota-ex textarea { min-height: 56px; font-size: 16px; }
+@media (prefers-reduced-motion: reduce) { .rest.fim { animation: none; } }
 .pse { border: 0; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; }
 .pse legend { margin-bottom: 8px; }
 .pse label { position: relative; }
@@ -378,6 +393,7 @@ body.papel-aluno .aluno-bar { display: none; }
   <a href="#backup" data-nav="backup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/></svg><span>Backup</span></a>
 </nav>
 
+<div id="rest" class="rest" hidden role="timer" aria-label="Cronômetro de descanso"></div>
 <dialog id="dlg"><div class="dlg" id="dlg-body"></div></dialog>
 
 <script>
@@ -437,7 +453,8 @@ function exemplo() {
     exemplo: true,
     exercicios: ex,
     alunos: [
-      { id: uid(), nome: 'Mariana Ribeiro', objetivo: 'Hipertrofia', telefone: '(11) 98765-4321', inicio: diasAtras(30), notas: 'Treina 4x por semana, de manhã.', treinos: [tA, tB], sessoes, medidas },
+      { id: uid(), nome: 'Mariana Ribeiro', objetivo: 'Hipertrofia', telefone: '(11) 98765-4321', inicio: diasAtras(30), notas: 'Treina 4x por semana, de manhã.', treinos: [tA, tB], sessoes, medidas,
+        comentarios: [{ id: uid(), data: diasAtras(4), hora: '07:42', texto: 'Senti o joelho direito no agachamento, fiz com menos carga.', exId: '', treinoNome: '', sessaoId: '', lido: false }] },
       { id: uid(), nome: 'Carlos Lima', objetivo: 'Emagrecimento', telefone: '(21) 99123-4567', inicio: diasAtras(18), notas: 'Hérnia de disco L5 (liberado pelo médico). Evitar carga axial alta.', treinos: [tC], sessoes: sessC, medidas: medC },
       { id: uid(), nome: 'Ana Costa', objetivo: 'Condicionamento', telefone: '', inicio: diasAtras(3), notas: '', treinos: [], sessoes: [], medidas: [] }
     ]
@@ -581,7 +598,7 @@ function viewAlunos() {
       <div style="min-width:0"><h3>${esc(a.nome)}</h3>${a.objetivo ? `<span class="chip">${esc(a.objetivo)}</span>` : ''}</div></div>
       <div class="stats num">
         <span><b>${a.treinos.length}</b> ${a.treinos.length === 1 ? 'treino' : 'treinos'} · <b>${nEx}</b> exerc.</span>
-        <span>${u ? `Último treino: <b>${dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : 'há ' + dias + ' dias'}</b>` : 'Sem sessões ainda'}</span>
+        ${(a.comentarios || []).some(c => !c.lido) ? `<span><span class="chip accent num">💬 ${a.comentarios.filter(c => !c.lido).length} ${a.comentarios.filter(c => !c.lido).length > 1 ? 'comentários novos' : 'comentário novo'}</span></span>` : ''}<span>${u ? `Último treino: <b>${dias === 0 ? 'hoje' : dias === 1 ? 'ontem' : 'há ' + dias + ' dias'}</b>` : 'Sem sessões ainda'}</span>
       </div></a>`;
   }).join('')}</div>`
   : `<div class="panel empty"><h2>Nenhum aluno ainda</h2><p>Cadastre o primeiro aluno para montar o plano de treino.</p><button class="btn primary" data-act="novo-aluno">+ Novo aluno</button></div>`}`;
@@ -605,6 +622,15 @@ function openAlunoForm(id) {
 }
 
 /* ---------- Vista: aluno ---------- */
+function comentariosPanel(a) {
+  const l = (a.comentarios || []).slice().sort((x, y) => (y.data + (y.hora || '')).localeCompare(x.data + (x.hora || '')));
+  if (!l.length) return '';
+  const nl = l.filter(c => !c.lido).length;
+  return `<div class="panel"><div class="row spread"><div class="row"><h3>Comentários do aluno</h3>${nl ? `<span class="chip accent num">${nl} ${nl > 1 ? 'novos' : 'novo'}</span>` : ''}</div>
+    ${nl ? `<button class="btn sm" data-act="ler-coment" data-id="${a.id}">Marcar como lidos</button>` : ''}</div>
+    ${l.slice(0, 8).map(c => { const ex = c.exId && exById(c.exId); return `<div class="coment ${c.lido ? '' : 'novo'}"><div class="small muted num">${fmtData(c.data)}${c.hora ? ' · ' + esc(c.hora) : ''}${c.treinoNome ? ' · ' + esc(c.treinoNome) : ''}${ex ? ' · ' + esc(ex.nome) : ''}</div><div>${esc(c.texto)}</div></div>`; }).join('')}
+    ${l.length > 8 ? `<div class="small muted">Mais antigos: veja nas sessões.</div>` : ''}</div>`;
+}
 function viewAluno(a) {
   const tab = ui.tab[a.id] || 'plano';
   const t = (k, label) => `<button role="tab" aria-selected="${tab === k}" data-act="tab" data-tab="${k}" data-id="${a.id}">${label}</button>`;
@@ -617,6 +643,7 @@ function viewAluno(a) {
     <div class="row"><a class="btn primary" href="#meu-inicio" data-act="ver-aluno" data-id="${a.id}">Ver como aluno</a><button class="btn" data-act="compartilhar" data-id="${a.id}">Enviar plano ao aluno</button><button class="btn" data-act="editar-aluno" data-id="${a.id}">Editar</button></div>
   </div>
   ${a.notas ? `<div class="panel" style="padding:12px 16px"><div class="eyebrow">Observações</div><div>${esc(a.notas)}</div></div>` : ''}
+  ${comentariosPanel(a)}
   <div class="tabs" role="tablist">${t('plano', 'Plano de treino')}${t('sessoes', `Sessões (${a.sessoes.length})`)}${t('evolucao', 'Evolução')}</div>
   ${tab === 'plano' ? tabPlano(a) : tab === 'sessoes' ? tabSessoes(a) : tabEvolucao(a)}`;
 }
@@ -681,7 +708,7 @@ function tabSessoes(a) {
       <button class="btn ghost sm danger" data-act="del-sessao" data-id="${a.id}" data-sessao="${s.id}">Excluir</button></div>
       <ul>${s.itens.map(i => { const ex = exById(i.exId); return `<li class="${i.feito ? '' : 'muted'}">${esc(ex ? ex.nome : 'Exercício removido')}: <span class="num">${i.series && i.series.length
         ? i.series.map(x => `${x.carga !== '' ? fmtNum(x.carga) : '—'}×${esc(x.reps || '—')}`).join(' · ') + ' kg×reps'
-        : `${i.carga !== '' ? fmtNum(i.carga) + ' kg' : '—'} × ${esc(i.reps || '—')}`}</span>${i.feito ? '' : ' (não feito)'}</li>`; }).join('')}</ul>
+        : `${i.carga !== '' ? fmtNum(i.carga) + ' kg' : '—'} × ${esc(i.reps || '—')}`}</span>${i.feito ? '' : ' (não feito)'}${i.nota ? `<div class="small" style="color:var(--fg)"><b>💬</b> ${esc(i.nota)}</div>` : ''}</li>`; }).join('')}</ul>
       ${s.nota ? `<div class="small"><b>Obs.:</b> ${esc(s.nota)}</div>` : ''}
     </article>`;
   }).join('') : `<div class="panel empty">Nenhuma sessão registrada ainda.</div>`}`;
@@ -919,6 +946,7 @@ document.addEventListener('click', ev => {
     case 'registrar': openRegistrar(a.id, t.id); break;
     case 'del-sessao': confirmar('Excluir esta sessão?', 'Excluir sessão', () => { a.sessoes = a.sessoes.filter(s => s.id !== b.dataset.sessao); save(); rerender(); }); break;
     case 'nova-medida': openMedida(a.id); break;
+    case 'ler-coment': (a.comentarios || []).forEach(c => { c.lido = true; }); save(); rerender(); break;
     case 'del-medida': confirmar('Excluir esta avaliação?', 'Excluir', () => { a.medidas = a.medidas.filter(m => m.id !== b.dataset.medida); save(); rerender(); }); break;
     case 'compartilhar':
       openDialog(`<div class="row spread"><h2>Enviar plano ao aluno</h2><button class="btn ghost" data-act="close">Fechar</button></div>
@@ -1035,15 +1063,16 @@ async function api(method, body) {
 }
 function agendaPush() { if (sync.status === 'desligada') return; clearTimeout(pushTimer); pushTimer = setTimeout(push, 500); }
 function mergeRemoto(local, remote) {
+  const uniaoCom = (a = [], b = []) => { const m = new Map(a.map(x => [x.id, Object.assign({}, x)])); b.forEach(x => { const y = m.get(x.id); if (y) y.lido = !!(y.lido || x.lido); else m.set(x.id, Object.assign({}, x)); }); return [...m.values()]; };
   const uniao = (a = [], b = []) => { const ids = new Set(a.map(x => x.id)); return a.concat(b.filter(x => !ids.has(x.id))); };
   const par = (lista, a) => lista.find(x => x.id === a.id) || lista.find(x => norm(x.nome) === norm(a.nome));
   if (meuPapel() === 'aluno') { // a aluna só acrescenta sessões e medidas; o resto vem do personal
     const out = JSON.parse(JSON.stringify(remote));
-    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniao(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); } });
+    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniao(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); } });
     out.alunoAtivo = local.alunoAtivo; return out;
   }
   const out = JSON.parse(JSON.stringify(local)); // o personal manda no plano; recebe as sessões e medidas da aluna
-  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniao(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); } });
+  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniao(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); } });
   return out;
 }
 function rerenderSeguro() {
@@ -1212,6 +1241,7 @@ function vInicio(a) {
     <div><b>${u ? fmtData(u.data).slice(0, 5) : '—'}</b><span>último treino</span></div>
     <div><b>${meds.length ? fmtNum(meds[meds.length - 1].peso) : '—'}</b><span>peso atual (kg)</span></div>
   </div>
+  <button class="btn" data-sact="comentar" style="justify-content:center">💬 Deixar comentário para o personal</button>
   ${ultimas.length ? `<div class="panel"><div class="row spread"><h3>Últimos treinos</h3><a class="small" href="#minha-evolucao">Ver evolução</a></div>
     ${ultimas.map(s => `<div class="hist-row"><div><b>${esc(s.treinoNome || 'Treino')}</b><div class="small muted num">${fmtData(s.data)}${s.rpe ? ' · esforço ' + esc(s.rpe) + '/10' : ''}</div></div>
       <div class="num small" style="text-align:right"><b>${fmtNum(volume(s))} kg</b><div class="muted">volume</div></div></div>`).join('')}</div>` : ''}`, 'inicio');
@@ -1260,12 +1290,13 @@ function vTreino(a, t) {
           <label class="reps"><input type="text" inputmode="numeric" id="w-r-${i}-${j}" class="num" value="${esc(s.reps)}" data-sedit="reps" data-i="${i}" data-j="${j}" aria-label="Repetições, série ${j + 1}"><small>reps</small></label>
           <button class="check" data-sact="check" data-i="${i}" data-j="${j}" aria-pressed="${s.done}" aria-label="${s.done ? 'Desmarcar' : 'Marcar'} série ${j + 1} como feita">✓</button>
         </div>`).join('')}</div>
+        <button class="btn sm" data-sact="rest-start" data-i="${i}" style="justify-self:start">⏱ Iniciar descanso de ${esc(it.descanso || 60)}s</button>
+        <label class="nota-ex">Comentário sobre este exercício (opcional)<textarea data-nedit="${i}" placeholder="Ex.: senti o joelho, achei pesado, faltou espaço…">${esc(w.nota || '')}</textarea></label>
       </div>` : ''}
     </article>`;
   }).join('')}
   <button class="btn primary concluir" data-sact="concluir" data-treino="${t.id}">Concluir treino</button>
-  <button class="btn ghost" data-sact="cancelar" style="justify-self:center">Cancelar treino</button>
-  <div id="rest" class="rest" hidden></div>`, 'treinar');
+  <button class="btn ghost" data-sact="cancelar" style="justify-self:center">Cancelar treino</button>`, 'treinar');
 }
 
 function vEvolucao(a) {
@@ -1285,6 +1316,8 @@ function vPerfil(a) {
     <div class="small muted">Dúvidas sobre o treino? Fale com seu personal pelo WhatsApp.</div></div>
   <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
+  <div class="panel"><div class="eyebrow">Comentários</div><p style="margin:0" class="small muted">Dor, dúvida ou recado? O personal vê na sua ficha.</p>
+    <button class="btn" data-sact="comentar">💬 Deixar comentário</button></div>
   <div class="panel"><div class="eyebrow">Medidas</div><p style="margin:0" class="small muted">Registre seu peso para acompanhar a evolução.</p>
     <button class="btn" data-act="nova-medida" data-id="${a.id}">+ Registrar peso e medidas</button></div>
   <div class="small muted sync-status" style="text-align:center"></div>
@@ -1296,29 +1329,72 @@ function renderAluno(h) {
   document.body.classList.add('modo-aluno');
   const a = alunoAtivo(); const app = $('#app');
   if (!a) { app.innerHTML = `<div class="panel empty">Cadastre um aluno primeiro.</div>`; return; }
-  if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); tickRest(); return; }
+  if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); if (t) pedeWake(); return; }
   app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
 }
 
-/* descanso */
-let restEnd = 0, restTimer = null;
-function startRest(seg) { restEnd = Date.now() + seg * 1000; clearInterval(restTimer); restTimer = setInterval(tickRest, 250); tickRest(); }
-function tickRest() {
-  const el = $('#rest'); if (!el) return;
-  const left = Math.ceil((restEnd - Date.now()) / 1000);
-  if (left <= 0) { if (restEnd) { try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {} } restEnd = 0; clearInterval(restTimer); el.hidden = true; return; }
-  el.hidden = false;
-  el.innerHTML = `<div><div class="eyebrow">Descanso</div><b class="num">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</b></div>
-    <div class="row"><button class="btn sm" data-sact="rest-mais">+15s</button><button class="btn sm primary" data-sact="rest-fim">Pular</button></div>`;
+/* descanso cronometrado */
+const rest = { ativo: false, end: 0, total: 0, pausa: 0, label: '', fim: false, esconde: 0, mudo: false };
+let restTimer = null, audioCtx = null, wake = null;
+try { rest.mudo = localStorage.getItem('pt-example:v1:mudo') === '1'; } catch (e) {}
+const fmtT = seg => `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, '0')}`;
+function liberaAudio() { try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); } catch (e) {} }
+function bipes() {
+  try { if (!audioCtx || rest.mudo) return; const t0 = audioCtx.currentTime;
+    [0, .28, .56].forEach((d, k) => { const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type = 'sine'; o.frequency.value = k === 2 ? 1175 : 880;
+      g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.4, t0 + d + .02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + .22);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t0 + d); o.stop(t0 + d + .25); }); } catch (e) {}
 }
+function desenhaRest() {
+  const el = $('#rest'); if (!el) return;
+  el.innerHTML = `<div class="rest-top"><div><div class="eyebrow" id="rest-l"></div><div id="rest-t" class="num" aria-live="off">0:00</div></div>
+    <button class="btn sm" data-sact="rest-som" id="rest-som" aria-label="Som do aviso" style="min-height:44px"></button></div>
+    <div class="rest-barra"><i id="rest-p"></i></div>
+    <div class="rest-btns"><button class="btn sm" data-sact="rest-menos">−15s</button><button class="btn sm" data-sact="rest-mais">+15s</button>
+    <button class="btn sm" data-sact="rest-pausa" id="rest-pausa">Pausar</button><button class="btn sm primary" data-sact="rest-fim">Pular</button></div>`;
+}
+function startRest(seg, label) {
+  rest.ativo = true; rest.total = seg; rest.end = Date.now() + seg * 1000; rest.pausa = 0; rest.fim = false; rest.label = label || 'Descanso';
+  const el = $('#rest'); if (!el) return; el.classList.remove('fim'); desenhaRest(); el.hidden = false; document.body.classList.add('rest-on');
+  clearInterval(restTimer); restTimer = setInterval(tickRest, 250); tickRest();
+}
+function stopRest() {
+  rest.ativo = false; rest.fim = false; clearInterval(restTimer); const el = $('#rest'); if (el) { el.hidden = true; el.classList.remove('fim'); } document.body.classList.remove('rest-on');
+}
+function tickRest() {
+  const el = $('#rest'); if (!el || !rest.ativo) return;
+  const ms = rest.pausa ? rest.pausa : rest.end - Date.now(), left = Math.max(0, Math.ceil(ms / 1000));
+  if (rest.fim) { if (Date.now() > rest.esconde) stopRest(); return; }
+  if (ms <= 0) {
+    rest.fim = true; rest.esconde = Date.now() + 8000; el.classList.add('fim');
+    try { navigator.vibrate && navigator.vibrate([300, 120, 300, 120, 500]); } catch (e) {}
+    bipes();
+    $('#rest-l').textContent = 'Descanso terminado'; $('#rest-t').textContent = 'Bora! 💪'; $('#rest-p').style.width = '0%'; return;
+  }
+  $('#rest-l').textContent = (rest.pausa ? 'Pausado · ' : '') + rest.label; $('#rest-t').textContent = fmtT(left);
+  $('#rest-p').style.width = Math.min(100, ms / (rest.total * 1000) * 100) + '%';
+  const pb = $('#rest-pausa'); if (pb) pb.textContent = rest.pausa ? 'Retomar' : 'Pausar';
+  const sb = $('#rest-som'); if (sb) sb.textContent = rest.mudo ? '🔕 Sem som' : '🔔 Som';
+}
+async function pedeWake() { try { if (!wake && wk && navigator.wakeLock && document.visibilityState === 'visible') { wake = await navigator.wakeLock.request('screen'); wake.addEventListener('release', () => { wake = null; }); } } catch (e) {} }
+function soltaWake() { try { wake && wake.release(); } catch (e) {} wake = null; }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { if (rest.ativo) tickRest(); if (wk) pedeWake(); } });
+
+function abreComentario() {
+  openDialog(`<form id="f-comentario" class="dlg" style="padding:0"><div><div class="eyebrow">Para o seu personal</div><h2>Deixar comentário</h2></div>
+    <label class="field">O que quer contar?<textarea id="cm-texto" required placeholder="Ex.: dor no ombro, dúvida sobre o treino, horário que não consigo…"></textarea></label>
+    <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Enviar</button></div></form>`);
+}
+const agoraHora = () => new Date().toTimeString().slice(0, 5);
+function novoComentario(a, texto, extra) { (a.comentarios = a.comentarios || []).push(Object.assign({ id: uid(), data: hoje(), hora: agoraHora(), texto, exId: '', treinoNome: '', sessaoId: '', lido: false }, extra || {})); }
 
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-sact]'); if (!b) return;
   const a = alunoAtivo(); const act = b.dataset.sact;
   const t = b.dataset.treino && a.treinos.find(x => x.id === b.dataset.treino);
   switch (act) {
-    case 'sair': document.body.classList.remove('modo-aluno'); break;
-    case 'logout': setSessao(null); wk = null; saveWk(); location.hash = ''; route(); break;
+    case 'sair': document.body.classList.remove('modo-aluno'); stopRest(); soltaWake(); break;
+    case 'logout': setSessao(null); wk = null; saveWk(); stopRest(); soltaWake(); location.hash = ''; route(); break;
     case 'forcar-envio': (async () => { try { const g = await api('GET'); if (g.status !== 200) { toast('Sincronização indisponível'); return; }
       const r = await api('PUT', { baseRev: g.j.rev || 0, data: dadosRemotos() });
       if (r.status === 200) { sync.rev = r.j.rev; sync.dirty = false; saveSync(); sync.status = 'ativa'; mostraStatus(); toast('Dados enviados para a nuvem'); } else toast('Não foi possível enviar'); } catch (e) { toast('Sem ligação'); } })(); break;
@@ -1333,13 +1409,22 @@ document.addEventListener('click', ev => {
       const tr = a.treinos.find(x => x.id === wk.treinoId);
       if (s.done) {
         if (w.sets.every(x => x.done)) { const nx = wk.itens.findIndex((x, k) => k > i && !x.sets.every(y => y.done)); wk.aberto = nx; saveWk(); }
-        else startRest(+tr.itens[i].descanso || 60);
-      }
+        liberaAudio();
+        const nx = wk.aberto; const prox = nx >= 0 && wk.itens[nx] ? exById(tr.itens[nx].exId) : null;
+        const seg = +tr.itens[i].descanso || 60;
+        if (w.sets.every(x => x.done)) { if (wk.itens.every(x => x.sets.every(y => y.done))) stopRest(); else startRest(seg, prox ? 'Descanso · próximo: ' + prox.nome : 'Descanso'); }
+        else startRest(seg, `Descanso · próxima: ${j + 2}ª série`);
+      } else if (rest.ativo) stopRest();
       rerender(); break; }
-    case 'rest-mais': restEnd += 15000; tickRest(); break;
-    case 'rest-fim': restEnd = 1; tickRest(); break;
+    case 'rest-mais': if (rest.ativo && !rest.fim) { rest.total += 15; rest.pausa ? rest.pausa += 15000 : rest.end += 15000; tickRest(); } break;
+    case 'rest-menos': if (rest.ativo && !rest.fim) { rest.pausa ? rest.pausa -= 15000 : rest.end -= 15000; if ((rest.pausa || rest.end - Date.now()) <= 0) stopRest(); else tickRest(); } break;
+    case 'rest-pausa': if (rest.ativo && !rest.fim) { if (rest.pausa) { rest.end = Date.now() + rest.pausa; rest.pausa = 0; } else rest.pausa = Math.max(1, rest.end - Date.now()); tickRest(); } break;
+    case 'rest-fim': stopRest(); break;
+    case 'rest-som': rest.mudo = !rest.mudo; try { localStorage.setItem('pt-example:v1:mudo', rest.mudo ? '1' : '0'); } catch (e) {} liberaAudio(); tickRest(); break;
+    case 'rest-start': { liberaAudio(); const tr = a.treinos.find(x => x.id === wk.treinoId); const ex = exById(tr.itens[+b.dataset.i].exId); startRest(+tr.itens[+b.dataset.i].descanso || 60, 'Descanso · ' + (ex ? ex.nome : '')); break; }
+    case 'comentar': abreComentario(); break;
     case 'cancelar':
-      confirmar('Cancelar este treino?', 'Cancelar treino', () => { wk = null; saveWk(); location.hash = 'meus-treinos'; }); break;
+      confirmar('Cancelar este treino?', 'Cancelar treino', () => { wk = null; saveWk(); stopRest(); soltaWake(); location.hash = 'meus-treinos'; }); break;
     case 'concluir': {
       const tr = a.treinos.find(x => x.id === wk.treinoId);
       const nSets = wk.itens.reduce((s, i) => s + i.sets.filter(x => x.done).length, 0);
@@ -1358,7 +1443,14 @@ document.addEventListener('change', ev => {
   const s = wk.itens[el.dataset.i].sets[el.dataset.j];
   s[k] = k === 'carga' ? (el.value === '' ? '' : +el.value) : el.value; saveWk();
 });
+document.addEventListener('input', ev => {
+  const el = ev.target; if (el.dataset && el.dataset.nedit !== undefined && wk && wk.itens[el.dataset.nedit]) { wk.itens[el.dataset.nedit].nota = el.value; saveWk(); }
+});
 document.addEventListener('submit', ev => {
+  if (ev.target.id === 'f-comentario') {
+    ev.preventDefault(); const a = alunoAtivo(), tx = $('#cm-texto').value.trim(); if (!a || !tx) return;
+    novoComentario(a, tx); save(); closeDialog(); toast('Comentário enviado ao personal'); return;
+  }
   if (ev.target.id !== 'f-concluir') return;
   ev.preventDefault();
   const a = alunoById(wk.alunoId), t = a.treinos.find(x => x.id === wk.treinoId);
@@ -1366,11 +1458,14 @@ document.addEventListener('submit', ev => {
   const itens = wk.itens.map(w => {
     const done = w.sets.filter(s => s.done), base = done.length ? done : w.sets;
     const top = base.reduce((m, s) => (+s.carga || 0) > (+m.carga || 0) ? s : m, base[0]);
-    return { exId: w.exId, carga: top.carga, reps: top.reps, feito: done.length > 0, series: done.map(s => ({ carga: s.carga, reps: s.reps })) };
+    return { exId: w.exId, carga: top.carga, reps: top.reps, feito: done.length > 0, nota: (w.nota || '').trim(), series: done.map(s => ({ carga: s.carga, reps: s.reps })) };
   });
   const sess = { id: uid(), data: hoje(), treinoId: t.id, treinoNome: treinoLabel(a, t), rpe: pse, nota: $('#c-nota').value.trim(), itens, peloAluno: true,
     minutos: Math.max(1, Math.round((Date.now() - wk.inicio) / 6e4)) };
-  a.sessoes.push(sess); save(); wk = null; saveWk(); closeDialog();
+  a.sessoes.push(sess);
+  itens.forEach(i => { if (i.nota) novoComentario(a, i.nota, { exId: i.exId, treinoNome: sess.treinoNome, sessaoId: sess.id }); });
+  if (sess.nota) novoComentario(a, sess.nota, { treinoNome: sess.treinoNome, sessaoId: sess.id });
+  save(); wk = null; saveWk(); closeDialog(); stopRest(); soltaWake();
   const vol = volume(sess), nS = itens.reduce((s, i) => s + i.series.length, 0);
   location.hash = 'meu-inicio';
   setTimeout(() => openDialog(`<div style="text-align:center;display:grid;gap:10px;justify-items:center">
