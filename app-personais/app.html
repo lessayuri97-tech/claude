@@ -100,7 +100,7 @@ main.wrap { padding-block: 24px 64px; display: grid; gap: 20px; }
 .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .spread { justify-content: space-between; }
 label.field { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); font-weight: 600; min-width: 0; }
-input[type=text], input[type=url], input[type=tel], input[type=date], input[type=number], input[type=search], select, textarea {
+input[type=text], input[type=url], input[type=tel], input[type=password], input[type=date], input[type=number], input[type=search], select, textarea {
   width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; color: var(--fg); font-weight: 400; font-size: .95rem; min-width: 0;
 }
 textarea { resize: vertical; min-height: 64px; }
@@ -222,7 +222,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .tabbar a[aria-current="page"] { color: var(--fg); background: var(--accent-soft); }
   .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
-  input[type=text], input[type=url], input[type=tel], input[type=date], input[type=number], input[type=search], select, textarea { font-size: 16px; min-height: 44px; }
+  input[type=text], input[type=url], input[type=tel], input[type=password], input[type=date], input[type=number], input[type=search], select, textarea { font-size: 16px; min-height: 44px; }
   .ficha-row input, .ficha-row select { min-height: 42px; font-size: 16px; }
   .set input { min-height: 40px; font-size: 16px; }
   .btn { padding: 10px 16px; min-height: 44px; }
@@ -449,7 +449,7 @@ function load() {
 }
 function migra() { if (db.exemplo) db.alunos.forEach(a => { if (a.nome === 'Mariana Souza') a.nome = 'Mariana Ribeiro'; }); }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
-load(); migra();
+load(); migra(); save();
 
 /* ---------- Utilidades ---------- */
 const $ = (s, el = document) => el.querySelector(s);
