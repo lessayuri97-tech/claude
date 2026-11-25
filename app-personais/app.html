@@ -85,6 +85,15 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .afirma { background: var(--greige); color: #1F2033; border-radius: var(--radius); padding: 18px; text-align: center; }
 .afirma .eyebrow { color: #4a4a58; }
 .afirma q { display: block; font-family: var(--font-serif); font-style: italic; font-size: 1.35rem; line-height: 1.25; margin-top: 6px; quotes: none; }
+/* Notificações */
+body.sem-login #sino, body.modo-aluno #sino { display: none !important; }
+#sino { position: relative; display: inline-flex; align-items: center; }
+#sino.novo { color: var(--fg); animation: toque 1.2s ease-in-out 2; }
+@keyframes toque { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-8deg); } }
+.sino-painel { position: absolute; right: 0; top: 44px; width: min(360px, 92vw); max-height: 70vh; overflow: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 14px 40px rgba(31,32,51,.25); z-index: 60; padding: 8px; }
+.sino-painel .it { display: grid; gap: 2px; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 10px; cursor: pointer; }
+.sino-painel .it:hover { background: var(--accent-soft); }
+.sino-painel .it.nl b::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #c2410c; margin-right: 8px; }
 /* Barra superior */
 .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
 .wrap { max-width: 1040px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
@@ -497,9 +506,11 @@ body.papel-aluno .aluno-bar { display: none; }
       <a href="#central" data-nav="central">Central</a>
       <a href="#alunos" data-nav="alunos">Alunos</a>
       <a href="#rever" data-nav="rever">Rever <span class="nav-badge" id="badge-rever" hidden></span></a>
+      <a href="#leads" data-nav="leads">Leads <span class="nav-badge" id="badge-leads" hidden></span></a>
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
       <a href="#definicoes" data-nav="definicoes">Definições</a>
     </nav>
+    <span style="position:relative"><button class="btn ghost sm" id="sino" data-act="sino" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="nav-badge" id="sino-n" hidden></span></button><div id="sino-painel" class="sino-painel" hidden></div></span>
     <button class="btn ghost sm" id="btn-sair" data-sact="logout" type="button">Sair</button>
   </div>
 </header>
@@ -733,8 +744,11 @@ function route() {
   const cur = document.querySelectorAll(`[data-nav="${navKey}"]`); cur.forEach(c => c.setAttribute('aria-current', 'page'));
   const nr = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
   ['badge-rever', 'badge-rever2'].forEach(id => { const el = document.getElementById(id); if (el) { el.hidden = !nr; el.textContent = nr; } });
+  verificaNotifs();
+  const nl = todosLeads().filter(l => l.estado === 'novo').length; { const el = document.getElementById('badge-leads'); if (el) { el.hidden = !nl; el.textContent = nl; } }
   const app = $('#app');
-  if (view === 'definicoes') app.innerHTML = viewDefinicoes();
+  if (view === 'leads') app.innerHTML = viewLeads();
+  else if (view === 'definicoes') app.innerHTML = viewDefinicoes();
   else if (view === 'central') app.innerHTML = viewCentral();
   else if (view === 'rever') app.innerHTML = viewRever();
   else if (view === 'exercicios') app.innerHTML = viewExercicios();
@@ -1100,6 +1114,61 @@ function sinaisRevisao(a, cfg) {
   if (ult.length >= cfg.nSess && ult.every(s => s.rpe !== '' && s.rpe != null && +s.rpe <= cfg.pseBaixo)) geral.push({ txt: `Esforço baixo (PSE até ${cfg.pseBaixo}) nas últimas ${cfg.nSess} sessões` });
   return { motivos, geral, precisa: motivos.length >= cfg.minEx || geral.length > 0 };
 }
+function notifs() {
+  const out = [], lim = Date.now() - 14 * 864e5;
+  db.alunos.forEach(a => a.sessoes.filter(s => s.peloAluno && new Date(s.data + 'T12:00').getTime() > lim).forEach(s => out.push({ id: 's:' + s.id, t: s.data, titulo: `${a.nome.split(' ')[0]} finalizou ${s.treinoNome || 'um treino'}`, sub: s.rpe ? 'Esforço ' + s.rpe + '/10' : 'Toque para rever', href: '#rever' })));
+  todosLeads().filter(l => l.estado === 'novo').forEach(l => out.push({ id: 'l:' + l.id, t: l.data, titulo: `Novo lead: ${l.nome}`, sub: (l.respostas || {}).objetivo || 'Fez o diagnóstico', href: '#leads' }));
+  const lidas = new Set(db.notifLidas || []);
+  return out.map(x => Object.assign(x, { lida: lidas.has(x.id) })).sort((a, b) => b.t.localeCompare(a.t));
+}
+let notifVistas = null;
+function verificaNotifs() {
+  const se = getSessao(); if (!se || se.papel !== 'personal') return;
+  const ns = notifs(), nao = ns.filter(x => !x.lida), el = $('#sino-n');
+  if (el) { el.hidden = !nao.length; el.textContent = nao.length; }
+  document.title = (nao.length ? `(${nao.length}) ` : '') + marca().nome;
+  const ids = new Set(nao.map(x => x.id));
+  if (notifVistas) {
+    const novas = nao.filter(x => !notifVistas.has(x.id));
+    if (novas.length) {
+      const sn = $('#sino'); if (sn) { sn.classList.remove('novo'); void sn.offsetWidth; sn.classList.add('novo'); }
+      try { if ('Notification' in window && Notification.permission === 'granted') novas.slice(0, 3).forEach(x => new Notification(marca().nome, { body: x.titulo, icon: 'icon-192.png', tag: x.id })); } catch (e) {}
+    }
+  }
+  notifVistas = ids;
+}
+function painelSino() {
+  const ns = notifs(), p = $('#sino-painel'), pode = 'Notification' in window;
+  p.innerHTML = `<div class="row spread" style="padding:6px 10px"><b>Notificações</b>${ns.some(x => !x.lida) ? '<button class="btn ghost sm" data-act="notif-todas">Marcar todas como lidas</button>' : ''}</div>
+    ${ns.length ? ns.slice(0, 30).map(x => `<button class="it ${x.lida ? '' : 'nl'}" data-act="notif-ir" data-id="${esc(x.id)}" data-href="${x.href}"><b>${esc(x.titulo)}</b><span class="small muted">${esc(x.sub)} · ${fmtData(x.t)}</span></button>`).join('') : '<div class="small muted" style="padding:14px">Sem novidades. Quando uma aluna finalizar um treino ou alguém fizer o diagnóstico, aparece aqui.</div>'}
+    ${pode && Notification.permission === 'default' ? '<div style="padding:8px 10px"><button class="btn primary sm" data-act="avisos-ativar" style="width:100%;justify-content:center">Ativar avisos no navegador</button></div>' : ''}`;
+}
+const ESTADOS_LEAD = [['novo', 'Novo'], ['contactado', 'Contactado'], ['aluna', 'Virou aluna'], ['perdido', 'Perdido']];
+const todosLeads = () => ((typeof SB !== 'undefined' ? SB.leads : []).concat(db.leads || [])).slice().sort((a, b) => b.data.localeCompare(a.data));
+const waLead = l => 'https://wa.me/' + String(l.whatsapp).replace(/\D/g, '');
+function leadSet(id, patch) {
+  const m = (db.leads || []).find(x => x.id === id); if (m) { Object.assign(m, patch); save(); return; }
+  const r = SB.leads.find(x => x.id === id); if (r) { Object.assign(r, patch); if (patch.estado) SB.req('/rest/v1/leads?id=eq.' + encodeURIComponent(id), { method: 'PATCH', body: { estado: patch.estado, contactado: patch.estado !== 'novo' }, headers: { Prefer: 'return=minimal' } }); }
+}
+function leadApaga(id) {
+  if ((db.leads || []).some(x => x.id === id)) { db.leads = db.leads.filter(x => x.id !== id); save(); return; }
+  SB.leads = SB.leads.filter(x => x.id !== id); SB.req('/rest/v1/leads?id=eq.' + encodeURIComponent(id), { method: 'DELETE' });
+}
+function viewLeads() {
+  const todos = todosLeads(), f = ui.leadF || 'novo', lista = todos.filter(l => f === 'todos' || l.estado === f);
+  const n = e => todos.filter(l => l.estado === e).length, sbOn = typeof SB !== 'undefined' && SB.ativo();
+  const chip = (k, t, c) => `<button class="btn ${f === k ? 'primary' : ''} sm" data-act="lead-filtro" data-f="${k}">${t} <span class="num">${c}</span></button>`;
+  return `${bannerExemplo()}<div class="page-head"><div><div class="eyebrow">Quem fez o diagnóstico no site</div><h1>Leads</h1></div>
+    <div class="row"><button class="btn" data-act="lead-colar">Colar mensagem</button><button class="btn" data-act="lead-novo">+ Novo lead</button></div></div>
+  ${sbOn ? '' : `<div class="banner"><span class="chip accent">Como funciona agora</span><span class="banner-txt">Sem o Supabase ligado, o site não consegue enviar os dados para esta app. A pessoa chega pelo WhatsApp com as respostas escritas: toque em "Colar mensagem" e o lead é criado aqui. Com o Supabase ligado, os leads entram sozinhos e só você os vê.</span></div>`}
+  <div class="row" style="flex-wrap:wrap;margin:10px 0">${chip('novo', 'Novos', n('novo'))}${chip('contactado', 'Contactados', n('contactado'))}${chip('aluna', 'Viraram aluna', n('aluna'))}${chip('perdido', 'Perdidos', n('perdido'))}${chip('todos', 'Todos', todos.length)}</div>
+  ${lista.length ? lista.map(l => { const r = l.respostas || {}; return `<article class="panel"><div class="row spread"><div><b>${esc(l.nome)}</b><div class="small muted num">${fmtData(l.data)} · ${esc(l.whatsapp)}</div></div>
+      <select data-lead-estado="${l.id}" aria-label="Estado do lead">${ESTADOS_LEAD.map(e => `<option value="${e[0]}" ${l.estado === e[0] ? 'selected' : ''}>${e[1]}</option>`).join('')}</select></div>
+    <div class="row" style="flex-wrap:wrap;gap:6px">${[r.objetivo, r.nivel, r.dias, r.local].filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>
+    ${r.lesao ? `<div class="small"><b>Limitações:</b> ${esc(r.lesao)}</div>` : ''}${r.comida ? `<div class="small"><b>Alimentação:</b> ${esc(r.comida)}</div>` : ''}
+    <div class="row"><a class="btn primary sm" target="_blank" rel="noopener" href="${waLead(l)}">Abrir WhatsApp</a>${l.estado === 'aluna' && l.alunoId && alunoById(l.alunoId) ? `<a class="btn sm" href="#aluno-${l.alunoId}">Ver ficha</a>` : `<button class="btn sm" data-act="lead-converter" data-id="${l.id}">Converter em aluna</button>`}<button class="btn ghost sm danger" data-act="lead-del" data-id="${l.id}">Apagar</button></div></article>`; }).join('')
+  : `<div class="panel empty">${todos.length ? 'Nenhum lead neste estado.' : 'Ainda não há leads. Quando alguém fizer o diagnóstico no site, aparece aqui.'}</div>`}`;
+}
 function viewCentral() {
   const cfg = cfgC(), h = hoje();
   const info = db.alunos.map(a => {
@@ -1126,8 +1195,8 @@ function viewCentral() {
     ${painel('Treinaram hoje', treinaram.length, 'ok', treinaram.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join(''), 'Ainda ninguém treinou hoje.')}
     ${painel(`Parados há ${cfg.diasParado} ou mais dias`, parados.length, 'accent', parados.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">há ${x.dias} dias · último: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})</span></span></a>`).join(''), 'Todos treinaram recentemente.')}
     ${painel('Nunca treinaram', nunca.length, 'accent', nunca.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.a.treinos.length ? x.a.treinos.length + ' treino(s) no plano' : 'sem plano ainda'}${x.a.inicio ? ' · aluno desde ' + fmtData(x.a.inicio) : ''}</span></span></a>`).join(''), 'Todos já fizeram pelo menos um treino.')}
-    ${(typeof SB !== 'undefined' && SB.leads.length) ? painel('Diagnósticos recebidos', SB.leads.filter(l => !l.contactado).length, 'accent', SB.leads.slice(0, 8).map(l => `<div class="cc-rev"><span><b>${esc(l.nome)}</b><span class="small muted">${esc((l.respostas || {}).objetivo || '')} · ${esc((l.respostas || {}).dias || '')} · ${fmtData(String(l.created_at).slice(0, 10))}${l.contactado ? ' · contactado' : ''}</span></span>
-      <a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${String(l.whatsapp).replace(/\D/g, '')}">WhatsApp</a>${l.contactado ? '' : `<button class="btn ghost sm" data-act="lead-ok" data-id="${l.id}">Contactado</button>`}</div>`).join(''), '') : ''}
+    ${(() => { const nv = todosLeads().filter(l => l.estado === 'novo'); return painel('Leads novos do diagnóstico', nv.length, 'accent', nv.slice(0, 5).map(l => `<div class="cc-rev"><span><b>${esc(l.nome)}</b><span class="small muted">${esc((l.respostas || {}).objetivo || '')} · ${esc((l.respostas || {}).dias || '')} · ${fmtData(l.data)}</span></span>
+      <a class="btn sm" target="_blank" rel="noopener" href="${waLead(l)}">WhatsApp</a></div>`).join('') + '<a class="small" href="#leads">Ver todos os leads →</a>', 'Quando alguém fizer o diagnóstico no site, aparece aqui. <a href="#leads">Ver leads</a>'); })()}
     ${painel('Sem registar comida há ' + cfg.diasParado + '+ dias', semComida.length, 'accent', semComida.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.dias === null ? 'ainda não marcou nenhuma refeição' : 'há ' + x.dias + ' dias'}</span></span></a>`).join(''), nutriInfo.length ? 'Todos os alunos com plano alimentar estão a registar.' : 'Quando montares um plano alimentar, vês aqui quem não está a seguir.')}
     ${painel('Podem precisar de nova revisão do plano', rever.length, 'tec', rever.map(x => `<div class="cc-rev">${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.rev.motivos.concat(x.rev.geral).slice(0, 3).map(m => esc(m.txt)).join(' · ')}</span></span></a>
       <button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button></div>`).join(''), 'Ninguém com sinais de progressão por agora.')}
@@ -1266,7 +1335,23 @@ document.addEventListener('click', ev => {
   switch (act) {
     case 'close': closeDialog(); break;
     case 'cor-marca': db.marca = Object.assign({}, db.marca || {}, { cor: b.dataset.cor }); save(); aplicaMarca(); rerender(); break;
-    case 'lead-ok': { const l = SB.leads.find(x => x.id === b.dataset.id); if (l) { l.contactado = true; SB.req('/rest/v1/leads?id=eq.' + l.id, { method: 'PATCH', body: { contactado: true }, headers: { Prefer: 'return=minimal' } }); rerender(); } break; }
+    case 'lead-converter': { const l = todosLeads().find(x => x.id === b.dataset.id); if (!l) break; const r = l.respostas || {};
+      const novo = { id: uid(), nome: l.nome, objetivo: r.objetivo || 'Condicionamento', telefone: l.whatsapp, inicio: hoje(), notas: [r.nivel ? 'Experiência: ' + r.nivel : '', 'Veio do diagnóstico do site'].filter(Boolean).join('. '), treinos: [], sessoes: [], medidas: [],
+        anamnese: { objetivo: r.objetivo || '', dias: r.dias || '', local: r.local || '', rotina: '', lesoes: r.lesao || '', comida: r.comida || '', ts: Date.now() } };
+      db.alunos.push(novo); leadSet(l.id, { estado: 'aluna', alunoId: novo.id }); save(); toast('Aluna criada com a ficha inicial'); location.hash = 'aluno-' + novo.id; break; }
+    case 'lead-del': { if (confirm('Apagar este lead?')) { leadApaga(b.dataset.id); rerender(); } break; }
+    case 'lead-colar': openDialog(`<form id="f-lead-colar" class="dlg" style="padding:0"><h2>Colar mensagem do diagnóstico</h2><p class="small muted" style="margin:0">Cole aqui a mensagem que a pessoa enviou pelo WhatsApp depois do diagnóstico. A app lê o nome, o número e as respostas.</p>
+      <label class="field wide"><textarea id="lc-txt" rows="9" placeholder="Olá! Fiz o diagnóstico da Squad.&#10;Nome: ..." required></textarea></label>
+      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Criar lead</button></div></form>`); break;
+    case 'lead-novo': openDialog(`<form id="f-lead-novo" class="dlg" style="padding:0"><h2>Novo lead</h2><div class="form-grid">
+      <label class="field">Nome<input type="text" id="ln-nome" required></label><label class="field">WhatsApp (com +país)<input type="tel" id="ln-tel" placeholder="+5511999999999" required></label>
+      <label class="field wide">Objetivo ou nota<input type="text" id="ln-obj"></label></div>
+      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); break;
+    case 'sino': { const p = $('#sino-painel'); if (p.hidden) { painelSino(); p.hidden = false; } else p.hidden = true; break; }
+    case 'notif-ir': { db.notifLidas = (db.notifLidas || []).concat([b.dataset.id]).slice(-400); save(); $('#sino-painel').hidden = true; location.hash = b.dataset.href.slice(1); verificaNotifs(); rerender(); break; }
+    case 'notif-todas': { db.notifLidas = notifs().map(x => x.id).concat(db.notifLidas || []).slice(0, 400); save(); verificaNotifs(); painelSino(); break; }
+    case 'avisos-ativar': { try { Notification.requestPermission().then(() => { painelSino(); rerender(); }); } catch (e) {} break; }
+    case 'lead-filtro': ui.leadF = b.dataset.f; rerender(); break;
     case 'foto-del': { const al = alunoById(b.dataset.id); if (al && confirm('Excluir esta foto?')) { al.fotos = (al.fotos || []).filter(f => f.id !== b.dataset.fid); save(); rerender(); } break; }
     case 'foto-ver': { const f = ((alunoAtivo() || {}).fotos || []).concat(db.alunos.flatMap(x => x.fotos || [])).find(x => x.id === b.dataset.fid); if (f) openDialog(`<div class="row spread"><h2>${fmtData(f.data)}</h2><button class="btn ghost" data-act="close">Fechar</button></div><img src="${f.img}" alt="Foto de progresso" style="width:100%;border-radius:10px">`); break; }
     case 'site-foto-del': { const sj = Object.assign({}, (db.marca || {}).site || {}); sj.fotos = (sj.fotos || []).filter((f, k) => k !== +b.dataset.k); db.marca = Object.assign({}, db.marca || {}, { site: sj }); save(); rerender(); break; }
@@ -1403,6 +1488,7 @@ document.addEventListener('change', ev => {
       if (k === 'i-nome' || k === 'i-g') { const mx = macrosItem(i.nome, i.g); if (mx) { Object.assign(i, mx); ['k', 'p', 'c', 'f'].forEach(c => { const e2 = document.getElementById('n' + c + '-' + i.id); if (e2) e2.value = i[c]; }); } } }
     save(); refreshNu(a); return;
   }
+  if (el.dataset.leadEstado) { leadSet(el.dataset.leadEstado, { estado: el.value }); rerender(); return; }
   if (el.dataset.site) {
     const sj = Object.assign({}, (db.marca || {}).site || {}), dp = (sj.depoimentos || []).slice(); const k = +el.dataset.site.slice(1), campo = el.dataset.site[0];
     while (dp.length <= k) dp.push({ t: '', n: '' }); dp[k] = Object.assign({}, dp[k], { [campo]: el.value.trim() }); sj.depoimentos = dp.filter(x => x.t || x.n);
@@ -1488,6 +1574,16 @@ document.addEventListener('submit', ev => {
   const f = ev.target; ev.preventDefault();
   const v = id => { const el = $('#' + id, f); return el ? el.value.trim() : ''; };
   const n = id => { const x = v(id); return x === '' ? '' : +x.replace(',', '.'); };
+  if (f.id === 'f-lead-colar') {
+    const t = v('lc-txt'), g = k => { const m = t.match(new RegExp('^\\s*' + k + '\\s*:\\s*(.+)$', 'im')); return m ? m[1].trim() : ''; };
+    const nome = g('Nome'), tel = g('WhatsApp'); if (!nome || !tel) { toast('Não encontrei o nome e o WhatsApp na mensagem'); return; }
+    (db.leads = db.leads || []).push({ id: uid(), nome, whatsapp: tel, data: hoje(), estado: 'novo', respostas: { objetivo: g('Objetivo'), nivel: g('Experiência'), dias: g('Dias por semana'), local: g('Local'), lesao: g('Limitações'), comida: g('Alimentação') } });
+    save(); closeDialog(); rerender(); toast('Lead criado'); return;
+  }
+  if (f.id === 'f-lead-novo') {
+    (db.leads = db.leads || []).push({ id: uid(), nome: v('ln-nome'), whatsapp: v('ln-tel'), data: hoje(), estado: 'novo', respostas: { objetivo: v('ln-obj') } });
+    save(); closeDialog(); rerender(); toast('Lead criado'); return;
+  }
   if (f.id === 'f-aluno') {
     const dados = { nome: v('a-nome'), objetivo: v('a-objetivo'), telefone: v('a-tel'), inicio: v('a-inicio'), notas: v('a-notas') };
     if (!dados.nome) return;
@@ -1557,6 +1653,7 @@ function mergeRemoto(local, remote) {
   return out;
 }
 function rerenderSeguro() {
+  verificaNotifs();
   const ae = document.activeElement;
   if (dlg.open) return;
   if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName) && !ae.closest('#f-login')) return;
@@ -1793,6 +1890,10 @@ function viewDefinicoes() {
       <div class="field wide"><span>Fotos de resultados (até 4, com autorização)</span><div class="row">${((m.site || {}).fotos || []).map((f, k) => `<span class="foto-mini"><img src="${f.img}" alt=""><button class="btn ghost sm" data-act="site-foto-del" data-k="${k}" aria-label="Tirar foto">×</button></span>`).join('')}
         ${((m.site || {}).fotos || []).length < 4 ? `<label class="btn sm" style="cursor:pointer">+ Adicionar foto<input type="file" accept="image/*" id="site-foto" hidden></label>` : ''}</div></div>
     </div></div>
+  <div class="panel"><h3>Avisos (notificações)</h3><p class="muted small" style="margin:0">O sino no topo acende quando uma aluna finaliza um treino ou alguém faz o diagnóstico no site.</p>
+    <div class="small" style="display:grid;gap:4px"><span><b>Estado dos avisos do navegador:</b> ${'Notification' in window ? ({ granted: 'ativos', denied: 'bloqueados (desbloqueie nas definições do navegador)', default: 'desligados' })[Notification.permission] : 'este navegador não suporta'}</span></div>
+    ${'Notification' in window && Notification.permission === 'default' ? '<div class="row"><button class="btn primary" data-act="avisos-ativar">Ativar avisos no navegador</button></div>' : ''}
+    <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>
   <div class="panel"><h3>Os meus dados</h3><p class="muted small" style="margin:0">Guarde uma cópia de segurança dos seus alunos e treinos, ou restaure uma cópia antiga.</p>
     <div class="row"><a class="btn" href="#backup">Cópia de segurança</a><button class="btn" data-act="limites">Limites da Central</button></div></div>
   <div class="panel"><h3>Ajuda rápida</h3>
@@ -1848,6 +1949,7 @@ async function entraComSB(papel) {
   else { const a = db.alunos[0]; if (!a) throw new Error('Ainda não há dados. Tente outra vez daqui a pouco.'); setSessao({ papel: 'aluno', alunoId: a.id, nome: a.nome }); location.hash = 'meu-inicio'; }
   route();
 }
+document.addEventListener('click', ev => { const p = $('#sino-painel'); if (p && !p.hidden && !ev.target.closest('#sino-painel') && !ev.target.closest('#sino')) p.hidden = true; });
 document.addEventListener('submit', async ev => {
   const fid = ev.target.id;
   if (SBC && (fid === 'f-convite' || fid === 'f-signup' || fid === 'f-novasenha')) {
@@ -2373,8 +2475,8 @@ const SB = {
   leads: [], leadsT: 0,
   async carregaLeads() {
     SB.leadsT = Date.now();
-    const r = await SB.req('/rest/v1/leads?select=id,nome,whatsapp,respostas,contactado,created_at&order=created_at.desc&limit=50');
-    if (r.ok) { SB.leads = r.j; rerenderSeguro(); }
+    const r = await SB.req('/rest/v1/leads?select=id,nome,whatsapp,respostas,contactado,estado,created_at&order=created_at.desc&limit=200');
+    if (r.ok) { SB.leads = r.j.map(x => ({ id: x.id, nome: x.nome, whatsapp: x.whatsapp, respostas: x.respostas || {}, data: String(x.created_at).slice(0, 10), estado: x.estado || (x.contactado ? 'contactado' : 'novo'), remoto: true })); rerenderSeguro(); }
   },
   async novoConvite(a) {
     sync.dirty = true; await SB.push();

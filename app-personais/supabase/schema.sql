@@ -150,4 +150,8 @@ revoke all on public.site_publico from anon, authenticated;
 grant select on public.site_publico to anon, authenticated;
 grant insert, update, delete on public.site_publico to authenticated;
 
+-- Estado do lead: novo, contactado, aluna ou perdido
+alter table public.leads add column if not exists estado text not null default 'novo' check (estado in ('novo','contactado','aluna','perdido'));
+grant update (estado, contactado) on public.leads to authenticated;
+
 -- Fim. Nunca coloque a "service_role key" na app nem no GitHub.
