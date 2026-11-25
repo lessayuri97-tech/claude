@@ -131,4 +131,23 @@ grant insert on public.leads to anon, authenticated;
 grant select, delete on public.leads to authenticated;
 grant update (contactado) on public.leads to authenticated;
 
+-- =====================================================================
+-- Página de venda pública: depoimentos, fotos e WhatsApp escritos em Definições
+-- (conteúdo público de propósito: qualquer visitante pode ler)
+-- =====================================================================
+create table if not exists public.site_publico (
+  personal_id uuid primary key references auth.users(id) on delete cascade,
+  dados       jsonb not null default '{}'::jsonb check (pg_column_size(dados) < 900000),
+  updated_at  timestamptz not null default now()
+);
+alter table public.site_publico enable row level security;
+drop policy if exists site_le on public.site_publico;
+create policy site_le on public.site_publico for select to anon, authenticated using (true);
+drop policy if exists site_dono on public.site_publico;
+create policy site_dono on public.site_publico for all to authenticated
+  using (personal_id = auth.uid()) with check (personal_id = auth.uid());
+revoke all on public.site_publico from anon, authenticated;
+grant select on public.site_publico to anon, authenticated;
+grant insert, update, delete on public.site_publico to authenticated;
+
 -- Fim. Nunca coloque a "service_role key" na app nem no GitHub.
