@@ -513,6 +513,14 @@ body.papel-aluno .aluno-bar { display: none; }
 .mini-stats > div { border-radius: 18px !important; background: var(--surface); }
 body.modo-aluno .panel, body.papel-aluno .panel { border-radius: 18px; }
 body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
+.inst-card { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+.inst-card-ico { width: 44px; height: 44px; border-radius: 12px; background: var(--greige); color: #fff; display: grid; place-items: center; flex: none; }
+.inst-card-ico svg { width: 26px; height: 26px; }
+.inst-lista { display: grid; gap: 10px; }
+.inst-passo { display: flex; align-items: center; gap: 12px; background: var(--surface-2); border-radius: 16px; padding: 12px; }
+.inst-n { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; font-size: .85rem; flex: none; }
+.inst-ico { width: 48px; height: 48px; border-radius: 14px; background: var(--surface); color: var(--accent); display: grid; place-items: center; flex: none; border: 1px solid var(--line); }
+.inst-aviso { background: #fff7e6; color: #6b4a00; border-radius: 14px; padding: 12px; font-size: .92rem; }
 </style>
 </head>
 <body>
@@ -2126,11 +2134,68 @@ function suporteBtn(a) {
   const msg = `Oi! Aqui é ${a.nome.split(' ')[0]}. Preciso de ajuda com meu treino/dieta.`;
   return `<a class="btn primary" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" style="justify-content:center">Suporte no WhatsApp</a>`;
 }
+/* ---------- Instalar a app (tutorial para iPhone e Android) ---------- */
+let pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); pwaPrompt = e; try { if (getSessao() && getSessao().papel === 'aluno') rerenderSeguro(); } catch (x) {} });
+window.addEventListener('appinstalled', () => { try { localStorage.setItem(KEY + ':inst', 'ok'); } catch (e) {} pwaPrompt = null; try { closeDialog(); rerenderSeguro(); toast('App instalada! 🎉'); } catch (x) {} });
+const instLer = k => { try { return localStorage.getItem(KEY + ':' + k) || ''; } catch (e) { return ''; } };
+const instSalvar = (k, v) => { try { localStorage.setItem(KEY + ':' + k, v); } catch (e) {} };
+function jaInstalada() {
+  let app = false; try { app = matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true; } catch (e) {}
+  if (app && instLer('inst') !== 'ok') instSalvar('inst', 'ok');
+  return app || instLer('inst') === 'ok';
+}
+function aparelho() {
+  const ua = navigator.userAgent || '', ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const android = /Android/i.test(ua), embutido = /FBAN|FBAV|Instagram|Line\/|; wv\)|WhatsApp|MicroMessenger/i.test(ua);
+  const safari = ios && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  return { ios, android, embutido, safari, celular: ios || android };
+}
+const ICO = {
+  share: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8M8 12h8"/></svg>',
+  dots: '<svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>',
+  down: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>'
+};
+const passoInst = (n, ico, t, d) => `<div class="inst-passo"><span class="inst-n">${n}</span><span class="inst-ico">${ico}</span><div><b>${t}</b><div class="small muted">${d}</div></div></div>`;
+function passosInstalar(ap) {
+  if (ap.ios) {
+    return (ap.safari ? '' : `<div class="inst-aviso">Para instalar no iPhone, abra este endereço no <b>Safari</b> (o navegador azul com a bússola). ${esc(urlApp().replace('https://', ''))}</div>`)
+      + passoInst(1, ICO.share, 'Toque em Compartilhar', 'É o quadradinho com a seta pra cima, na barra do Safari (embaixo, ou em cima no iPad).')
+      + passoInst(2, ICO.plus, 'Adicionar à Tela de Início', 'Role o menu pra cima um pouquinho e toque nessa opção.')
+      + passoInst(3, ICO.ok, 'Toque em Adicionar', 'Pronto! O ícone da Squad aparece na tela do seu celular, como um app.');
+  }
+  if (ap.android) {
+    return (ap.embutido ? `<div class="inst-aviso">Você abriu por dentro de outro app. Toque no menu ⋮ e escolha <b>Abrir no Chrome</b> para instalar.</div>` : '')
+      + passoInst(1, ICO.dots, 'Toque no menu ⋮', 'São os três pontinhos, no canto de cima do Chrome.')
+      + passoInst(2, ICO.down, 'Instalar app', 'Ou "Adicionar à tela inicial", dependendo do seu celular.')
+      + passoInst(3, ICO.ok, 'Confirme', 'Toque em Instalar. O ícone da Squad aparece na tela do seu celular.');
+  }
+  return `<div class="inst-aviso">Abra este endereço no <b>celular</b> para instalar: <b>${esc(urlApp().replace('https://', ''))}</b>. No computador, você pode usar a app direto no navegador.</div>`;
+}
+function abreTutorialInstalar() {
+  const ap = aparelho();
+  openDialog(`<div class="row spread"><h2>Instale a app no seu celular</h2><button class="btn ghost" data-sact="inst-fechar" aria-label="Fechar">✕</button></div>
+    <p class="muted" style="margin:0">Assim a Squad fica na tela do celular, abre rápido e em tela cheia, como qualquer app. Leva 20 segundos.</p>
+    ${pwaPrompt && ap.android ? `<button class="btn primary" data-sact="inst-nativo" style="justify-content:center;min-height:54px;font-size:1.05rem">Instalar agora</button><div class="small muted" style="text-align:center">ou siga os passos abaixo</div>` : ''}
+    <div class="inst-lista">${passosInstalar(ap)}</div>
+    <div class="row" style="gap:8px"><button class="btn primary" data-sact="inst-ok" style="flex:1;justify-content:center">Já instalei</button><button class="btn" data-sact="inst-depois" style="flex:1;justify-content:center">Agora não</button></div>`);
+}
 function dicaInstalar() {
-  let fechada = false, app = false; try { fechada = localStorage.getItem(KEY + ':dica') === '1'; app = matchMedia('(display-mode: standalone)').matches || navigator.standalone; } catch (e) {}
-  if (fechada || app) return '';
-  return `<div class="panel" style="padding:12px 16px"><div class="row spread"><b>Deixe a app no tela do celular</b><button class="btn ghost sm" data-sact="fechar-dica">Já sei</button></div>
-    <div class="small muted">iPhone: toque em Partilhar e depois em "Adicionar ao tela de início". Android: toque no menu ⋮ e depois em "Instalar app".</div></div>`;
+  if (jaInstalada()) return '';
+  const ap = aparelho(); if (!ap.celular && !pwaPrompt) return '';
+  return `<div class="inst-card"><div class="inst-card-ico">${ICO.plus}</div><div style="flex:1;min-width:0"><b>Instale a app no seu celular</b><div class="small muted">Ícone na tela, abre em um toque.</div></div>
+    <button class="btn primary sm" data-sact="instalar-tut">Como instalar</button></div>`;
+}
+function atalhoInstalar() {
+  if (jaInstalada()) return `<div class="panel"><div class="eyebrow">App no celular</div><div class="row" style="gap:10px;color:var(--ok)">${ICO.ok}<b>App instalada</b></div></div>`;
+  return `<div class="panel"><div class="eyebrow">App no celular</div><p class="small muted" style="margin:0">Deixe a Squad na tela do celular, como um app.</p><button class="btn primary" data-sact="instalar-tut" style="justify-content:center">Instalar a app</button></div>`;
+}
+// primeira entrada: abre o tutorial uma vez (só em celular e só se ainda não instalada)
+function tutorialPrimeiraVez() {
+  if (jaInstalada() || instLer('instVisto') || !aparelho().celular) return;
+  instSalvar('instVisto', '1'); setTimeout(() => { if (!jaInstalada() && !(dlg && dlg.open)) abreTutorialInstalar(); }, 700);
 }
 function segundaDe(d) { const x = new Date(d + 'T12:00'); const k = (x.getDay() + 6) % 7; x.setDate(x.getDate() - k); return x.toISOString().slice(0, 10); }
 function progressoSemana(a) {
@@ -2152,6 +2217,7 @@ function semanaCard(a) {
     <div class="sem-bar" role="progressbar" aria-valuenow="${pr.pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pr.pct}%"></i></div></div>`;
 }
 function vInicio(a) {
+  tutorialPrimeiraVez();
   const prox = proximoTreino(a), u = ultimaSessao(a);
   const mes = hoje().slice(0, 7), noMes = a.sessoes.filter(s => s.data.startsWith(mes)).length;
   const emCurso = wk && wk.alunoId === a.id && a.treinos.find(t => t.id === wk.treinoId);
@@ -2254,6 +2320,7 @@ function vPerfil(a) {
     <div><b>${esc(marca().nome)}</b><div class="small muted">${esc(marca().sub)}</div></div></div>
     <div class="small muted">Dúvidas sobre o treino? Fale com a equipe Squad.</div>
     ${suporteBtn(a)}</div>
+  ${atalhoInstalar()}
   <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
   <div class="panel"><div class="eyebrow">Comentários</div><p style="margin:0" class="small muted">Dor, dúvida ou recado? O personal vê na sua ficha.</p>
@@ -2376,6 +2443,11 @@ document.addEventListener('click', ev => {
         <label class="field wide">Lesões, dores ou restrições?<textarea id="an-lesoes" placeholder="Ex.: dor no joelho direito. Se não tiver, escreva 'nenhuma'">${esc(x.lesoes || '')}</textarea></label>
         <label class="field wide">Como é a sua alimentação hoje? Alguma alergia ou alimento que não come?<textarea id="an-comida" placeholder="Ex.: pulo o café da manhã. Não como lactose">${esc(x.comida || '')}</textarea></label>
         </div><div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Agora não</button><button class="btn primary">Salvar</button></div></form>`); break; }
+    case 'instalar-tut': abreTutorialInstalar(); break;
+    case 'inst-fechar': closeDialog(); break;
+    case 'inst-ok': instSalvar('inst', 'ok'); closeDialog(); rerender(); toast('Que bom! Bom treino 💪'); break;
+    case 'inst-depois': closeDialog(); break;
+    case 'inst-nativo': if (pwaPrompt) { const pr = pwaPrompt; pwaPrompt = null; pr.prompt(); pr.userChoice.then(r => { if (r && r.outcome === 'accepted') { instSalvar('inst', 'ok'); closeDialog(); rerender(); } }).catch(() => {}); } break;
     case 'fechar-dica': try { localStorage.setItem(KEY + ':dica', '1'); } catch (e) {} rerender(); break;
     case 'refeicao': { const id = hoje() + '|' + b.dataset.ref, reg = (a.nutriReg = a.nutriReg || []), x = reg.find(q => q.id === id); if (x) { x.feito = !x.feito; x.ts = Date.now(); } else reg.push({ id, data: hoje(), refId: b.dataset.ref, feito: true, ts: Date.now() }); save(); rerender(); break; }
     case 'cancelar':
