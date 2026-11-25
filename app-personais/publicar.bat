@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Publicar PT example
+title Publicar Squad
 cd /d "%~dp0"
 echo ============================================
-echo   Publicar o PT example na Vercel
+echo   Publicar o Squad na Vercel
 echo ============================================
 echo.
 where node >nul 2>nul

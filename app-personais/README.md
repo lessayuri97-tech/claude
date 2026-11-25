@@ -1,4 +1,4 @@
-# PT example · app para personal trainers
+# Squad · app para personal trainers
 
 Webapp simples para personal trainers acompanharem alunos e planos de treino. Sem avatar, batalhas ou desafios.
 

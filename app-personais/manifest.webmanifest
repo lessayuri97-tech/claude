@@ -1,6 +1,6 @@
 {
-  "name": "PT example",
-  "short_name": "PT example",
+  "name": "Squad",
+  "short_name": "Squad",
   "description": "Alunos, planos de treino com vídeos do YouTube e evolução de cargas.",
   "lang": "pt-BR",
   "start_url": "/app",

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>PT example</title>
+<title>Squad</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1c1c1b" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="PT example">
+<meta name="apple-mobile-web-app-title" content="Squad">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -1342,7 +1342,7 @@ document.addEventListener('click', ev => {
 function restaurar(txt) {
   let novo;
   try { novo = JSON.parse(txt); } catch (e) { toast('Backup inválido. Confira se colou o texto inteiro.'); return; }
-  if (!novo || !Array.isArray(novo.alunos) || !Array.isArray(novo.exercicios)) { toast('Esse texto não é um backup do PT example.'); return; }
+  if (!novo || !Array.isArray(novo.alunos) || !Array.isArray(novo.exercicios)) { toast('Esse texto não é um backup do Squad.'); return; }
   confirmar('Substituir todos os dados por este backup?', 'Restaurar', () => { db = novo; save(); location.hash = 'alunos'; route(); toast('Backup restaurado'); });
 }
 
@@ -1660,7 +1660,7 @@ function vNutri(a) {
 }
 /* ================= MARCA DO PERSONAL ================= */
 const MKEY = KEY + ':marca';
-const MARCA_PADRAO = { nome: 'PT example', sigla: 'PT', cor: '#262625', logo: '', tel: '', boasVindas: '', sub: 'Personal Trainer' };
+const MARCA_PADRAO = { nome: 'Squad', sigla: 'SQ', cor: '#262625', logo: '', tel: '', boasVindas: '', sub: 'Treino e nutrição' };
 function marca() {
   let l = {}; try { l = JSON.parse(localStorage.getItem(MKEY) || '{}'); } catch (e) {}
   return Object.assign({}, MARCA_PADRAO, l, db && db.marca || {});
