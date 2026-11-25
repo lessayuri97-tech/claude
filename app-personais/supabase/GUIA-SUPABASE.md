@@ -19,7 +19,7 @@ Demora uns 10 minutos. É grátis. Faz isto uma vez só.
 1. Menu da esquerda: **Authentication** → **Sign In / Providers** (ou **Providers**) → **Email**.
 2. Desligue **Confirm email** e toque em **Save**.
    (Se deixar ligado, cada pessoa tem de abrir um e-mail antes de entrar. Funciona, mas dá mais passos aos alunos.)
-3. Em **Authentication** → **URL Configuration**, em **Site URL** escreva `https://pt-example.vercel.app` (provisório; depois do domínio próprio ligar, troque por `https://vemprosquad.com.br`) e guarde. Em **Redirect URLs** acrescente também `https://pt-example.vercel.app/**` (endereço alternativo). (Serve para o link de "esqueci a senha".)
+3. Em **Authentication** → **URL Configuration**, em **Site URL** escreva `https://www.vemprosquad.com.br` e guarde. Em **Redirect URLs** acrescente estas três (uma por linha): `https://www.vemprosquad.com.br/**`, `https://vemprosquad.com.br/**` e `https://pt-example.vercel.app/**`. (Serve para o link de "esqueci a senha".)
 
 ## 4. Copiar só duas coisas
 1. Menu da esquerda: **Project Settings** (a roda dentada) → **API** (ou **API Keys**).

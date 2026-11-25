@@ -27,7 +27,7 @@ Se o Vercel mostrar valores diferentes, **use os do Vercel** (são os certos par
 O Registro.br pode demorar de alguns minutos até 24 horas a propagar.
 
 ## 3. Confirmar
-Volte a **Settings → Domains** no Vercel. Quando aparecer **Valid Configuration** (visto verde), o site já abre em https://vemprosquad.com.br. O certificado (cadeado) é automático.
+Volte a **Settings → Domains** no Vercel. Quando aparecer **Valid Configuration** (visto verde), o site já abre em https://www.vemprosquad.com.br (o endereço sem www redireciona para ele). O certificado (cadeado) é automático.
 
 ## 4. Depois de funcionar
 - No Supabase: **Authentication → URL Configuration → Site URL** = `https://vemprosquad.com.br`.
