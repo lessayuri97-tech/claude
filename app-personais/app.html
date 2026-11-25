@@ -521,6 +521,25 @@ body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
 .inst-n { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; font-size: .85rem; flex: none; }
 .inst-ico { width: 48px; height: 48px; border-radius: 14px; background: var(--surface); color: var(--accent); display: grid; place-items: center; flex: none; border: 1px solid var(--line); }
 .inst-aviso { background: #fff7e6; color: #6b4a00; border-radius: 14px; padding: 12px; font-size: .92rem; }
+
+/* Central: mais amigável */
+.cc-resumo { margin: 6px 0 0; color: var(--muted); font-size: 1.02rem; }
+.cc-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
+.cc-tile { display: grid; gap: 2px; padding: 14px 16px; border-radius: 18px; border: 0 !important; }
+.cc-tile .cc-ico { font-size: 1.4rem; line-height: 1; margin-bottom: 4px; }
+.cc-tile b { font-size: 2rem; line-height: 1.05; }
+.cc-tile span:last-child { font-size: .9rem; color: var(--fg); opacity: .8; }
+.cc-tile.t-verde { background: color-mix(in srgb, #3f6b4f 16%, var(--surface)); } .cc-tile.t-rosa { background: color-mix(in srgb, #c98b84 20%, var(--surface)); } .cc-tile.t-areia { background: color-mix(in srgb, #b5a39a 22%, var(--surface)); } .cc-tile.t-azul { background: color-mix(in srgb, #8c93b8 20%, var(--surface)); }
+.cc-sec { font-size: 1.5rem; margin: 4px 0 12px; }
+.cc-aten { display: grid; gap: 10px; margin-bottom: 22px; }
+.cc-act { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--greige); border-radius: 16px; padding: 12px 14px; flex-wrap: wrap; }
+.cc-act.lead { border-left-color: #c98b84; } .cc-act.rever { border-left-color: var(--accent); } .cc-act.parada { border-left-color: #8c93b8; } .cc-act.nunca { border-left-color: #b5a39a; } .cc-act.plano { border-left-color: #7f9d89; } .cc-act.comida { border-left-color: #a8b88f; }
+.cc-act-ico { font-size: 1.5rem; width: 40px; height: 40px; display: grid; place-items: center; background: var(--surface-2); border-radius: 12px; flex: none; }
+.cc-act-t { display: grid; gap: 2px; flex: 1; min-width: 200px; }
+.cc-act-b { display: flex; gap: 8px; flex-wrap: wrap; }
+.cc-calmo { display: flex; align-items: center; gap: 14px; background: color-mix(in srgb, #3f6b4f 14%, var(--surface)); border-radius: 18px; padding: 18px; margin-bottom: 22px; }
+.cc-quieto { display: flex; gap: 8px; color: var(--muted); font-size: .95rem; padding: 10px 4px 24px; }
+@media (max-width: 760px) { .cc-tiles { grid-template-columns: repeat(2, 1fr); } .cc-act-b { width: 100%; } .cc-act-b .btn { flex: 1; justify-content: center; } }
 </style>
 </head>
 <body>
@@ -1258,6 +1277,7 @@ function viewLeads() {
     <div class="row"><a class="btn primary sm" target="_blank" rel="noopener" href="${waLead(l)}">Abrir WhatsApp</a>${l.estado === 'aluna' && l.alunoId && alunoById(l.alunoId) ? `<a class="btn sm" href="#aluno-${l.alunoId}">Ver ficha</a>` : `<button class="btn sm" data-act="lead-converter" data-id="${l.id}">Converter em aluna</button>`}<button class="btn ghost sm danger" data-act="lead-del" data-id="${l.id}">Apagar</button></div></article>`; }).join('')
   : `<div class="panel empty">${todos.length ? 'Nenhum lead neste estado.' : 'Ainda não há leads. Quando alguém fizer o diagnóstico no site, aparece aqui.'}</div>`}`;
 }
+function saudacao() { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 19 ? 'Boa tarde' : 'Boa noite'; }
 function viewCentral() {
   const cfg = cfgC(), h = hoje();
   const info = db.alunos.map(a => {
@@ -1269,24 +1289,58 @@ function viewCentral() {
   const nutriInfo = db.alunos.filter(a => a.nutri && a.nutri.refeicoes.length).map(a => { const ds = Array.from({ length: 30 }, (_, k) => isoDe(new Date(Date.now() - k * 864e5))); const ult = ds.find(d => a.nutri.refeicoes.some(r => refFeita(a, d, r.id))); return { a, dias: ult ? diasEntre(ult) : null }; });
   const semComida = nutriInfo.filter(x => x.dias === null || x.dias >= cfg.diasParado);
   const porRever = db.alunos.reduce((n, a) => n + a.sessoes.filter(x => x.revisto === false).length, 0);
-  const lnk = x => `<a class="cc-l" href="#aluno-${x.a.id}"><span class="avatar-ini" style="width:34px;height:34px;font-size:.85rem" aria-hidden="true">${esc(iniciais(x.a.nome))}</span>`;
-  const painel = (tit, n, cls, corpo, vazio) => `<section class="panel cc-p"><div class="row spread"><h3>${tit}</h3><span class="chip ${cls} num">${n}</span></div>${n ? corpo : `<div class="small muted">${vazio}</div>`}</section>`;
-  const tile = (n, t, cls) => `<div class="cc-tile ${cls || ''}"><b class="num">${n}</b><span>${t}</span></div>`;
-  const reais = db.alunos;
+  const leadsNovos = todosLeads().filter(l => l.estado === 'novo');
+  const av = (nome, px) => `<span class="avatar-ini" style="width:${px || 40}px;height:${px || 40}px;font-size:${Math.round((px || 40) * .38)}px" aria-hidden="true">${esc(iniciais(nome))}</span>`;
+  const waAl = (a, txt) => { const t = PTTel.wa(a.telefone); return t.length >= 9 ? `<a class="btn sm" target="_blank" rel="noopener" href="https://wa.me/${t}?text=${encodeURIComponent(txt)}">WhatsApp</a>` : ''; };
+  const pn = x => x.a.nome.split(' ')[0];
+
+  // O que precisa de atenção hoje
+  const acoes = [];
+  leadsNovos.slice(0, 5).forEach(l => acoes.push({ cls: 'lead', ico: '💌', nome: l.nome, tit: `Novo lead: ${esc(l.nome)}`, sub: [(l.respostas || {}).objetivo, (l.respostas || {}).dias].filter(Boolean).map(esc).join(' · ') || 'Fez o diagnóstico no site',
+    bot: `<a class="btn primary sm" target="_blank" rel="noopener" href="${waLead(l)}">Chamar no WhatsApp</a><a class="btn ghost sm" href="#leads">Ver lead</a>` }));
+  if (leadsNovos.length > 5) acoes.push({ cls: 'lead', ico: '💌', nome: 'Leads', tit: `Mais ${leadsNovos.length - 5} leads novos`, sub: 'Todos esperando um contato', bot: '<a class="btn sm" href="#leads">Ver todos</a>' });
+  if (porRever) acoes.push({ cls: 'rever', ico: '👀', nome: 'Rever', tit: `${porRever} ${porRever === 1 ? 'treino' : 'treinos'} para rever`, sub: 'Veja como foi e deixe um feedback para elas', bot: '<a class="btn primary sm" href="#rever">Rever agora</a>' });
+  nunca.slice(0, 4).forEach(x => acoes.push({ cls: 'nunca', ico: '🌱', nome: x.a.nome, tit: `${esc(x.a.nome)} ainda não treinou`, sub: x.a.treinos.length ? `${x.a.treinos.length} treino(s) no plano${x.a.inicio ? ' · desde ' + fmtData(x.a.inicio) : ''}` : 'Ainda sem plano de treino',
+    bot: `${waAl(x.a, `Oi, ${pn(x)}! Tudo bem? Seu treino já está pronto. Bora começar hoje? 💛`)}<a class="btn ghost sm" href="#aluno-${x.a.id}">Ver ficha</a>` }));
+  parados.slice(0, 4).forEach(x => acoes.push({ cls: 'parada', ico: '💤', nome: x.a.nome, tit: `${esc(x.a.nome)} está parada há ${x.dias} dias`, sub: `Último treino: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})`,
+    bot: `${waAl(x.a, `Oi, ${pn(x)}! Sentimos sua falta por aqui 💛 Vamos retomar o treino hoje? Estamos juntas!`)}<a class="btn ghost sm" href="#aluno-${x.a.id}">Ver ficha</a>` }));
+  rever.slice(0, 3).forEach(x => acoes.push({ cls: 'plano', ico: '🔄', nome: x.a.nome, tit: `Revisar o plano de ${esc(x.a.nome)}`, sub: x.rev.motivos.concat(x.rev.geral).slice(0, 2).map(m => esc(m.txt)).join(' · '),
+    bot: `<a class="btn sm" href="#aluno-${x.a.id}">Ver ficha</a><button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button>` }));
+  semComida.slice(0, 2).forEach(x => acoes.push({ cls: 'comida', ico: '🥗', nome: x.a.nome, tit: `${esc(x.a.nome)} sem registrar a comida`, sub: x.dias === null ? 'Ainda não marcou nenhuma refeição' : `há ${x.dias} dias`,
+    bot: `${waAl(x.a, `Oi, ${pn(x)}! Como está a alimentação? Lembra de marcar as refeições no app 💛`)}<a class="btn ghost sm" href="#aluno-${x.a.id}">Ver ficha</a>` }));
+  const total = leadsNovos.length + (porRever ? 1 : 0) + nunca.length + parados.length + rever.length + semComida.length;
+  const resumo = total ? `Você tem ${total} ${total === 1 ? 'coisa' : 'coisas'} para olhar hoje.` : 'Tudo em dia por aqui. Bom trabalho! ✨';
+
+  const tile = (ico, n, t, cls) => `<div class="cc-tile ${cls}"><span class="cc-ico" aria-hidden="true">${ico}</span><b class="num">${n}</b><span>${t}</span></div>`;
+  const tilesH = tile('💪', treinaram.length, treinaram.length === 1 ? 'treinou hoje' : 'treinaram hoje', 't-verde')
+    + tile('💌', leadsNovos.length, leadsNovos.length === 1 ? 'lead novo' : 'leads novos', 't-rosa')
+    + tile('🌱', nunca.length, 'ainda não treinaram', 't-areia')
+    + tile('💤', parados.length, `paradas há ${cfg.diasParado}+ dias`, 't-azul');
+
+  const atencao = acoes.length
+    ? `<div class="cc-aten">${acoes.map(a => `<div class="cc-act ${a.cls}"><span class="cc-act-ico">${a.ico}</span><div class="cc-act-t"><b>${a.tit}</b><span class="small muted">${a.sub}</span></div><div class="cc-act-b">${a.bot}</div></div>`).join('')}</div>`
+    : `<div class="cc-calmo"><span style="font-size:2rem">✨</span><div><b>Tudo em dia!</b><div class="small muted">Nenhum lead esperando, nada para rever e todas as alunas em movimento.</div></div></div>`;
+
+  const festa = treinaram.length ? `<section class="panel cc-p"><div class="row spread"><h3>🎉 Treinaram hoje</h3><span class="chip ok num">${treinaram.length}</span></div>
+    <div class="small muted" style="margin-bottom:4px">${treinaram.length === 1 ? 'Mais uma aluna cuidando de si!' : 'Que dia! Elas estão arrasando.'}</div>
+    ${treinaram.map(x => `<a class="cc-l" href="#aluno-${x.a.id}">${av(x.a.nome, 34)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join('')}</section>` : '';
+  const tranq = [];
+  if (!treinaram.length) tranq.push('Ninguém treinou ainda hoje');
+  if (!parados.length) tranq.push('ninguém parada há muito tempo');
+  if (!nunca.length) tranq.push('todas já começaram a treinar');
+  if (!rever.length) tranq.push('nenhum plano pedindo revisão');
+  if (!leadsNovos.length) tranq.push('sem leads novos esperando');
+  const calma = tranq.length ? `<div class="cc-quieto">😌 <span>Tranquilo por aqui: ${tranq.join(', ')}.</span></div>` : '';
+  const nomes = db.alunos.length ? '' : `<div class="panel empty"><h2>Bem-vinda à Central</h2><p>Quando as alunas chegarem, você vê aqui quem precisa de atenção. Comece em <a href="#alunos">Alunas</a> ou aguarde os leads do diagnóstico.</p></div>`;
   return `${bannerExemplo()}
-  <div class="page-head"><div><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Central de clientes</h1></div>
-    <div class="row">${porRever ? `<a class="btn primary" href="#rever">${porRever} ${porRever === 1 ? 'treino' : 'treinos'} por rever</a>` : ''}<button class="btn" data-act="limites">Limites</button></div></div>
-  <div class="cc-tiles">${tile(treinaram.length, 'treinaram hoje', 'ok')}${tile(parados.length, `parados há ${cfg.diasParado}+ dias`, parados.length ? 'alerta' : '')}${tile(nunca.length, 'nunca treinaram', nunca.length ? 'alerta' : '')}${tile(rever.length, 'podem precisar de nova revisão do plano', rever.length ? 'info' : '')}</div>
-  <div class="cc-grid">
-    ${painel('Treinaram hoje', treinaram.length, 'ok', treinaram.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.hoje.map(s => esc(s.treinoNome || 'Treino')).join(', ')}${x.hoje[0].rpe !== '' && x.hoje[0].rpe != null ? ' · PSE ' + esc(x.hoje[0].rpe) : ''}</span></span></a>`).join(''), 'Ainda ninguém treinou hoje.')}
-    ${painel(`Parados há ${cfg.diasParado} ou mais dias`, parados.length, 'accent', parados.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">há ${x.dias} dias · último: ${esc(x.u.treinoNome || 'Treino')} (${fmtData(x.u.data)})</span></span></a>`).join(''), 'Todos treinaram recentemente.')}
-    ${painel('Nunca treinaram', nunca.length, 'accent', nunca.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.a.treinos.length ? x.a.treinos.length + ' treino(s) no plano' : 'sem plano ainda'}${x.a.inicio ? ' · aluno desde ' + fmtData(x.a.inicio) : ''}</span></span></a>`).join(''), 'Todos já fizeram pelo menos um treino.')}
-    ${(() => { const nv = todosLeads().filter(l => l.estado === 'novo'); return painel('Leads novos do diagnóstico', nv.length, 'accent', nv.slice(0, 5).map(l => `<div class="cc-rev"><span><b>${esc(l.nome)}</b><span class="small muted">${esc((l.respostas || {}).objetivo || '')} · ${esc((l.respostas || {}).dias || '')} · ${fmtData(l.data)}</span></span>
-      <a class="btn sm" target="_blank" rel="noopener" href="${waLead(l)}">WhatsApp</a></div>`).join('') + '<a class="small" href="#leads">Ver todos os leads →</a>', 'Quando alguém fizer o diagnóstico no site, aparece aqui. <a href="#leads">Ver leads</a>'); })()}
-    ${painel('Sem registar comida há ' + cfg.diasParado + '+ dias', semComida.length, 'accent', semComida.map(x => `${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.dias === null ? 'ainda não marcou nenhuma refeição' : 'há ' + x.dias + ' dias'}</span></span></a>`).join(''), nutriInfo.length ? 'Todas as alunas com plano alimentar estão a registar.' : 'Quando montares um plano alimentar, vês aqui quem não está a seguir.')}
-    ${painel('Podem precisar de nova revisão do plano', rever.length, 'tec', rever.map(x => `<div class="cc-rev">${lnk(x)}<span><b>${esc(x.a.nome)}</b><span class="small muted">${x.rev.motivos.concat(x.rev.geral).slice(0, 3).map(m => esc(m.txt)).join(' · ')}</span></span></a>
-      <button class="btn ghost sm" data-act="plano-revisto" data-id="${x.a.id}" title="Ignora estas sessões nas próximas verificações">Plano revisto</button></div>`).join(''), 'Ninguém com sinais de progressão por agora.')}
-  </div>`;
+  <div class="page-head"><div><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>${saudacao()}, equipe!</h1><p class="cc-resumo">${resumo}</p></div>
+    <div class="row"><button class="btn" data-act="limites" title="Ajustar quando considerar uma aluna parada">Ajustes</button></div></div>
+  <div class="cc-tiles">${tilesH}</div>
+  <h2 class="cc-sec">O que precisa de atenção hoje</h2>
+  ${atencao}
+  ${nomes}
+  ${festa}
+  ${calma}`;
 }
 function viewRever() {
   const todos = [];
