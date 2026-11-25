@@ -1,6 +1,6 @@
 # Ligar o domínio vemprosquad.com.br à app
 
-Demora uns 10 minutos, mais o tempo da internet "aprender" o endereço (de minutos até algumas horas). O endereço `squad.vercel.app` continua a funcionar como alternativa.
+Demora uns 10 minutos, mais o tempo da internet "aprender" o endereço (de minutos até algumas horas). O endereço `pt-example.vercel.app` continua a funcionar como alternativa.
 
 ## 1. No Vercel
 1. Abra o projeto **squad** → **Settings** → **Domains**.
