@@ -4,4 +4,4 @@
 // Enquanto estiver vazio, a app funciona só em modo demonstração (dados no próprio aparelho).
 // whatsapp: número do personal com indicativo, só números (ex.: '351912345678'). Recebe as mensagens do diagnóstico.
 // leadsPara: o id da conta do personal no Supabase (o Claude preenche) para guardar os diagnósticos.
-window.PT_SUPABASE = { url: '', anonKey: 'sb_publishable_mKvmOiJiHcU6gK3liucz9g_rCTojzhw', whatsapp: '', leadsPara: '' };
+window.PT_SUPABASE = { url: 'https://aiwnrizdmjnpksvdntnt.supabase.co', anonKey: 'sb_publishable_mKvmOiJiHcU6gK3liucz9g_rCTojzhw', whatsapp: '', leadsPara: '' };
