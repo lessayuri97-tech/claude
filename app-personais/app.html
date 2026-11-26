@@ -459,7 +459,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
 .tabbar-aluno { display: none; }
 body.modo-aluno .topbar .nav, body.modo-aluno .tabbar { display: none !important; }
 body.modo-aluno main.wrap { max-width: 600px; padding-block: 12px calc(100px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
-body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(7, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
   padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
 .tabbar-aluno a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; max-width: 140px; width: 100%; margin: 0 auto; }
 .tabbar-aluno svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -468,6 +468,10 @@ body.modo-aluno [data-act=del-medida], body.modo-aluno [data-act=del-sessao] { d
 body.modo-aluno .toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
 .aluno-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 8px 10px; }
 .aluno-bar .btn { margin-left: auto; }
+.perfil-top { display: none; align-items: center; gap: 8px; margin-left: auto; padding: 3px 12px 3px 3px; border-radius: 999px; border: 1px solid var(--line); text-decoration: none; color: var(--fg); font-weight: 600; font-size: .9rem; min-height: 40px; }
+.perfil-top[aria-current] { background: var(--accent-soft); border-color: var(--accent); }
+body.modo-aluno .perfil-top, body.papel-aluno .perfil-top { display: inline-flex; }
+body.modo-aluno #btn-sair, body.papel-aluno #btn-sair { margin-left: 0; }
 .ola h1 { font-size: 2.1rem; }
 .ola .eyebrow::first-letter { text-transform: uppercase; }
 .semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
@@ -624,6 +628,7 @@ body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
       <a href="#definicoes" data-nav="definicoes">Definições</a>
     </nav>
     <span style="position:relative"><button class="btn ghost sm" id="sino" data-act="sino" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="nav-badge" id="sino-n" hidden></span></button><div id="sino-painel" class="sino-painel" hidden></div></span>
+    <a id="btn-perfil" class="perfil-top" href="#meu-perfil" aria-label="Meu perfil"></a>
     <button class="btn ghost sm" id="btn-sair" data-sact="logout" type="button">Sair</button>
   </div>
 </header>
@@ -3126,6 +3131,7 @@ function iniciarTreino(a, t) {
 function shell(content, aba) {
   const a = alunoAtivo();
   const t = (k, href, label, icon) => `<a href="#${href}" class="${aba === k ? 'on' : ''}" ${aba === k ? 'aria-current="page"' : ''}>${icon}<span>${label}</span></a>`;
+  setTimeout(() => { const el = document.getElementById('btn-perfil'); if (!el) return; el.innerHTML = (typeof comuAtiva === 'function' && comuAtiva() ? avatarHtml(sbS.uid, a.nome, comu.perfil ? comu.perfil.foto_v : 0, 34, false) : `<span class="avatar-ini" style="width:34px;height:34px;font-size:.85rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>`) + `<span>${esc(a.nome.split(' ')[0])}</span>`; if (aba === 'perfil') el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); }, 0);
   return `<div class="aluno-bar"><span class="chip accent">Visão da aluna</span><b class="small">${esc(a.nome.split(' ')[0])}</b>
     <a class="btn sm" href="#aluno-${a.id}" data-sact="sair">Voltar ao personal</a></div>
   ${content}
@@ -3136,7 +3142,6 @@ function shell(content, aba) {
     ${t('evolucao', 'minha-evolucao', 'Evolução', '<svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M5 15l4-4 4 3 6-7"/><path d="M15 7h4v4"/></svg>')}
     ${t('dietbox', 'minha-dietbox', 'Dietbox', '<svg viewBox="0 0 24 24"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg>')}
     ${t('comunidade', 'minha-comunidade', 'Feed', '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>')}
-    ${t('perfil', 'meu-perfil', 'Perfil', '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>')}
   </nav>`;
 }
 
