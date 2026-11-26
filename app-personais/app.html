@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
 <style>
 /* Layout: barra superior fixa + coluna única de conteúdo (máx. 1040px); fichas de treino em linhas tipo planilha que viram cartões no celular */
 :root {
@@ -30,13 +30,13 @@
   --accent-ink: #ffffff;
   --accent-soft: #E3E1EA;
   --greige: #CDC9C0;
-  --font-serif: "Instrument Serif", "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-serif: "Plus Jakarta Sans", "Hanken Grotesk", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --ok: #3f6b4f;
   --ok-soft: #e1ebe3;
   --danger: #a3332d;
   --danger-soft: #f5e1df;
-  --font-display: "Hanken Grotesk", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-body: "Hanken Grotesk", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Hanken Grotesk", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: "Plus Jakarta Sans", "Hanken Grotesk", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --radius: 10px;
   color-scheme: light;
 }
@@ -62,7 +62,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
-h1, h2, h3 { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: 0; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--font-serif); font-style: normal; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; margin: 0; text-wrap: balance; }
 h1 { font-size: 2rem; }
 h2 { font-size: 1.5rem; }
 h3 { font-size: 1.2rem; }
@@ -84,7 +84,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .foto-mini button { position: absolute; top: -6px; right: -6px; padding: 0 6px; min-height: 22px; background: var(--surface); border-radius: 99px; }
 .afirma { background: var(--greige); color: #3C3E52; border-radius: var(--radius); padding: 18px; text-align: center; }
 .afirma .eyebrow { color: #4a4a58; }
-.afirma q { display: block; font-family: var(--font-serif); font-style: italic; font-size: 1.35rem; line-height: 1.25; margin-top: 6px; quotes: none; }
+.afirma q { display: block; font-family: var(--font-serif); font-weight: 600; font-size: 1.2rem; line-height: 1.25; margin-top: 6px; quotes: none; }
 /* Notificações */
 body.sem-login #sino, body.modo-aluno #sino { display: none !important; }
 #sino { position: relative; display: inline-flex; align-items: center; }
@@ -101,8 +101,10 @@ body.sem-login #sino, body.modo-aluno #sino { display: none !important; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--fg); }
 .brand-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
 .brand-mark svg { width: 22px; height: 22px; }
-.brand b { font-family: var(--font-serif); font-weight: 400; font-size: 1.35rem; letter-spacing: .14em; text-transform: uppercase; }
+.brand b { font-family: var(--font-serif); font-weight: 800; font-size: 1.35rem; letter-spacing: .14em; text-transform: uppercase; }
 .brand-logo { display: inline-flex; align-items: center; }
+.brand-txt { font-size: .66rem; font-weight: 600; letter-spacing: .06em; white-space: nowrap; line-height: 1.2; } .brand-txt b { font-weight: 800; letter-spacing: .1em; }
+@media (max-width: 360px) { .brand-txt { font-size: .58rem; } }
 .logo-d { display: none !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .logo-l { display: none !important; } :root:not([data-theme="light"]) .logo-d { display: block !important; } }
 :root[data-theme="dark"] .logo-l { display: none !important; } :root[data-theme="dark"] .logo-d { display: block !important; }
@@ -601,7 +603,7 @@ body.papel-aluno .aluno-bar { display: none; }
 .hoje-card .btn { min-height: 52px; font-size: 1.05rem; }
 .afirma { background: var(--greige); border: 0 !important; border-radius: 22px; color: #fff; padding: 20px !important; }
 .afirma .eyebrow { color: rgba(255,255,255,.85) !important; }
-.afirma q { display: block; font-family: var(--font-serif); font-style: italic; font-size: 1.5rem; line-height: 1.2; quotes: none; margin-top: 6px; }
+.afirma q { display: block; font-family: var(--font-serif); font-weight: 600; font-size: 1.3rem; line-height: 1.2; quotes: none; margin-top: 6px; }
 .mini-stats > div { border-radius: 18px !important; background: var(--surface); }
 body.modo-aluno .panel, body.papel-aluno .panel { border-radius: 18px; }
 body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
@@ -2580,7 +2582,7 @@ function aplicaMarca() {
   const ok = /^#[0-9a-f]{6}$/i.test(m.cor);
   if (ok && m.cor.toLowerCase() !== MARCA_PADRAO.cor) { r.setProperty('--accent', m.cor); r.setProperty('--accent-ink', inkPara(m.cor)); r.setProperty('--accent-soft', `color-mix(in srgb, ${m.cor} 14%, var(--surface))`); }
   else { r.removeProperty('--accent'); r.removeProperty('--accent-ink'); r.removeProperty('--accent-soft'); }
-  const t = document.getElementById('brand-top'); if (t) t.innerHTML = marcaMark(40);
+  const t = document.getElementById('brand-top'); if (t) t.innerHTML = marcaMark(40) + '<span class="brand-txt"><b>SQUAD</b> | CONSULTORIA FITNESS</span>';
   document.title = m.nome;
   try { localStorage.setItem(MKEY, JSON.stringify({ nome: m.nome, sigla: m.sigla, cor: m.cor, logo: m.logo, sub: m.sub })); } catch (e) {}
 }
