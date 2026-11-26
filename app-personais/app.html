@@ -296,6 +296,12 @@ body.papel-aluno .hoje-card, body.modo-aluno .hoje-card { padding: 16px; gap: 4p
 .nu-card { padding: 12px 14px; gap: 8px; }
 .nu-m { gap: 2px; }
 .plano-card { padding: 14px; gap: 10px; }
+.pz { display: block; flex: none; } .pz-bg { fill: none; stroke: var(--surface-2); stroke-width: 5; } .pz-s { fill: none; stroke-width: 5; } .pz-p { stroke: #d9627f; } .pz-c { stroke: #e8a838; } .pz-f { stroke: #4a9bd1; }
+.pz-k { font: 700 8px var(--font-body); fill: var(--fg); text-anchor: middle; } .pz-k2 { font-size: 9.5px; } .pz-u { font: 500 3.6px var(--font-body); fill: var(--muted); text-anchor: middle; }
+.pz-wrap { display: flex; align-items: center; gap: 14px; } .pz-leg { display: grid; gap: 5px; flex: 1; min-width: 0; } .pz-l b { white-space: nowrap; } .pz-l { display: grid; grid-template-columns: 12px 1fr auto 36px; gap: 6px; align-items: center; font-size: .85rem; } .pz-l .muted { text-align: right; }
+.pz-dot { width: 10px; height: 10px; border-radius: 50%; display: block; } .pz-bg-p { background: #d9627f; } .pz-bg-c { background: #e8a838; } .pz-bg-f { background: #4a9bd1; }
+.pz-mini { display: inline-flex; align-items: center; gap: 8px; } .pz-txt { color: var(--muted); }
+.nu-dia .pz-wrap { margin-bottom: 6px; }
 .avatar-ini.av-eq { background: var(--accent); color: #fff; }
 .cp-novo { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
 .cp-novo textarea { width: 100%; resize: vertical; min-height: 56px; }
@@ -2102,7 +2108,21 @@ const refFeita = (a, dia, rid) => { const x = (a.nutriReg || []).find(q => q.id 
 const aguaDe = (a, dia) => { const x = (a.agua || []).find(q => q.id === dia); return x ? x.copos : 0; };
 function barra(v, meta, cls) { const pc = meta > 0 ? Math.min(100, Math.round(v / meta * 100)) : 0; return `<div class="nu-bar ${cls || ''}"><i style="width:${pc}%"></i></div>`; }
 function macroLinha(rot, v, meta, un) { return `<div class="nu-m"><div class="row spread small"><span>${rot}</span><span class="num"><b>${Math.round(v)}</b>${meta ? ' / ' + Math.round(meta) : ''} ${un}</span></div>${meta ? barra(v, meta) : ''}</div>`; }
-function resumoDia(n, tot) { const m = n.metas; return `${macroLinha('Calorias', tot.k, +m.kcal, 'kcal')}${macroLinha('Proteína', tot.p, +m.p, 'g')}${macroLinha('Carboidratos', tot.c, +m.c, 'g')}${macroLinha('Gordura', tot.f, +m.f, 'g')}`; }
+function resumoDia(n, tot, plan) { const m = n.metas, z = plan || tot; return `${pizzaBloco(z.p, z.c, z.f, z.k, 104, [m.p, m.c, m.f])}${macroLinha('Calorias', tot.k, +m.kcal, 'kcal')}`; }
+/* ================= MACROS EM MODO PIZZA ================= */
+function pizza(p, c, f, kcal, px, rot) {
+  p = +p || 0; c = +c || 0; f = +f || 0;
+  const e = [p * 4, c * 4, f * 9], tot = e[0] + e[1] + e[2], k = Math.round(+kcal || tot);
+  let acc = 0; const seg = ['p', 'c', 'f'].map((n, i) => { const pc = tot > 0 ? e[i] / tot * 100 : 0, s = pc > 0 ? `<circle class="pz-s pz-${n}" cx="18" cy="18" r="15.9155" stroke-dasharray="${Math.max(0, pc - (pc < 100 ? .6 : 0)).toFixed(2)} ${(100 - Math.max(0, pc - (pc < 100 ? .6 : 0))).toFixed(2)}" stroke-dashoffset="${(25 - acc).toFixed(2)}"/>` : ''; acc += pc; return s; }).join('');
+  const txt = px >= 80 ? `<text x="18" y="18.2" class="pz-k">${k}</text><text x="18" y="23.2" class="pz-u">${rot || 'kcal'}</text>` : `<text x="18" y="21" class="pz-k pz-k2">${k}</text>`;
+  return `<svg class="pz" viewBox="0 0 36 36" width="${px}" height="${px}" role="img" aria-label="${k} kcal: proteína ${Math.round(p)} g, carboidratos ${Math.round(c)} g, gordura ${Math.round(f)} g"><circle class="pz-bg" cx="18" cy="18" r="15.9155"/>${seg}${txt}</svg>`;
+}
+function pzLeg(p, c, f, mt) {
+  const e = [p * 4, c * 4, f * 9], t = e[0] + e[1] + e[2] || 1;
+  return [['p', 'Proteína', p, e[0]], ['c', 'Carboidratos', c, e[1]], ['f', 'Gordura', f, e[2]]].map(([n, nome, g, en]) => `<div class="pz-l"><i class="pz-dot pz-bg-${n}"></i><span>${nome}</span><b class="num">${r1(g)}${mt && +mt[['p','c','f'].indexOf(n)] ? ' / ' + Math.round(mt[['p','c','f'].indexOf(n)]) : ''} g</b><span class="muted num">${Math.round(en / t * 100)}%</span></div>`).join('');
+}
+function pizzaMini(t) { return `<span class="pz-mini">${pizza(t.p, t.c, t.f, t.k, 46)}<span class="pz-txt small num">P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}</span></span>`; }
+function pizzaBloco(p, c, f, kcal, px, mt) { return `<div class="pz-wrap">${pizza(p, c, f, kcal, px || 92)}<div class="pz-leg">${pzLeg(+p || 0, +c || 0, +f || 0, mt)}</div></div>`; }
 const NOTA_ORIENTACAO = 'Este plano é uma orientação geral e não substitui o acompanhamento médico ou de um(a) nutricionista.';
 function sugestaoMetas(a) {
   const med = a.medidas.filter(x => x.peso !== '' && x.peso != null).sort((x, y) => y.data.localeCompare(x.data))[0];
@@ -2176,7 +2196,7 @@ function tabNutri(a) {
     return `<section class="panel nu-ref" aria-label="${esc(r.nome)}">
       <div class="row" style="gap:10px;flex-wrap:wrap"><span class="nu-em" aria-hidden="true">${emoRef(r.nome)}</span><input type="text" class="nu-nome" value="${esc(r.nome)}" placeholder="Nome da refeição" ${d(`data-nu="r-nome" data-ref="${r.id}"`)} aria-label="Nome da refeição">
         <input type="time" value="${esc(r.hora || '')}" ${d(`data-nu="r-hora" data-ref="${r.id}"`)} aria-label="Hora" style="width:110px">
-        <span class="small muted num" id="mt-${r.id}" style="margin-left:auto">${Math.round(t.k)} kcal · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}</span>
+        <span id="mt-${r.id}" style="margin-left:auto">${pizzaMini(t)}</span>
         <div class="row" style="gap:2px"><button class="btn ghost icon" data-act="nu-mover" data-dir="-1" data-id="${a.id}" data-ref="${r.id}" ${ri === 0 ? 'disabled' : ''} aria-label="Subir refeição">↑</button><button class="btn ghost icon" data-act="nu-mover" data-dir="1" data-id="${a.id}" data-ref="${r.id}" ${ri === P.refeicoes.length - 1 ? 'disabled' : ''} aria-label="Descer refeição">↓</button><button class="btn ghost icon" data-act="nu-dup-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Duplicar refeição" title="Duplicar">⧉</button><button class="btn ghost icon danger" data-act="nu-del-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Excluir refeição">✕</button></div></div>
       ${r.itens.length ? `<div class="nu-cab"><span>Alimento</span><span>Gramas</span><span>kcal</span><span>Prot.</span><span>Carb.</span><span>Gord.</span><span></span></div>` : ''}
       ${r.itens.map(i => `<div class="nu-itw"><div class="nu-it"><input type="text" list="lista-alim" value="${esc(i.nome)}" placeholder="Escreva ou escolha o alimento" ${d(`data-nu="i-nome" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Alimento">
@@ -2206,7 +2226,7 @@ function adesaoNutri(a) {
 }
 function refreshNu(a) {
   const n = nutri(a), P = planoSel(a); const e = document.getElementById('nu-dia'); if (e) e.innerHTML = `<div class="eyebrow">Este plano soma</div>${resumoDia(n, totDia(P))}`;
-  P.refeicoes.forEach(r => { const t = totRef(r), el = document.getElementById('mt-' + r.id); if (el) el.textContent = `${Math.round(t.k)} kcal · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}`; r.itens.forEach(i => { const m = document.getElementById('nm-' + i.id); if (m) m.textContent = medidaItem(i); }); });
+  P.refeicoes.forEach(r => { const t = totRef(r), el = document.getElementById('mt-' + r.id); if (el) el.innerHTML = pizzaMini(t); r.itens.forEach(i => { const m = document.getElementById('nm-' + i.id); if (m) m.textContent = medidaItem(i); }); });
 }
 function textoNutri(a) {
   const n = nutri(a), m = n.metas, l = [`PLANO ALIMENTAR · ${a.nome}`];
@@ -2227,10 +2247,10 @@ function vNutri(a) {
   const feitas = refs.filter(r => refFeita(a, dia, r.id)).length, tot = totDia(P, true, a, dia), copos = aguaDe(a, dia), alvoA = +m.agua || 8;
   return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><div class="row spread" style="align-items:flex-end;gap:8px"><h1>Comida</h1><a class="btn sm" href="#minha-dietbox">🥗 Dietbox</a></div>${n.extras.length ? `<p class="incentivo">Hoje: <b>${esc(nomePlano(n, P))}</b></p>` : ''}</div>
   <div class="panel"><div class="row spread"><b>${feitas} de ${refs.length} refeições feitas</b><span class="chip ${feitas === refs.length ? 'ok' : 'accent'} num">${Math.round(feitas / refs.length * 100)}%</span></div>
-    ${barra(feitas, refs.length, 'grande')}${m.kcal ? resumoDia(n, tot) : ''}</div>
+    ${barra(feitas, refs.length, 'grande')}${m.kcal ? resumoDia(n, tot, totDia(P)) : ''}</div>
   <div class="panel agua" style="padding:12px 16px"><div class="row spread" style="gap:10px;flex-wrap:nowrap"><b>💧 Água <span class="num small muted">${copos}/${alvoA}</span></b><div class="row" style="gap:8px;flex:none"><button class="btn sm" data-sact="agua" data-d="-1" aria-label="Menos um copo">−</button><button class="btn sm primary" data-sact="agua" data-d="1">+ 1 copo</button></div></div>${barra(copos, alvoA)}</div>
   ${refs.map(r => { const t = totRef(r), f = refFeita(a, dia, r.id);
-    return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${emoRef(r.nome)} ${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div></div>
+    return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${emoRef(r.nome)} ${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div>${pizzaMini(t)}</div>
       <button class="nu-check" data-sact="refeicao" data-ref="${r.id}" aria-pressed="${f}" aria-label="${f ? 'Desmarcar' : 'Marcar'} ${esc(r.nome)} como feita">${f ? '✓ Feita' : 'Marcar feita'}</button></div>
       <ul class="nu-lista">${r.itens.map(i => { const md = medidaItem(i); return `<li><span>${i.rec ? '' : '<span aria-hidden="true">' + emo(i.nome) + '</span> '}${esc(i.nome)}${md ? `<span class="small muted nu-md"> ${esc(md)}</span>` : ''}${i.sub ? `<span class="small muted nu-md" style="display:block">${esc(i.sub)}</span>` : ''}${i.rec ? `<button class="btn ghost sm" data-act="rec-ver" data-ref="${r.id}" data-item="${i.id}" style="margin-top:4px">📖 Ver receita</button>` : ''}</span><span class="num muted">${i.g ? esc(i.g) + ' g' : ''}</span></li>`; }).join('') || '<li class="muted">Sem alimentos definidos.</li>'}</ul>
       ${r.nota ? `<div class="dica">${esc(r.nota)}</div>` : ''}
@@ -2440,7 +2460,7 @@ function dbxLista() {
   } else {
     const l = todasReceitas().filter(r => (!d.rf || r.ref === d.rf) && (!q || norm(r.nome).includes(q)));
     el.innerHTML = (d.rf === '' && !q ? '' : '') + (l.length ? l.map(r => { const x = receitaPorcao(r, 1), meu = !!r.fixo;
-      return `<div class="dbx-row dbx-rec"><span class="dbx-e" aria-hidden="true">${r.emoji || '🍽️'}</span><div class="dbx-n"><b>${esc(r.nome)}</b>${meu ? ' <span class="chip">Minha</span>' : ''}<div class="small muted">${r.tempo ? r.tempo + ' min · ' : ''}${esc(REC_REF[r.ref] || 'Receita')}</div><div class="small num">${x.k} kcal · P ${x.p} · C ${x.c} · G ${x.f}</div>
+      return `<div class="dbx-row dbx-rec"><span class="dbx-e" aria-hidden="true">${r.emoji || '🍽️'}</span><div class="dbx-n"><b>${esc(r.nome)}</b>${meu ? ' <span class="chip">Minha</span>' : ''}<div class="small muted">${r.tempo ? r.tempo + ' min · ' : ''}${esc(REC_REF[r.ref] || 'Receita')}</div>${pizzaMini(x)}
         <details class="dbx-det"><summary class="small">Ver ingredientes e preparo</summary><ul class="dbx-ul">${x.ing.map(([n, g]) => `<li>${emo(n)} ${esc(n)} <span class="muted num">${g} g</span></li>`).join('')}</ul>${(r.preparo || []).length ? `<ol class="dbx-prep">${r.preparo.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}</details></div>
         <div class="dbx-q"><input type="number" class="num" min="0.5" step="0.5" value="1" aria-label="Porções de ${esc(r.nome)}"><span class="small muted">porção</span></div><div class="row" style="gap:4px"><button class="btn sm primary" data-act="dbx-add-rec" data-rid="${esc(r.id)}">+ Adicionar</button>${meu ? `<button class="btn sm ghost danger" data-act="dbx-rec-del" data-rid="${esc(r.id)}" aria-label="Excluir receita">✕</button>` : ''}</div></div>`; }).join('') : '<div class="small muted">Nenhuma receita encontrada.</div>');
   }
@@ -2448,7 +2468,7 @@ function dbxLista() {
 function abreReceita(i) {
   const rc = i && i.rec; if (!rc) return; const f = rc.g0 > 0 && +i.g > 0 ? +i.g / rc.g0 : 1;
   openDialog(`<div class="row spread"><div><div class="eyebrow">Receita${rc.tempo ? ' · ' + rc.tempo + ' min' : ''}</div><h2>${esc(i.nome)}</h2></div><button class="btn ghost" data-act="close">Fechar</button></div>
-    <div class="small num"><b>${Math.round(+i.k || 0)} kcal</b> · P ${r1(i.p)} · C ${r1(i.c)} · G ${r1(i.f)}</div>
+    ${pizzaBloco(i.p, i.c, i.f, i.k, 92)}
     <h3 style="margin:6px 0 0">Ingredientes</h3><ul class="nu-lista">${rc.ing.map(([n, g]) => { const gg = Math.round(g * f / 5) * 5 || Math.round(g * f), md = medidaTxt(n, gg); return `<li><span>${emo(n)} ${esc(n)}${md ? `<span class="small muted nu-md"> ${esc(md)}</span>` : ''}</span><span class="num muted">${gg} g</span></li>`; }).join('')}</ul>
     ${(rc.preparo || []).length ? `<h3 style="margin:6px 0 0">Modo de preparo</h3><ol class="dbx-prep">${rc.preparo.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}
     <p class="small muted" style="margin:0">${NOTA_ORIENTACAO}</p>`);
@@ -2515,9 +2535,9 @@ function migraModelosNutri() {
 function abreModelosNutri(a) {
   const lista = db.modelosNutri || [];
   const card = m => { const refs = refsDeModelo(m.planos[0]), t = totDia({ refeicoes: refs }), cp = capaNutri(m), pl = m.planos.length > 1 ? ` · ${m.planos.length} planos (${m.planos.map(p => esc(p.nome)).join(' / ')})` : '';
-    const dia = refs.map(r => { const tr = totRef(r); return `<div class="nu-mdia"><span aria-hidden="true">${emoRef(r.nome)}</span><div><b>${r.hora ? esc(r.hora) + ' · ' : ''}${esc(r.nome)}</b> <span class="small muted num">${Math.round(tr.k)} kcal</span><div class="small muted">${r.itens.map(i => (i.rec ? '' : emo(i.nome) + ' ') + esc(i.nome)).join(' · ')}</div></div></div>`; }).join('');
+    const dia = refs.map(r => { const tr = totRef(r); return `<div class="nu-mdia"><span aria-hidden="true">${emoRef(r.nome)}</span><div><b>${r.hora ? esc(r.hora) + ' · ' : ''}${esc(r.nome)}</b> ${pizzaMini(tr)}<div class="small muted">${r.itens.map(i => (i.rec ? '' : emo(i.nome) + ' ') + esc(i.nome)).join(' · ')}</div></div></div>`; }).join('');
     return `<div class="nu-mod2"><div class="nu-capa" style="background:linear-gradient(135deg,${cp.c[0]},${cp.c[1]})" aria-hidden="true"><span>${cp.e}</span></div>
-      <div class="row spread" style="gap:10px;align-items:flex-start"><div><b>${esc(m.nome)}</b><div class="small muted">${esc(m.desc || '')}</div><div class="small num">${Math.round(t.k)} kcal · P ${Math.round(t.p)} · C ${Math.round(t.c)} · G ${Math.round(t.f)}${pl}</div></div>
+      <div class="row spread" style="gap:10px;align-items:flex-start"><div><b>${esc(m.nome)}</b><div class="small muted">${esc(m.desc || '')}</div>${pizzaMini(t)}<div class="small muted">${pl.replace(/^ · /, '')}</div></div>
       <div class="row" style="gap:6px;flex:none"><button class="btn sm primary" data-act="nu-modelo-usar" data-id="${a.id}" data-mid="${esc(m.id)}">Usar</button>${m.padrao ? '' : `<button class="btn sm ghost danger" data-act="nu-modelo-del" data-id="${a.id}" data-mid="${esc(m.id)}" aria-label="Excluir modelo">✕</button>`}</div></div>
       <details class="dbx-det"><summary class="small">Ver o dia (refeições e alimentos)</summary>${dia}</details></div>`; };
   openDialog(`<div class="row spread"><h2>Modelos de plano alimentar</h2><button class="btn ghost" data-act="close">Fechar</button></div>
@@ -2872,7 +2892,7 @@ function dbxlCard(d, eq) {
   if (d.foto) { const u = dbxl.fotos[d.foto]; if (u) img = `<div class="dl-img"><img src="${u}" alt="Foto do prato ${esc(d.nome)}"></div>`; else { img = `<div class="dl-img sk" data-dph="${esc(d.foto)}"></div>`; dbxlFoto(d.foto); } }
   else img = `<div class="dl-img dl-emo" aria-hidden="true">${esc(d.emoji || '🍽️')}</div>`;
   const cat = (DBXL_CATS.find(c => c[0] === d.categoria) || [0, 'Outra'])[1], ing = linhasTxt(d.ingredientes), prep = linhasTxt(d.preparo);
-  const mac = d.kcal != null ? `<div class="small num"><b>${d.kcal} kcal</b>${d.prot != null ? ` · P ${+d.prot} · C ${+d.carb} · G ${+d.gord}` : ''}</div>` : '';
+  const mac = d.kcal != null ? (d.prot != null ? pizzaMini({ k: d.kcal, p: +d.prot, c: +d.carb, f: +d.gord }) : `<div class="small num"><b>${d.kcal} kcal</b></div>`) : '';
   const chk = eq ? `<label class="dl-sel" title="Selecionar"><input type="checkbox" data-dsel="${d.id}" ${dbxl.sel.has(d.id) ? 'checked' : ''} aria-label="Selecionar ${esc(d.nome)}"></label>` : '';
   return `<article class="dl-card ${d.publicado ? '' : 'rasc'}" style="position:relative">${chk}${img}<div class="dl-b"><div class="row spread" style="gap:8px;align-items:flex-start"><div><b>${esc(d.nome)}</b><div class="small muted">${esc(cat)}${d.tempo ? ' · ' + d.tempo + ' min' : ''}${eq && !d.publicado ? ' · <span class="chip">Rascunho (as alunas não veem)</span>' : ''}</div></div></div>${mac}
     <details class="dbx-det"><summary class="small"><b>Como fazer</b></summary>${ing.length ? `<div class="eyebrow" style="margin-top:6px">Ingredientes</div><ul class="dbx-ul">${ing.map(x => `<li>• ${esc(x)}</li>`).join('')}</ul>` : ''}${prep.length ? `<div class="eyebrow" style="margin-top:6px">Modo de preparo</div><ol class="dbx-prep">${prep.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}${!ing.length && !prep.length ? '<div class="small muted">Sem detalhes.</div>' : ''}</details>
