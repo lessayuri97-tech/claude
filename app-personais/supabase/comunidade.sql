@@ -37,6 +37,7 @@ create table if not exists public.posts (
   created_at timestamptz not null default now()
 );
 alter table public.posts add column if not exists foto text;
+alter table public.posts add column if not exists fixado boolean not null default false;
 alter table public.posts alter column texto set default '';
 alter table public.posts drop constraint if exists posts_texto_check;
 alter table public.posts add constraint posts_texto_check check (char_length(texto) <= 1000);
@@ -82,19 +83,40 @@ grant execute on function public.pt_comunidade_de(uuid), public.pt_comunidade(),
 drop function if exists public.pt_feed(timestamptz, int);
 create or replace function public.pt_feed(p_antes timestamptz default null, p_limite int default 15)
 returns table(id uuid, autor_id uuid, nome text, equipe boolean, foto_v bigint, texto text, foto text, created_at timestamptz,
-              editado boolean, oculto boolean, curtidas int, comentarios int, eu_curti boolean, denuncias int)
+              editado boolean, oculto boolean, curtidas int, comentarios int, eu_curti boolean, denuncias int, fixado boolean)
 language sql security definer stable set search_path = public as $$
   select p.id, p.autor_id, p.autor_nome, p.equipe, coalesce(pf.foto_v, 0), p.texto, p.foto, p.created_at, p.editado, p.oculto,
     (select count(*)::int from public.curtidas c where c.post_id = p.id),
     (select count(*)::int from public.posts r where r.pai_id = p.id and (public.pt_e_equipe_com() or not r.oculto)),
     exists (select 1 from public.curtidas c where c.post_id = p.id and c.user_id = auth.uid()),
-    case when public.pt_e_equipe_com() then (select count(*)::int from public.denuncias d where d.post_id = p.id) else 0 end
+    case when public.pt_e_equipe_com() then (select count(*)::int from public.denuncias d where d.post_id = p.id) else 0 end,
+    p.fixado
   from public.posts p left join public.perfis pf on pf.user_id = p.autor_id
   where p.espaco_id = public.pt_comunidade() and p.pai_id is null
     and (public.pt_e_equipe_com() or not p.oculto)
     and (p_antes is null or p.created_at < p_antes)
   order by p.created_at desc
   limit least(greatest(p_limite, 1), 30) $$;
+
+-- Publicações fixadas no topo (máx. 3), visíveis a todas
+drop function if exists public.pt_fixados();
+create or replace function public.pt_fixados()
+returns table(id uuid, autor_id uuid, nome text, equipe boolean, foto_v bigint, texto text, foto text, created_at timestamptz,
+              editado boolean, oculto boolean, curtidas int, comentarios int, eu_curti boolean, denuncias int, fixado boolean)
+language sql security definer stable set search_path = public as $$
+  select p.id, p.autor_id, p.autor_nome, p.equipe, coalesce(pf.foto_v, 0), p.texto, p.foto, p.created_at, p.editado, p.oculto,
+    (select count(*)::int from public.curtidas c where c.post_id = p.id),
+    (select count(*)::int from public.posts r where r.pai_id = p.id and (public.pt_e_equipe_com() or not r.oculto)),
+    exists (select 1 from public.curtidas c where c.post_id = p.id and c.user_id = auth.uid()),
+    case when public.pt_e_equipe_com() then (select count(*)::int from public.denuncias d where d.post_id = p.id) else 0 end,
+    true
+  from public.posts p left join public.perfis pf on pf.user_id = p.autor_id
+  where p.espaco_id = public.pt_comunidade() and p.pai_id is null and p.fixado
+    and (public.pt_e_equipe_com() or not p.oculto)
+  order by p.created_at desc
+  limit 3 $$;
+revoke all on function public.pt_fixados() from public, anon;
+grant execute on function public.pt_fixados() to authenticated;
 
 drop function if exists public.pt_comentarios(uuid);
 create or replace function public.pt_comentarios(p_post uuid)
@@ -148,17 +170,31 @@ begin
   insert into public.curtidas(post_id, user_id) values (p_post, auth.uid()); return true;
 end $$;
 
--- Editar a própria publicação
+-- Editar a própria publicação (a equipe também edita as publicações da equipe)
 create or replace function public.pt_editar(p_post uuid, p_texto text) returns void
 language plpgsql security definer set search_path = public as $$
 declare v_t text := btrim(coalesce(p_texto, ''));
 begin
   if char_length(v_t) > 1000 then raise exception 'escreva no máximo 1000 letras'; end if;
   update public.posts set texto = v_t, editado = true
-   where id = p_post and autor_id = auth.uid() and espaco_id = public.pt_comunidade()
+   where id = p_post and espaco_id = public.pt_comunidade()
+     and (autor_id = auth.uid() or (equipe and public.pt_e_equipe_com()))
      and (char_length(v_t) >= 1 or foto is not null);
-  if not found then raise exception 'só pode editar as suas publicações'; end if;
+  if not found then raise exception 'não pode editar esta publicação'; end if;
 end $$;
+
+-- Equipe: fixar / soltar uma publicação da equipe no topo (máx. 3)
+create or replace function public.pt_fixar(p_post uuid, p_fixado boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.pt_e_equipe_com() then raise exception 'só a equipe pode fixar'; end if;
+  if p_fixado and (select count(*) from public.posts x where x.espaco_id = public.pt_comunidade() and x.fixado and x.id <> p_post) >= 3 then
+    raise exception 'já há 3 publicações fixadas: solte uma primeiro'; end if;
+  update public.posts set fixado = p_fixado where id = p_post and espaco_id = public.pt_comunidade() and pai_id is null and equipe;
+  if not found then raise exception 'só se fixam publicações da equipe'; end if;
+end $$;
+revoke all on function public.pt_fixar(uuid, boolean) from public, anon;
+grant execute on function public.pt_fixar(uuid, boolean) to authenticated;
 
 -- Equipe: ocultar / mostrar de novo (nada é apagado)
 create or replace function public.pt_ocultar(p_post uuid, p_oculto boolean) returns void

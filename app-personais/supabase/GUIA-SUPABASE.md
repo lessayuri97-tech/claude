@@ -56,3 +56,5 @@ O Claude coloca o URL e a chave no ficheiro `config.js`. Depois faça duplo cliq
 - Fotos de perfil: reduzidas para 256 px no aparelho (cerca de 15 KB), guardadas num espaço privado; só quem é da mesma comunidade as vê. A equipe escolhe a foto e o nome em **Definições**.
 
 **Fotos nas publicações (feed estilo Instagram):** volte a correr o `comunidade.sql` atualizado (é seguro repetir). Cada publicação pode ter uma foto (reduzida para 1080 px, cerca de 200 KB) e legenda. Duplo clique na foto curte.
+
+**Publicações da equipe (editar e fixar):** volte a correr o `comunidade.sql` atualizado (é seguro repetir). Na Central, a equipe pode editar as publicações da equipe e fixar até 3 no topo do Feed (menu ⋯, ou a caixa "Fixar no topo" ao publicar). Todas as alunas veem as fixadas primeiro.

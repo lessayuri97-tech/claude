@@ -255,6 +255,26 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .agua { display: grid; gap: 10px; }
 .tabbar-aluno a { font-size: .66rem; }
 .avatar-ini.av-foto { overflow: hidden; padding: 0; } .avatar-ini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nu-semana { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+.nu-sem7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.nu-d7 { display: grid; gap: 2px; min-height: 54px; padding: 6px 2px; text-align: center; align-content: center; min-width: 0; }
+.nu-d7 small { font-size: .62rem; font-weight: 500; opacity: .85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nu-d7.out:not(.on) { background: var(--surface-2); }
+.nu-chip.sm { min-height: 34px; padding: 0 12px; font-size: .85rem; }
+.nu-em { font-size: 1.4rem; line-height: 1; } .nu-em2 { font-size: 1.05rem; }
+.nu-mod2 { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.nu-capa { height: 76px; border-radius: 12px; display: grid; place-items: center; color: #fff; }
+.nu-capa span { font-size: 1.9rem; letter-spacing: .25em; padding-left: .25em; }
+.nu-mdia { display: grid; grid-template-columns: 24px 1fr; gap: 8px; padding: 6px 0; border-top: 1px solid var(--line); }
+.dbx-lista { display: grid; gap: 8px; max-height: 46vh; overflow-y: auto; overscroll-behavior: contain; }
+.dbx-row { display: grid; grid-template-columns: 36px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.dbx-e { font-size: 1.6rem; text-align: center; line-height: 1; }
+.dbx-q { display: flex; align-items: center; gap: 4px; } .dbx-q input { width: 74px; min-height: 40px; }
+.dbx-det summary { cursor: pointer; color: var(--muted); min-height: 32px; display: flex; align-items: center; }
+.dbx-ul, .dbx-prep { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 3px; font-size: .9rem; }
+.dbx-ul { list-style: none; padding-left: 0; }
+.cp-fix { display: grid; gap: 8px; margin-bottom: 14px; padding: 10px; border: 1.5px dashed var(--accent); border-radius: 18px; }
+@media (max-width: 560px) { .dbx-row { grid-template-columns: 36px 1fr; } .dbx-row .dbx-q, .dbx-row > button, .dbx-row > .row { grid-column: 2; } }
 .avatar-ini.av-eq { background: var(--accent); color: #fff; }
 .cp-novo { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
 .cp-novo textarea { width: 100%; resize: vertical; min-height: 56px; }
@@ -1385,7 +1405,7 @@ function viewCentral() {
   ${nomes}
   ${festa}
   ${calma}
-  ${comuAtiva() ? '<h2 class="cc-sec">Feed da comunidade</h2>' + comunidadePainel('inner') : ''}`;
+  ${comuAtiva() ? '<h2 class="cc-sec">Publicações para as alunas</h2><p class="small muted" style="margin:-4px 0 10px">O que a equipe publica aparece para todas as alunas, na aba Feed. Use ⋯ para editar uma publicação da equipe ou fixá-la no topo.</p>' + comunidadePainel('inner') : ''}`;
 }
 function viewRever() {
   const todos = [];
@@ -1554,7 +1574,7 @@ document.addEventListener('click', async ev => {
     case 'nu-trocas': { const r = planoSel(a).refeicoes.find(x => x.id === b.dataset.ref), it = r && r.itens.find(x => x.id === b.dataset.item); if (!it) break; const t = trocasPara(it); if (!t) { toast('Escolha primeiro um alimento da lista e a quantidade'); break; } it.sub = t.replace('Pode trocar por: ', 'Troque por: '); save(); rerender(); toast('Trocas sugeridas. Pode editar o texto.'); break; }
     case 'nu-plano': { ui.nuPlano = ui.nuPlano || {}; ui.nuPlano[a.id] = b.dataset.p === 'main' ? '' : b.dataset.p; rerender(); break; }
     case 'nu-novo-plano': { const n = nutri(a), P = planoSel(a), id = uid(); n.extras.push({ id, nome: 'Outros dias', dias: [], refeicoes: P.refeicoes.map(r => ({ ...r, id: uid(), itens: r.itens.map(x => ({ ...x, id: uid() })) })) }); ui.nuPlano = ui.nuPlano || {}; ui.nuPlano[a.id] = id; save(); rerender(); toast('Plano criado a partir do atual. Escolha os dias e ajuste.'); break; }
-    case 'nu-dia': { const n = nutri(a), P = planoSel(a), w = +b.dataset.w; if (P === n) break; P.dias = P.dias || []; const i = P.dias.indexOf(w); if (i >= 0) P.dias.splice(i, 1); else { n.extras.forEach(e => { if (e !== P) e.dias = (e.dias || []).filter(x => x !== w); }); P.dias.push(w); } save(); rerender(); break; }
+    case 'nu-dia': { const n = nutri(a), P = planoSel(a), w = +b.dataset.w; if (P === n) { const dn = (n.extras || []).find(e => (e.dias || []).includes(w)); if (dn) { dn.dias = dn.dias.filter(x => x !== w); save(); rerender(); } else toast('Este dia já usa o plano principal. Para mudar, abra o outro plano e marque o dia nele.'); break; } P.dias = P.dias || []; const i = P.dias.indexOf(w); if (i >= 0) P.dias.splice(i, 1); else { n.extras.forEach(e => { if (e !== P) e.dias = (e.dias || []).filter(x => x !== w); }); P.dias.push(w); } save(); rerender(); break; }
     case 'nu-plano-del': confirmar('Excluir este plano?', 'Excluir plano', () => { const n = nutri(a), P = planoSel(a); n.extras = n.extras.filter(e => e !== P); ui.nuPlano[a.id] = ''; save(); rerender(); }); break;
     case 'nu-calc': abreCalc(a); break;
     case 'calc-aplicar': { const v = calcLer(), r = calcMetas(v); if (!r) break; const n = nutri(a); Object.assign(n.metas, { kcal: r.kcal, p: r.p, c: r.c, f: r.f }); n.calc = v; save(); closeDialog(); rerender(); toast('Metas aplicadas. Pode ajustar.'); break; }
@@ -1693,7 +1713,8 @@ document.addEventListener('change', ev => {
     if (k === 'r-nome') r.nome = v.trim() || 'Refeição'; else if (k === 'r-hora') r.hora = v; else if (k === 'r-nota') r.nota = v.trim();
     else { const i = r.itens.find(x => x.id === el.dataset.item); if (!i) return;
       if (k === 'i-nome') i.nome = v.trim(); else if (k === 'i-g') i.g = v === '' ? '' : +v; else if (k === 'i-sub') i.sub = v.trim(); else i[k.slice(2)] = v === '' ? '' : +v;
-      if (k === 'i-nome' || k === 'i-g') { const mx = macrosItem(i.nome, i.g); if (mx) { Object.assign(i, mx); ['k', 'p', 'c', 'f'].forEach(c => { const e2 = document.getElementById('n' + c + '-' + i.id); if (e2) e2.value = i[c]; }); } } }
+      if (k === 'i-g' && i.rec && i.rec.g0 > 0 && +i.g > 0) { const q = i.g / i.rec.g0; i.k = Math.round(i.rec.k0 * q); i.p = r1(i.rec.p0 * q); i.c = r1(i.rec.c0 * q); i.f = r1(i.rec.f0 * q); ['k', 'p', 'c', 'f'].forEach(c => { const e2 = document.getElementById('n' + c + '-' + i.id); if (e2) e2.value = i[c]; }); }
+      else if (k === 'i-nome' || k === 'i-g') { const mx = macrosItem(i.nome, i.g); if (mx) { Object.assign(i, mx); ['k', 'p', 'c', 'f'].forEach(c => { const e2 = document.getElementById('n' + c + '-' + i.id); if (e2) e2.value = i[c]; }); } } }
     save(); refreshNu(a); return;
   }
   if (el.dataset.leadEstado) { leadSet(el.dataset.leadEstado, { estado: el.value }); rerender(); return; }
@@ -2103,17 +2124,15 @@ function tabNutri(a) {
   const dl = `<datalist id="lista-alim">${alimentosBase().map(x => `<option value="${esc(x[0])}">`).join('')}</datalist>`;
   const d = (extra) => `data-aluno="${a.id}" ${extra || ''}`;
   const chips = [`<button class="nu-chip ${sel === 'main' ? 'on' : ''}" data-act="nu-plano" data-id="${a.id}" data-p="main">${esc(n.nomePlano || 'Principal')}</button>`].concat(n.extras.map(e => `<button class="nu-chip ${sel === e.id ? 'on' : ''}" data-act="nu-plano" data-id="${a.id}" data-p="${e.id}">${esc(e.nome || 'Plano')}</button>`)).join('');
-  const quando = P === n
-    ? `<div class="small muted">Vale para: <b>${diasTxt(diasLivres(n))}</b>${n.extras.length ? ' (os dias sem plano próprio)' : ''}.</div>`
-    : `<div class="nu-dias" role="group" aria-label="Dias deste plano">${ORDEM_SEM.map(w => `<button class="nu-dia-b ${(P.dias || []).includes(w) ? 'on' : ''}" data-act="nu-dia" data-id="${a.id}" data-w="${w}" aria-pressed="${(P.dias || []).includes(w)}">${DIAS_SEM[w]}</button>`).join('')}</div>`;
+  const quando = '';
   return `${dl}
   <div class="panel"><div class="row spread" style="flex-wrap:wrap;gap:10px"><div><h3>Plano alimentar</h3><div class="small muted">Monte por dia e por refeição. Metas, medidas caseiras e trocas ajudam a aluna a seguir.</div></div>
     <div class="row" style="flex-wrap:wrap"><button class="btn sm primary" data-act="nu-modelos" data-id="${a.id}">Modelos prontos</button><button class="btn sm" data-act="nu-modelo-salvar" data-id="${a.id}">Guardar como modelo</button>
     <button class="btn sm ghost" data-act="nutri-copiar" data-id="${a.id}">Copiar para outra aluna</button><button class="btn sm ghost" data-act="nutri-texto" data-id="${a.id}">Enviar por mensagem</button></div></div>
     <div class="nu-chips">${chips}<button class="nu-chip novo" data-act="nu-novo-plano" data-id="${a.id}">+ Plano para outros dias</button></div>
-    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center"><input type="text" class="nu-nome" style="max-width:260px" value="${esc(nomePlano(n, P))}" ${d('data-nu="p-nome"')} aria-label="Nome do plano">${quando}${P !== n ? `<button class="btn sm ghost danger" data-act="nu-plano-del" data-id="${a.id}" style="margin-left:auto">Excluir este plano</button>` : ''}</div></div>
+    <div class="row" style="gap:10px;flex-wrap:wrap;align-items:center"><input type="text" class="nu-nome" style="max-width:260px" value="${esc(nomePlano(n, P))}" ${d('data-nu="p-nome"')} aria-label="Nome do plano">${quando}${P !== n ? `<button class="btn sm ghost danger" data-act="nu-plano-del" data-id="${a.id}" style="margin-left:auto">Excluir este plano</button>` : ''}</div>${semanaNutri(a)}</div>
   <div class="panel"><div class="row spread" style="flex-wrap:wrap;gap:10px"><div><h3>Metas diárias</h3><div class="small muted">O objetivo do dia. A aluna acompanha pelo celular.</div></div>
-    <div class="row"><button class="btn sm primary" data-act="nu-calc" data-id="${a.id}">Calcular metas</button></div></div>
+    <div class="row" style="flex-wrap:wrap"><button class="btn sm primary" data-act="nu-calc" data-id="${a.id}">Calcular metas</button><button class="btn sm" data-act="nu-ajustar" data-id="${a.id}" title="Ajusta as quantidades do plano para chegar às calorias da meta">Ajustar à meta</button></div></div>
     <div class="nu-metas">
       <label class="met"><span>Calorias (kcal)</span><input type="number" class="num" min="0" value="${esc(m.kcal)}" ${d('data-nu="m-kcal"')}></label>
       <label class="met"><span>Proteína (g)</span><input type="number" class="num" min="0" value="${esc(m.p)}" ${d('data-nu="m-p"')}></label>
@@ -2124,7 +2143,7 @@ function tabNutri(a) {
   ${P.refeicoes.length ? P.refeicoes.map((r, ri) => {
     const t = totRef(r);
     return `<section class="panel nu-ref" aria-label="${esc(r.nome)}">
-      <div class="row" style="gap:10px;flex-wrap:wrap"><input type="text" class="nu-nome" value="${esc(r.nome)}" placeholder="Nome da refeição" ${d(`data-nu="r-nome" data-ref="${r.id}"`)} aria-label="Nome da refeição">
+      <div class="row" style="gap:10px;flex-wrap:wrap"><span class="nu-em" aria-hidden="true">${emoRef(r.nome)}</span><input type="text" class="nu-nome" value="${esc(r.nome)}" placeholder="Nome da refeição" ${d(`data-nu="r-nome" data-ref="${r.id}"`)} aria-label="Nome da refeição">
         <input type="time" value="${esc(r.hora || '')}" ${d(`data-nu="r-hora" data-ref="${r.id}"`)} aria-label="Hora" style="width:110px">
         <span class="small muted num" id="mt-${r.id}" style="margin-left:auto">${Math.round(t.k)} kcal · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}</span>
         <div class="row" style="gap:2px"><button class="btn ghost icon" data-act="nu-mover" data-dir="-1" data-id="${a.id}" data-ref="${r.id}" ${ri === 0 ? 'disabled' : ''} aria-label="Subir refeição">↑</button><button class="btn ghost icon" data-act="nu-mover" data-dir="1" data-id="${a.id}" data-ref="${r.id}" ${ri === P.refeicoes.length - 1 ? 'disabled' : ''} aria-label="Descer refeição">↓</button><button class="btn ghost icon" data-act="nu-dup-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Duplicar refeição" title="Duplicar">⧉</button><button class="btn ghost icon danger" data-act="nu-del-ref" data-id="${a.id}" data-ref="${r.id}" aria-label="Excluir refeição">✕</button></div></div>
@@ -2136,8 +2155,8 @@ function tabNutri(a) {
         <input type="number" class="num" min="0" step="0.1" value="${esc(i.c)}" ${d(`data-nu="i-c" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Carboidratos" id="nc-${i.id}">
         <input type="number" class="num" min="0" step="0.1" value="${esc(i.f)}" ${d(`data-nu="i-f" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Gordura" id="nf-${i.id}">
         <button class="btn ghost icon danger" data-act="nu-del-it" data-id="${a.id}" data-ref="${r.id}" data-item="${i.id}" aria-label="Remover alimento">✕</button></div>
-        <div class="nu-sub"><span class="small muted nu-med" id="nm-${i.id}">${esc(medidaTxt(i.nome, i.g))}</span><input type="text" value="${esc(i.sub || '')}" placeholder="Trocas (ex.: batata-doce 150 g, macarrão 100 g)" ${d(`data-nu="i-sub" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Substituições"><button class="btn ghost sm" data-act="nu-trocas" data-id="${a.id}" data-ref="${r.id}" data-item="${i.id}" title="Sugere alimentos equivalentes">Sugerir trocas</button></div></div>`).join('')}
-      <div class="row"><button class="btn sm" data-act="nu-add-it" data-id="${a.id}" data-ref="${r.id}">+ Alimento</button>
+        <div class="nu-sub"><span class="nu-em2" aria-hidden="true">${emo(i.nome)}</span><span class="small muted nu-med" id="nm-${i.id}">${esc(medidaItem(i))}</span><input type="text" value="${esc(i.sub || '')}" placeholder="Trocas (ex.: batata-doce 150 g, macarrão 100 g)" ${d(`data-nu="i-sub" data-ref="${r.id}" data-item="${i.id}"`)} aria-label="Substituições"><button class="btn ghost sm" data-act="nu-trocas" data-id="${a.id}" data-ref="${r.id}" data-item="${i.id}" title="Sugere alimentos equivalentes">Sugerir trocas</button>${i.rec ? `<button class="btn ghost sm" data-act="rec-ver" data-id="${a.id}" data-ref="${r.id}" data-item="${i.id}">Ver receita</button>` : ''}</div></div>`).join('')}
+      <div class="row" style="flex-wrap:wrap"><button class="btn sm primary" data-act="nu-dbx" data-id="${a.id}" data-ref="${r.id}">🥗 Dietbox</button><button class="btn sm" data-act="nu-add-it" data-id="${a.id}" data-ref="${r.id}">+ Alimento</button><button class="btn sm ghost" data-act="nu-ref-receita" data-id="${a.id}" data-ref="${r.id}" title="Guarda esta refeição no Dietbox">Guardar como receita</button>
         <input type="text" class="nu-notaref" value="${esc(r.nota || '')}" placeholder="Nota para a aluna (ex.: pode trocar o arroz por batata-doce)" ${d(`data-nu="r-nota" data-ref="${r.id}"`)} aria-label="Nota da refeição"></div>
     </section>`; }).join('') : `<div class="panel empty"><h2>Este plano ainda não tem refeições</h2><p>Escolha as refeições do dia com horários sugeridos, ou comece por um modelo pronto e ajuste.</p>
       <div class="row" style="justify-content:center"><button class="btn primary" data-act="nu-montar" data-id="${a.id}">Montar as refeições do dia</button><button class="btn" data-act="nu-modelos" data-id="${a.id}">Usar um modelo pronto</button></div></div>`}
@@ -2156,7 +2175,7 @@ function adesaoNutri(a) {
 }
 function refreshNu(a) {
   const n = nutri(a), P = planoSel(a); const e = document.getElementById('nu-dia'); if (e) e.innerHTML = `<div class="eyebrow">Este plano soma</div>${resumoDia(n, totDia(P))}`;
-  P.refeicoes.forEach(r => { const t = totRef(r), el = document.getElementById('mt-' + r.id); if (el) el.textContent = `${Math.round(t.k)} kcal · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}`; r.itens.forEach(i => { const m = document.getElementById('nm-' + i.id); if (m) m.textContent = medidaTxt(i.nome, i.g); }); });
+  P.refeicoes.forEach(r => { const t = totRef(r), el = document.getElementById('mt-' + r.id); if (el) el.textContent = `${Math.round(t.k)} kcal · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)}`; r.itens.forEach(i => { const m = document.getElementById('nm-' + i.id); if (m) m.textContent = medidaItem(i); }); });
 }
 function textoNutri(a) {
   const n = nutri(a), m = n.metas, l = [`PLANO ALIMENTAR · ${a.nome}`];
@@ -2164,7 +2183,7 @@ function textoNutri(a) {
   const planos = [n].concat(n.extras || []);
   planos.forEach(P => {
     if (planos.length > 1) l.push('', `=== ${nomePlano(n, P).toUpperCase()} (${diasTxt(P === n ? diasLivres(n) : (P.dias || []))}) ===`);
-    P.refeicoes.forEach(r => { const t = totRef(r); l.push('', `${r.hora ? r.hora + ' · ' : ''}${r.nome.toUpperCase()} (${Math.round(t.k)} kcal)`); r.itens.forEach(i => { const md = medidaTxt(i.nome, i.g); l.push(`- ${i.nome}${i.g ? ' ' + i.g + ' g' : ''}${md ? ' (' + md + ')' : ''}`); if (i.sub) l.push(`    ${i.sub}`); }); if (r.nota) l.push(`  Nota: ${r.nota}`); });
+    P.refeicoes.forEach(r => { const t = totRef(r); l.push('', `${r.hora ? r.hora + ' · ' : ''}${r.nome.toUpperCase()} (${Math.round(t.k)} kcal)`); r.itens.forEach(i => { const md = medidaItem(i); l.push(`- ${i.nome}${i.g ? ' ' + i.g + ' g' : ''}${md ? ' (' + md + ')' : ''}`); if (i.sub) l.push(`    ${i.sub}`); }); if (r.nota) l.push(`  Nota: ${r.nota}`); });
   });
   if (n.nota) l.push('', n.nota); l.push('', NOTA_ORIENTACAO); return l.join('\n');
 }
@@ -2181,9 +2200,9 @@ function vNutri(a) {
   <div class="panel agua"><div class="row spread"><b>💧 Água</b><span class="num small"><b>${copos}</b> de ${alvoA} copos</span></div>${barra(copos, alvoA)}
     <div class="row" style="justify-content:center;gap:12px"><button class="btn" data-sact="agua" data-d="-1" aria-label="Menos um copo" style="min-width:56px;justify-content:center">−</button><button class="btn primary" data-sact="agua" data-d="1" style="min-width:140px;justify-content:center">+ 1 copo</button></div></div>
   ${refs.map(r => { const t = totRef(r), f = refFeita(a, dia, r.id);
-    return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div></div>
+    return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${emoRef(r.nome)} ${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div></div>
       <button class="nu-check" data-sact="refeicao" data-ref="${r.id}" aria-pressed="${f}" aria-label="${f ? 'Desmarcar' : 'Marcar'} ${esc(r.nome)} como feita">${f ? '✓ Feita' : 'Marcar feita'}</button></div>
-      <ul class="nu-lista">${r.itens.map(i => { const md = medidaTxt(i.nome, i.g); return `<li><span>${esc(i.nome)}${md ? `<span class="small muted nu-md"> ${esc(md)}</span>` : ''}${i.sub ? `<span class="small muted nu-md" style="display:block">${esc(i.sub)}</span>` : ''}</span><span class="num muted">${i.g ? esc(i.g) + ' g' : ''}</span></li>`; }).join('') || '<li class="muted">Sem alimentos definidos.</li>'}</ul>
+      <ul class="nu-lista">${r.itens.map(i => { const md = medidaItem(i); return `<li><span>${i.rec ? '' : '<span aria-hidden="true">' + emo(i.nome) + '</span> '}${esc(i.nome)}${md ? `<span class="small muted nu-md"> ${esc(md)}</span>` : ''}${i.sub ? `<span class="small muted nu-md" style="display:block">${esc(i.sub)}</span>` : ''}${i.rec ? `<button class="btn ghost sm" data-act="rec-ver" data-ref="${r.id}" data-item="${i.id}" style="margin-top:4px">📖 Ver receita</button>` : ''}</span><span class="num muted">${i.g ? esc(i.g) + ' g' : ''}</span></li>`; }).join('') || '<li class="muted">Sem alimentos definidos.</li>'}</ul>
       ${r.nota ? `<div class="dica">${esc(r.nota)}</div>` : ''}
       <button class="btn ghost sm" data-sact="comentar" data-ctx="Refeição: ${esc(r.nome)}" style="justify-self:start">💬 Comentar</button></article>`; }).join('')}
   ${n.nota ? `<div class="panel"><div class="eyebrow">Recados da sua equipe</div><div>${esc(n.nota)}</div></div>` : ''}
@@ -2243,8 +2262,206 @@ const MODELOS_NUTRI_PADRAO = [
       { nome: 'Lanche da tarde', hora: '16:30', itens: [['Banana prata', 80], ['Pasta de amendoim', 15], ['Leite desnatado', 200]] },
       { nome: 'Jantar', hora: '19:30', itens: [['Grão-de-bico cozido', 140], ['Batata-doce cozida', 130], ['Brócolis cozido', 90], ['Ovo cozido', 50], ['Azeite de oliva', 5]] }] }] }
 ];
+/* 5 modelos ilustrados, montados com as receitas prontas; ['@receita', porções] ou [alimento, gramas] */
+MODELOS_NUTRI_PADRAO.push(
+  { id: 'nm-rotina-1700', nome: 'Rotina prática · 1700 kcal', desc: 'Receitas rápidas para o dia a dia, com poucos ingredientes e muita variedade.', capa: { c: ['#34364D', '#6c7ae0'], e: '🥞🍛🥪🍠' }, metas: { agua: 8 }, planos: [
+    { nome: 'Todos os dias', refeicoes: [
+      { nome: 'Café da manhã', hora: '07:30', itens: [['@r-panqueca', 1]] },
+      { nome: 'Lanche da manhã', hora: '10:00', itens: [['@r-iogurte-granola', 1]] },
+      { nome: 'Almoço', hora: '12:30', itens: [['@r-frango-batata', 1]] },
+      { nome: 'Lanche da tarde', hora: '16:30', itens: [['@r-sanduiche', 1]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-omelete', 1], ['Salada mista', 100]] }] }] },
+  { id: 'nm-proteina-2000', nome: 'Foco em proteína · 2000 kcal', desc: 'Proteína em todas as refeições para saciedade e manutenção da massa magra.', capa: { c: ['#7a2e3b', '#e0728a'], e: '🥑🥩🐟🥤' }, metas: { agua: 9 }, planos: [
+    { nome: 'Todos os dias', refeicoes: [
+      { nome: 'Café da manhã', hora: '07:30', itens: [['@r-ovos-abacate', 1]] },
+      { nome: 'Lanche da manhã', hora: '10:00', itens: [['@r-overnight', 1]] },
+      { nome: 'Almoço', hora: '12:30', itens: [['@r-carne-abobrinha', 1], ['Arroz branco cozido', 120]] },
+      { nome: 'Lanche da tarde', hora: '16:30', itens: [['@r-vitamina', 1]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-salmao', 1], ['Salada mista', 100]] }] }] },
+  { id: 'nm-corrida-2200', nome: 'Dia de corrida · 2200 kcal', desc: 'Dois planos: dia de treino/corrida (mais carboidrato antes e depois) e dia de descanso (domingo).', capa: { c: ['#b8541a', '#f2b24c'], e: '🍌🍝🐠🍚' }, metas: { agua: 10 }, planos: [
+    { nome: 'Dia de corrida', refeicoes: [
+      { nome: 'Café da manhã', hora: '07:00', itens: [['@r-cuscuz', 1]] },
+      { nome: 'Almoço', hora: '12:30', itens: [['@r-macarrao', 1], ['Salada mista', 100]] },
+      { nome: 'Pré-treino', hora: '16:00', itens: [['@r-tapioca', 1], ['Banana prata', 80]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-tilapia', 1], ['Arroz branco cozido', 100], ['Salada mista', 100]] },
+      { nome: 'Ceia', hora: '21:30', itens: [['@r-iogurte-granola', 1]] }] },
+    { nome: 'Dia de descanso', dias: [0], refeicoes: [
+      { nome: 'Café da manhã', hora: '08:30', itens: [['@r-omelete', 1], ['Pão integral de forma', 50], ['Mamão papaia', 120]] },
+      { nome: 'Almoço', hora: '13:00', itens: [['@r-frango-batata', 1]] },
+      { nome: 'Lanche da tarde', hora: '16:30', itens: [['@r-salada-frutas', 1]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-salmao', 1]] }] }] },
+  { id: 'nm-veg-receitas-1700', nome: 'Vegetariano com receitas · 1700 kcal', desc: 'Sem carne: ovos, laticínios, tofu e leguminosas em receitas simples.', capa: { c: ['#2f6b45', '#9bd17a'], e: '🥙🥚🥗🍮' }, metas: { agua: 8 }, planos: [
+    { nome: 'Todos os dias', refeicoes: [
+      { nome: 'Café da manhã', hora: '07:30', itens: [['@r-tapioca', 1]] },
+      { nome: 'Lanche da manhã', hora: '10:00', itens: [['@r-pudim-chia', 1]] },
+      { nome: 'Almoço', hora: '12:30', itens: [['@r-bowl-tofu', 1]] },
+      { nome: 'Lanche da tarde', hora: '16:30', itens: [['@r-salada-frutas', 1]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-omelete', 1], ['Batata-doce cozida', 130], ['Salada mista', 100]] }] }] },
+  { id: 'nm-massa-2600', nome: 'Ganho de massa prático · 2600 kcal', desc: 'Mais energia com refeições fáceis de repetir e preparar em lote.', capa: { c: ['#1f5f7a', '#4fc3d9'], e: '🥞🍗🍚🥤' }, metas: { agua: 10 }, planos: [
+    { nome: 'Todos os dias', refeicoes: [
+      { nome: 'Café da manhã', hora: '07:30', itens: [['@r-panqueca', 1], ['Iogurte natural integral', 170]] },
+      { nome: 'Lanche da manhã', hora: '10:00', itens: [['@r-vitamina', 1], ['Pão integral de forma', 50]] },
+      { nome: 'Almoço', hora: '12:30', itens: [['@r-frango-arroz', 1.2], ['Abacate', 40]] },
+      { nome: 'Lanche da tarde', hora: '16:30', itens: [['@r-sanduiche', 1]] },
+      { nome: 'Jantar', hora: '19:30', itens: [['@r-macarrao', 1], ['Salada mista', 100]] },
+      { nome: 'Ceia', hora: '21:30', itens: [['Leite integral', 250], ['Aveia em flocos', 20]] }] }] }
+);
+/* capas dos modelos antigos (emoji + cor) */
+const CAPAS_NUTRI = {
+  'nm-emag-1500': { c: ['#2a6f5c', '#7fd1b0'], e: '🥗🍳🐟🍓' }, 'nm-emag-1800': { c: ['#2a6f5c', '#a7d96a'], e: '🥗🍗🍠🥚' },
+  'nm-hiper-2500': { c: ['#5b3a8c', '#c08cf0'], e: '🍚🥩🍌🥛' }, 'nm-manut-2000': { c: ['#3d5a80', '#98c1d9'], e: '🍛🍎🥪🥚' },
+  'nm-lowcarb-1600': { c: ['#7a5c1f', '#e0c06a'], e: '🥑🥩🥬🧀' }, 'nm-veg-1800': { c: ['#2f6b45', '#9bd17a'], e: '🥦🫘🥚🧀' }
+};
+const capaNutri = m => m.capa || CAPAS_NUTRI[m.id] || { c: ['#34364D', '#7a7fb8'], e: '🍽️🥗🍎' };
+/* ================= DIETBOX: RECEITAS E EMOJIS ================= */
+const EMO_ALIM = [[/ovo|omelete|crepioca/, '🥚'], [/p[aã]o|torrada|sandu[ií]che/, '🍞'], [/banana/, '🍌'], [/ma[cç][aã]|ma[cç]a/, '🍎'], [/morango/, '🍓'], [/laranja/, '🍊'], [/uva/, '🍇'], [/melancia/, '🍉'], [/abacaxi/, '🍍'], [/manga/, '🥭'], [/kiwi/, '🥝'], [/mam[aã]o/, '🍈'], [/abacate/, '🥑'], [/tomate/, '🍅'], [/cenoura/, '🥕'], [/br[oó]colis/, '🥦'], [/pepino/, '🥒'], [/alface|salada|couve|espinafre/, '🥬'], [/batata/, '🍠'], [/mandioca|tapioca|cuscuz/, '🫓'], [/arroz/, '🍚'], [/macarr/, '🍝'], [/feij|lentilha|gr[aã]o-de-bico/, '🫘'], [/frango|peru/, '🍗'], [/carne|patinho|lombo|su[ií]no/, '🥩'], [/til[aá]pia|salm[aã]o|atum|peixe/, '🐟'], [/camar/, '🍤'], [/tofu/, '🧈'], [/queijo|cottage|ricota/, '🧀'], [/iogurte|leite/, '🥛'], [/whey|vitamina|shake/, '🥤'], [/aveia|granola|chia|linha[cç]a/, '🌾'], [/azeite/, '🫒'], [/amendoim|castanha|am[eê]ndoas|nozes/, '🥜'], [/chocolate/, '🍫'], [/mel\b/, '🍯'], [/caf[eé]/, '☕'], [/panqueca/, '🥞'], [/pudim/, '🍮'], [/bowl/, '🥙']];
+const EMO_CAT = { carbo: '🍚', prot: '🍗', lat: '🥛', fruta: '🍎', leg: '🫘', gord: '🥑', veg: '🥦', outro: '🍯' };
+function emo(nome) { const n = norm(nome || ''); const h = EMO_ALIM.find(([re]) => re.test(n)); if (h) return h[1]; const x = alimInfo(nome); return x ? EMO_CAT[x.cat] || '🍽️' : '🍽️'; }
+const EMO_REF = [[/caf[eé]/, '☕'], [/lanche da manh/, '🍎'], [/almo/, '🍛'], [/pr[eé]/, '⚡'], [/lanche da tarde|lanche/, '🥪'], [/jantar/, '🍲'], [/ceia/, '🌙']];
+function emoRef(nome) { const n = norm(nome || ''); const h = EMO_REF.find(([re]) => re.test(n)); return h ? h[1] : '🍽️'; }
+
+/* receitas prontas: porção para 1 pessoa; ing = [alimento da lista, gramas] */
+const RECEITAS_BASE = [
+  { id: 'r-omelete', nome: 'Omelete de espinafre e queijo', emoji: '🍳', tempo: 10, ref: 'cafe', ing: [['Ovo cozido', 150], ['Espinafre cozido', 60], ['Queijo minas frescal', 30], ['Azeite de oliva', 3]], preparo: ['Bata os ovos com uma pitada de sal.', 'Refogue o espinafre no azeite por 1 minuto.', 'Junte os ovos, espalhe e cubra com o queijo em cubinhos.', 'Tampe 2 minutos, dobre ao meio e sirva.'] },
+  { id: 'r-panqueca', nome: 'Panqueca de banana e aveia', emoji: '🥞', tempo: 10, ref: 'cafe', ing: [['Banana prata', 100], ['Ovo cozido', 100], ['Aveia em flocos', 30]], preparo: ['Amasse a banana com um garfo.', 'Misture os ovos e a aveia até ficar uma massa mole.', 'Frite em frigideira antiaderente, 2 minutos de cada lado.', 'Se quiser, finalize com canela.'] },
+  { id: 'r-tapioca', nome: 'Tapioca com ovo e queijo', emoji: '🫓', tempo: 8, ref: 'cafe', ing: [['Tapioca (goma hidratada)', 70], ['Ovo cozido', 100], ['Queijo minas frescal', 30]], preparo: ['Espalhe a goma numa frigideira quente até formar o disco.', 'Recheie com o ovo mexido e o queijo.', 'Dobre e sirva quente.'] },
+  { id: 'r-crepioca', nome: 'Crepioca de frango', emoji: '🌯', tempo: 12, ref: 'cafe', ing: [['Tapioca (goma hidratada)', 40], ['Ovo cozido', 100], ['Peito de frango grelhado', 60], ['Queijo cottage', 40]], preparo: ['Misture a goma com os ovos batidos.', 'Frite como uma panqueca fina.', 'Recheie com o frango desfiado e o cottage e dobre.'] },
+  { id: 'r-cuscuz', nome: 'Cuscuz com ovo e queijo', emoji: '🌽', tempo: 10, ref: 'cafe', ing: [['Cuscuz de milho cozido', 150], ['Ovo cozido', 100], ['Queijo minas frescal', 30]], preparo: ['Hidrate o flocão e cozinhe no vapor.', 'Faça os ovos mexidos ou fritos sem óleo.', 'Sirva o cuscuz com os ovos e o queijo por cima.'] },
+  { id: 'r-ovos-abacate', nome: 'Ovos mexidos com abacate', emoji: '🥑', tempo: 8, ref: 'cafe', ing: [['Ovo cozido', 150], ['Abacate', 60], ['Pão integral de forma', 50]], preparo: ['Mexa os ovos em fogo baixo até ficarem cremosos.', 'Amasse o abacate com um pouco de limão e sal.', 'Sirva sobre o pão torrado.'] },
+  { id: 'r-overnight', nome: 'Aveia da noite com iogurte e morango', emoji: '🥣', tempo: 5, ref: 'lanche', ing: [['Aveia em flocos', 40], ['Iogurte grego 0%', 170], ['Morango', 100], ['Chia', 10]], preparo: ['Na véspera, misture a aveia, a chia e o iogurte num pote.', 'Deixe na geladeira a noite toda.', 'Na hora de comer, cubra com os morangos picados.'] },
+  { id: 'r-iogurte-granola', nome: 'Iogurte com granola e banana', emoji: '🍓', tempo: 3, ref: 'lanche', ing: [['Iogurte natural integral', 170], ['Granola sem açúcar', 24], ['Banana prata', 80]], preparo: ['Coloque o iogurte numa tigela.', 'Fatie a banana e junte com a granola.'] },
+  { id: 'r-vitamina', nome: 'Vitamina de banana com whey', emoji: '🥤', tempo: 3, ref: 'lanche', ing: [['Leite desnatado', 250], ['Banana prata', 100], ['Whey protein', 30], ['Aveia em flocos', 15]], preparo: ['Bata tudo no liquidificador com gelo.', 'Sirva na hora.'] },
+  { id: 'r-pudim-chia', nome: 'Pudim de chia com morango', emoji: '🍮', tempo: 5, ref: 'lanche', ing: [['Chia', 25], ['Leite desnatado', 200], ['Morango', 100], ['Mel', 7]], preparo: ['Misture a chia com o leite e o mel.', 'Descanse 4 horas (ou da noite para o dia) na geladeira.', 'Cubra com os morangos.'] },
+  { id: 'r-salada-frutas', nome: 'Salada de frutas com iogurte', emoji: '🍑', tempo: 5, ref: 'lanche', ing: [['Manga', 100], ['Morango', 100], ['Kiwi', 75], ['Iogurte grego 0%', 120]], preparo: ['Pique as frutas.', 'Sirva com o iogurte por cima.'] },
+  { id: 'r-sanduiche', nome: 'Sanduíche natural de frango', emoji: '🥪', tempo: 8, ref: 'lanche', ing: [['Pão integral de forma', 50], ['Peito de frango grelhado', 80], ['Queijo cottage', 40], ['Alface', 20], ['Tomate', 40]], preparo: ['Desfie o frango e misture com o cottage.', 'Monte o sanduíche com a alface e o tomate.'] },
+  { id: 'r-frango-arroz', nome: 'Frango grelhado com arroz e feijão', emoji: '🍛', tempo: 25, ref: 'almoco', ing: [['Peito de frango grelhado', 130], ['Arroz branco cozido', 120], ['Feijão carioca cozido', 90], ['Salada mista', 100], ['Azeite de oliva', 5]], preparo: ['Tempere o frango com sal, alho e limão e grelhe.', 'Sirva com o arroz, o feijão e a salada temperada com o azeite.'] },
+  { id: 'r-frango-batata', nome: 'Frango com batata-doce e brócolis', emoji: '🍠', tempo: 25, ref: 'almoco', ing: [['Peito de frango grelhado', 130], ['Batata-doce cozida', 200], ['Brócolis cozido', 90], ['Azeite de oliva', 5]], preparo: ['Cozinhe a batata-doce e o brócolis no vapor.', 'Grelhe o frango temperado.', 'Monte o prato e finalize com o azeite.'] },
+  { id: 'r-carne-abobrinha', nome: 'Carne moída com abobrinha', emoji: '🥘', tempo: 20, ref: 'almoco', ing: [['Carne moída magra cozida', 120], ['Abobrinha cozida', 150], ['Tomate', 80], ['Azeite de oliva', 5]], preparo: ['Refogue cebola e alho no azeite.', 'Junte a carne e o tomate picado e cozinhe 5 minutos.', 'Acrescente a abobrinha em cubos e deixe cozinhar até ficar macia.'] },
+  { id: 'r-macarrao', nome: 'Macarrão com carne moída e brócolis', emoji: '🍝', tempo: 25, ref: 'almoco', ing: [['Macarrão cozido', 150], ['Carne moída magra cozida', 100], ['Brócolis cozido', 90], ['Tomate', 100], ['Azeite de oliva', 5]], preparo: ['Cozinhe o macarrão al dente.', 'Faça um molho rápido com o tomate e a carne.', 'Misture tudo com o brócolis.'] },
+  { id: 'r-salada-atum', nome: 'Salada de atum com grão-de-bico', emoji: '🥗', tempo: 10, ref: 'almoco', ing: [['Atum em conserva (em água)', 120], ['Grão-de-bico cozido', 100], ['Tomate', 100], ['Pepino', 80], ['Azeite de oliva', 5]], preparo: ['Misture o grão-de-bico com o tomate e o pepino picados.', 'Junte o atum escorrido.', 'Tempere com azeite, limão e sal.'] },
+  { id: 'r-bowl-tofu', nome: 'Bowl vegetariano de tofu e lentilha', emoji: '🥙', tempo: 20, ref: 'almoco', ing: [['Tofu', 120], ['Lentilha cozida', 120], ['Arroz integral cozido', 100], ['Brócolis cozido', 90], ['Azeite de oliva', 5]], preparo: ['Corte o tofu em cubos e doure na frigideira.', 'Monte o bowl com o arroz, a lentilha e o brócolis.', 'Finalize com o azeite e o tofu.'] },
+  { id: 'r-salmao', nome: 'Salmão com legumes', emoji: '🐟', tempo: 25, ref: 'jantar', ing: [['Salmão grelhado', 120], ['Brócolis cozido', 100], ['Batata inglesa cozida', 150], ['Azeite de oliva', 5]], preparo: ['Tempere o salmão com limão e sal.', 'Grelhe 4 minutos de cada lado.', 'Sirva com os legumes cozidos.'] },
+  { id: 'r-tilapia', nome: 'Tilápia com purê de mandioca', emoji: '🐠', tempo: 25, ref: 'jantar', ing: [['Tilápia grelhada', 140], ['Mandioca cozida', 150], ['Couve refogada', 40], ['Azeite de oliva', 5]], preparo: ['Cozinhe e amasse a mandioca para fazer o purê.', 'Grelhe a tilápia temperada.', 'Sirva com a couve refogada.'] }
+];
+const REC_REF = { cafe: 'Café da manhã', lanche: 'Lanches', almoco: 'Almoço', jantar: 'Jantar' };
+function receitaPorcao(r, porc) { // soma dos ingredientes (porc = nº de porções)
+  const f = +porc > 0 ? +porc : 1;
+  if (r.fixo) { const ing = r.ing.map(([n, g]) => [n, Math.round(g * f)]); return { ing, g: ing.reduce((s, x) => s + x[1], 0), k: Math.round(r.fixo.k * f), p: r1(r.fixo.p * f), c: r1(r.fixo.c * f), f: r1(r.fixo.f * f) }; }
+  const ing = r.ing.map(([n, g]) => [n, Math.round(g * f / 5) * 5 || Math.round(g * f)]);
+  const t = ing.reduce((s, [n, g]) => { const m = macrosItem(n, g) || { k: 0, p: 0, c: 0, f: 0 }; return { k: s.k + m.k, p: s.p + m.p, c: s.c + m.c, f: s.f + m.f }; }, { k: 0, p: 0, c: 0, f: 0 });
+  return { ing, g: ing.reduce((s, x) => s + x[1], 0), k: Math.round(t.k), p: r1(t.p), c: r1(t.c), f: r1(t.f) };
+}
+function todasReceitas() { return RECEITAS_BASE.concat((typeof db !== 'undefined' && db.receitas) || []); }
+const achaReceita = id => todasReceitas().find(r => r.id === id);
+function itemDeReceita(r, porc) {
+  const x = receitaPorcao(r, porc || 1);
+  return { id: uid(), nome: (r.emoji ? r.emoji + ' ' : '') + r.nome, g: x.g, k: x.k, p: x.p, c: x.c, f: x.f, sub: '', rec: { id: r.id, emoji: r.emoji || '', tempo: r.tempo || '', g0: x.g, k0: x.k, p0: x.p, c0: x.c, f0: x.f, ing: x.ing, preparo: r.preparo || [] } };
+}
+/* ================= DIETBOX (alimentos + receitas), SEMANA, AJUSTE ================= */
+const DBX_CATS = [['', 'Tudo'], ['prot', 'Proteínas'], ['carbo', 'Carboidratos'], ['fruta', 'Frutas'], ['veg', 'Vegetais'], ['leg', 'Leguminosas'], ['lat', 'Laticínios'], ['gord', 'Gorduras'], ['outro', 'Outros']];
+const DBX_RF = [['', 'Todas'], ['cafe', 'Café da manhã'], ['lanche', 'Lanches'], ['almoco', 'Almoço'], ['jantar', 'Jantar']];
+const PRESETS_DIAS = [['Todos os dias', '1,2,3,4,5,6,0'], ['Seg a Sex', '1,2,3,4,5'], ['Fim de semana', '6,0'], ['Seg · Qua · Sex', '1,3,5'], ['Ter · Qui', '2,4']];
+function medidaItem(i) { if (i.rec) { const p = i.rec.g0 > 0 && +i.g > 0 ? Math.round(+i.g / i.rec.g0 * 10) / 10 : 1; return 'Receita · ' + String(p).replace('.', ',') + (p === 1 ? ' porção' : ' porções'); } return medidaTxt(i.nome, i.g); }
+function semanaNutri(a) {
+  const n = nutri(a), P = planoSel(a), dono = w => (n.extras || []).find(e => (e.dias || []).includes(w)) || n;
+  const strip = ORDEM_SEM.map(w => { const o = dono(w), on = o === P, nm = nomePlano(n, o); return `<button class="nu-dia-b nu-d7 ${on ? 'on' : ''} ${o === n ? '' : 'out'}" data-act="nu-dia" data-id="${a.id}" data-w="${w}" aria-pressed="${on}" aria-label="${DIAS_SEM[w]}: ${esc(nm)}"><b>${DIAS_SEM[w]}</b><small>${esc(nm.length > 9 ? nm.slice(0, 8) + '…' : nm)}</small></button>`; }).join('');
+  const pres = PRESETS_DIAS.map(([t, v]) => `<button class="nu-chip sm" data-act="nu-dias-preset" data-id="${a.id}" data-w="${v}">${t}</button>`).join('') + (P !== n ? `<button class="nu-chip sm novo" data-act="nu-dias-preset" data-id="${a.id}" data-w="">Nenhum</button>` : '');
+  const vale = P === n ? diasLivres(n) : (P.dias || []);
+  return `<div class="nu-semana"><div class="small muted" style="margin-bottom:6px">Em que dias vale o plano <b>${esc(nomePlano(n, P))}</b>? Toque nos dias, ou use um atalho. Os dias sem plano próprio usam o plano principal.</div>
+    <div class="nu-sem7" role="group" aria-label="Dias da semana">${strip}</div>
+    <div class="nu-chips" style="margin-top:8px">${pres}</div>
+    <div class="small muted" style="margin-top:6px">Este plano vale: <b>${diasTxt(vale)}</b>.</div></div>`;
+}
+/* ajustar as quantidades à meta de calorias */
+function ajustaMeta(a) {
+  const n = nutri(a), P = planoSel(a), meta = +n.metas.kcal, tot = totDia(P).k;
+  if (!(meta > 0)) { toast('Defina primeiro as calorias nas metas diárias (ou use “Calcular metas”)'); return; }
+  if (!(tot > 0)) { toast('Este plano ainda não tem alimentos com calorias'); return; }
+  const f = meta / tot; if (Math.abs(f - 1) < 0.02) { toast('O plano já está na meta'); return; }
+  if (f < 0.4 || f > 2) { toast('A diferença é grande demais para ajustar sozinho. Escolha outro modelo ou edite à mão.'); return; }
+  confirmar(`O plano soma ${Math.round(tot)} kcal e a meta é ${Math.round(meta)} kcal. Ajustar todas as quantidades em ${f > 1 ? '+' : ''}${Math.round((f - 1) * 100)}%?`, 'Ajustar quantidades', () => {
+    P.refeicoes.forEach(r => r.itens.forEach(i => {
+      if (!(+i.g > 0)) return; const g = Math.max(5, Math.round(+i.g * f / 5) * 5);
+      if (i.rec) { const k = i.rec.g0 > 0 ? g / i.rec.g0 : 1; i.g = g; i.k = Math.round(i.rec.k0 * k); i.p = r1(i.rec.p0 * k); i.c = r1(i.rec.c0 * k); i.f = r1(i.rec.f0 * k); return; }
+      i.g = g; const mx = macrosItem(i.nome, g); if (mx) Object.assign(i, mx);
+    }));
+    save(); rerender(); toast('Quantidades ajustadas: ' + Math.round(totDia(P).k) + ' kcal');
+  });
+}
+/* Dietbox */
+function dbxRef() { const d = ui.dbx, a = d && alunoById(d.id); return a ? todasRefeicoes(nutri(a)).find(r => r.id === d.ref) || null : null; }
+function abreDietbox(a, refId) { ui.dbx = { id: a.id, ref: refId, tab: 'alim', q: '', cat: '', rf: '' }; openDialog('<div id="dbx-box" class="dbx"></div>'); dbxDesenha(); }
+function dbxResumo() { const el = document.getElementById('dbx-res'), r = dbxRef(); if (!el || !r) return; const t = totRef(r); el.innerHTML = `Nesta refeição: <b>${Math.round(t.k)} kcal</b> · P ${r1(t.p)} · C ${r1(t.c)} · G ${r1(t.f)} · ${r.itens.length} ite${r.itens.length === 1 ? 'm' : 'ns'}`; }
+function dbxDesenha() {
+  const box = document.getElementById('dbx-box'); if (!box || !ui.dbx) return; const d = ui.dbx, r = dbxRef(), a = alunoById(d.id);
+  const chips = (d.tab === 'alim' ? DBX_CATS : DBX_RF).map(([k, t]) => { const on = (d.tab === 'alim' ? d.cat : d.rf) === k; return `<button class="nu-chip sm ${on ? 'on' : ''}" data-act="${d.tab === 'alim' ? 'dbx-cat' : 'dbx-rf'}" data-k="${k}">${t}</button>`; }).join('');
+  box.innerHTML = `<div class="row spread"><div><div class="eyebrow">Dietbox${a ? ' · ' + esc(a.nome) : ''}</div><h2>${r ? emoRef(r.nome) + ' ' + esc(r.nome) : 'Refeição'}</h2></div><button class="btn primary" data-act="dbx-fim">Concluído</button></div>
+    <div class="nu-chips"><button class="nu-chip ${d.tab === 'alim' ? 'on' : ''}" data-act="dbx-tab" data-t="alim">🍎 Alimentos</button><button class="nu-chip ${d.tab === 'rec' ? 'on' : ''}" data-act="dbx-tab" data-t="rec">👩‍🍳 Receitas prontas</button></div>
+    <input type="search" id="dbx-q" placeholder="${d.tab === 'alim' ? 'Buscar alimento (ex.: frango, arroz, banana)' : 'Buscar receita (ex.: omelete, salmão)'}" value="${esc(d.q)}" autocomplete="off" aria-label="Buscar">
+    <div class="nu-chips">${chips}</div><div class="small muted" id="dbx-res"></div><div id="dbx-lista" class="dbx-lista"></div>`;
+  dbxResumo(); dbxLista();
+}
+function dbxLista() {
+  const el = document.getElementById('dbx-lista'); if (!el || !ui.dbx) return; const d = ui.dbx, q = norm(d.q.trim());
+  if (d.tab === 'alim') {
+    const l = alimentosBR().filter(x => (!d.cat || x.cat === d.cat) && (!q || norm(x.nome).includes(q)));
+    el.innerHTML = l.length ? l.map(x => { const g = x.cat === 'gord' || x.cat === 'outro' ? (x.mg || 10) : 100, med = x.med && x.mg ? `1 ${x.med.split('/')[0]} ≈ ${x.mg} g` : '';
+      return `<div class="dbx-row"><span class="dbx-e" aria-hidden="true">${emo(x.nome)}</span><div class="dbx-n"><b>${esc(x.nome)}</b><div class="small muted num">100 g: ${x.k} kcal · P ${x.p} · C ${x.c} · G ${x.f}</div>${med ? `<div class="small muted">${esc(med)}</div>` : ''}</div><div class="dbx-q"><input type="number" class="num" min="1" value="${g}" aria-label="Gramas de ${esc(x.nome)}"><span class="small muted">g</span></div><button class="btn sm primary" data-act="dbx-add" data-n="${esc(x.nome)}">+ Adicionar</button></div>`; }).join('') : '<div class="small muted">Nenhum alimento encontrado.</div>';
+  } else {
+    const l = todasReceitas().filter(r => (!d.rf || r.ref === d.rf) && (!q || norm(r.nome).includes(q)));
+    el.innerHTML = (d.rf === '' && !q ? '' : '') + (l.length ? l.map(r => { const x = receitaPorcao(r, 1), meu = !!r.fixo;
+      return `<div class="dbx-row dbx-rec"><span class="dbx-e" aria-hidden="true">${r.emoji || '🍽️'}</span><div class="dbx-n"><b>${esc(r.nome)}</b>${meu ? ' <span class="chip">Minha</span>' : ''}<div class="small muted">${r.tempo ? r.tempo + ' min · ' : ''}${esc(REC_REF[r.ref] || 'Receita')}</div><div class="small num">${x.k} kcal · P ${x.p} · C ${x.c} · G ${x.f}</div>
+        <details class="dbx-det"><summary class="small">Ver ingredientes e preparo</summary><ul class="dbx-ul">${x.ing.map(([n, g]) => `<li>${emo(n)} ${esc(n)} <span class="muted num">${g} g</span></li>`).join('')}</ul>${(r.preparo || []).length ? `<ol class="dbx-prep">${r.preparo.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}</details></div>
+        <div class="dbx-q"><input type="number" class="num" min="0.5" step="0.5" value="1" aria-label="Porções de ${esc(r.nome)}"><span class="small muted">porção</span></div><div class="row" style="gap:4px"><button class="btn sm primary" data-act="dbx-add-rec" data-rid="${esc(r.id)}">+ Adicionar</button>${meu ? `<button class="btn sm ghost danger" data-act="dbx-rec-del" data-rid="${esc(r.id)}" aria-label="Excluir receita">✕</button>` : ''}</div></div>`; }).join('') : '<div class="small muted">Nenhuma receita encontrada.</div>');
+  }
+}
+function abreReceita(i) {
+  const rc = i && i.rec; if (!rc) return; const f = rc.g0 > 0 && +i.g > 0 ? +i.g / rc.g0 : 1;
+  openDialog(`<div class="row spread"><div><div class="eyebrow">Receita${rc.tempo ? ' · ' + rc.tempo + ' min' : ''}</div><h2>${esc(i.nome)}</h2></div><button class="btn ghost" data-act="close">Fechar</button></div>
+    <div class="small num"><b>${Math.round(+i.k || 0)} kcal</b> · P ${r1(i.p)} · C ${r1(i.c)} · G ${r1(i.f)}</div>
+    <h3 style="margin:6px 0 0">Ingredientes</h3><ul class="nu-lista">${rc.ing.map(([n, g]) => { const gg = Math.round(g * f / 5) * 5 || Math.round(g * f), md = medidaTxt(n, gg); return `<li><span>${emo(n)} ${esc(n)}${md ? `<span class="small muted nu-md"> ${esc(md)}</span>` : ''}</span><span class="num muted">${gg} g</span></li>`; }).join('')}</ul>
+    ${(rc.preparo || []).length ? `<h3 style="margin:6px 0 0">Modo de preparo</h3><ol class="dbx-prep">${rc.preparo.map(t => `<li>${esc(t)}</li>`).join('')}</ol>` : ''}
+    <p class="small muted" style="margin:0">${NOTA_ORIENTACAO}</p>`);
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return; const act = b.dataset.act;
+  if (!/^(dbx-|nu-dias-preset|nu-ajustar|nu-ref-receita|rec-ver|nu-dbx)/.test(act)) return;
+  const a = alunoById(b.dataset.id) || (ui.dbx && alunoById(ui.dbx.id)) || (typeof alunoAtivo === 'function' ? alunoAtivo() : null); if (!a) return;
+  if (act === 'nu-dbx') { abreDietbox(a, b.dataset.ref); return; }
+  if (act === 'dbx-fim') { closeDialog(); rerender(); return; }
+  if (act === 'dbx-tab') { ui.dbx.tab = b.dataset.t; ui.dbx.q = ''; dbxDesenha(); return; }
+  if (act === 'dbx-cat') { ui.dbx.cat = b.dataset.k; dbxDesenha(); return; }
+  if (act === 'dbx-rf') { ui.dbx.rf = b.dataset.k; dbxDesenha(); return; }
+  if (act === 'dbx-add') { const r = dbxRef(); if (!r) return; const g = Math.max(1, +b.closest('.dbx-row').querySelector('input').value || 100), nome = b.dataset.n, mx = macrosItem(nome, g) || { k: '', p: '', c: '', f: '' };
+    r.itens.push({ id: uid(), nome, g, ...mx, sub: '' }); save(); rerender(); dbxResumo(); toast(`${emo(nome)} ${nome} · ${g} g adicionado`); return; }
+  if (act === 'dbx-add-rec') { const r = dbxRef(), rc = achaReceita(b.dataset.rid); if (!r || !rc) return; const porc = Math.max(0.5, +b.closest('.dbx-row').querySelector('input').value || 1);
+    r.itens.push(itemDeReceita(rc, porc)); save(); rerender(); dbxResumo(); toast(`${rc.emoji || '🍽️'} ${rc.nome} adicionada`); return; }
+  if (act === 'dbx-rec-del') { confirmar('Excluir esta receita da sua lista? (Refeições que já a usam não mudam.)', 'Excluir receita', () => { db.receitas = (db.receitas || []).filter(r => r.id !== b.dataset.rid); save(); dbxDesenha(); }); return; }
+  if (act === 'rec-ver') { const r = todasRefeicoes(nutri(a)).find(x => x.id === b.dataset.ref), it = r && r.itens.find(x => x.id === b.dataset.item); if (it) abreReceita(it); return; }
+  if (act === 'nu-ajustar') { ajustaMeta(a); return; }
+  if (act === 'nu-dias-preset') { const n = nutri(a), P = planoSel(a), ds = b.dataset.w ? b.dataset.w.split(',').map(Number) : [];
+    if (P === n) n.extras.forEach(e => { e.dias = (e.dias || []).filter(x => !ds.includes(x)); }); else { n.extras.forEach(e => { if (e !== P) e.dias = (e.dias || []).filter(x => !ds.includes(x)); }); P.dias = ds.slice(); }
+    save(); rerender(); return; }
+  if (act === 'nu-ref-receita') { const r = planoSel(a).refeicoes.find(x => x.id === b.dataset.ref); if (!r || !r.itens.length) { toast('Adicione primeiro alimentos a esta refeição'); return; }
+    openDialog(`<form id="f-rec-nova" class="dlg" style="padding:0" data-id="${a.id}" data-ref="${r.id}"><div><div class="eyebrow">Dietbox</div><h2>Guardar como receita</h2></div>
+      <div class="form-grid"><label class="field wide">Nome da receita<input id="rn-nome" required maxlength="60" value="${esc(r.nome)}"></label>
+      <label class="field">Emoji<input id="rn-emoji" maxlength="4" value="${emoRef(r.nome)}"></label><label class="field">Tempo (min)<input id="rn-tempo" type="number" min="0" value=""></label>
+      <label class="field wide">Modo de preparo (um passo por linha)<textarea id="rn-prep" rows="4" placeholder="Ex.: Grelhe o frango.&#10;Cozinhe o arroz."></textarea></label></div>
+      <p class="small muted" style="margin:0">Fica na aba “Receitas prontas” do Dietbox para usar em qualquer aluna.</p>
+      <div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar receita</button></div></form>`); return; }
+});
+document.addEventListener('input', ev => { if (ev.target.id === 'dbx-q' && ui.dbx) { ui.dbx.q = ev.target.value; dbxLista(); } });
+document.addEventListener('submit', ev => {
+  const f = ev.target; if (f.id !== 'f-rec-nova') return; ev.preventDefault();
+  const a = alunoById(f.dataset.id), r = a && todasRefeicoes(nutri(a)).find(x => x.id === f.dataset.ref); if (!r) return;
+  const t = totRef(r), its = r.itens.filter(i => i.nome && +i.g > 0);
+  (db.receitas = db.receitas || []).push({ id: 'ru-' + uid(), nome: $('#rn-nome').value.trim() || r.nome, emoji: $('#rn-emoji').value.trim() || '🍽️', tempo: +$('#rn-tempo').value || '', ref: '', ing: its.map(i => [i.nome, +i.g]), fixo: { k: Math.round(t.k), p: r1(t.p), c: r1(t.c), f: r1(t.f) }, preparo: $('#rn-prep').value.split('\n').map(x => x.trim()).filter(Boolean) });
+  save(); closeDialog(); toast('Receita guardada no Dietbox');
+});
 /* ---- modelos, montagem e trocas ---- */
-function itensDeModelo(its) { return its.map(it => { const [nome, g, sub] = Array.isArray(it) ? it : [it.nome, it.g, it.sub]; const mx = macrosItem(nome, g) || { k: '', p: '', c: '', f: '' }; return { id: uid(), nome, g, ...mx, sub: sub || '' }; }); }
+function itensDeModelo(its) { return its.map(it => { if (it && !Array.isArray(it) && it.rec) return { ...it, id: uid(), rec: { ...it.rec } }; const [nome, g, sub] = Array.isArray(it) ? it : [it.nome, it.g, it.sub];
+    if (String(nome).startsWith('@')) { const rc = achaReceita(String(nome).slice(1)); if (rc) { const o = itemDeReceita(rc, g || 1); if (sub) o.sub = sub; return o; } return { id: uid(), nome: String(nome).slice(1), g: 0, k: '', p: '', c: '', f: '', sub: '' }; }
+    const mx = macrosItem(nome, g) || { k: '', p: '', c: '', f: '' }; return { id: uid(), nome, g, ...mx, sub: sub || '' }; }); }
 function refsDeModelo(pl) { return pl.refeicoes.map(r => ({ id: uid(), nome: r.nome, hora: r.hora || '', nota: r.nota || '', itens: itensDeModelo(r.itens) })); }
 function totModeloPlano(pl) { return totDia({ refeicoes: refsDeModelo(pl) }); }
 function aplicaModeloNutri(a, m) {
@@ -2260,20 +2477,23 @@ function migraModelosNutri() {
   const feitos = new Set(db.modelosNutriIds || []); let mudou = false;
   MODELOS_NUTRI_PADRAO.forEach(m => {
     if (feitos.has(m.id)) return;
-    (db.modelosNutri = db.modelosNutri || []).push({ id: m.id, nome: m.nome, desc: m.desc, padrao: true, metas: m.metas, planos: m.planos });
+    (db.modelosNutri = db.modelosNutri || []).push({ id: m.id, nome: m.nome, desc: m.desc, padrao: true, capa: m.capa, metas: m.metas, planos: m.planos });
     feitos.add(m.id); mudou = true;
   });
   if (mudou) { db.modelosNutriIds = [...feitos]; save(); }
 }
 function abreModelosNutri(a) {
   const lista = db.modelosNutri || [];
-  const card = m => { const t = totModeloPlano(m.planos[0]); const pl = m.planos.length > 1 ? ` · ${m.planos.length} planos (${m.planos.map(p => esc(p.nome)).join(' / ')})` : '';
-    return `<div class="nu-mod"><div><b>${esc(m.nome)}</b><div class="small muted">${esc(m.desc || '')}</div><div class="small num">${Math.round(t.k)} kcal · P ${Math.round(t.p)} · C ${Math.round(t.c)} · G ${Math.round(t.f)}${pl}</div></div>
-      <div class="row" style="gap:6px"><button class="btn sm primary" data-act="nu-modelo-usar" data-id="${a.id}" data-mid="${esc(m.id)}">Usar</button>${m.padrao ? '' : `<button class="btn sm ghost danger" data-act="nu-modelo-del" data-id="${a.id}" data-mid="${esc(m.id)}" aria-label="Excluir modelo">✕</button>`}</div></div>`; };
+  const card = m => { const refs = refsDeModelo(m.planos[0]), t = totDia({ refeicoes: refs }), cp = capaNutri(m), pl = m.planos.length > 1 ? ` · ${m.planos.length} planos (${m.planos.map(p => esc(p.nome)).join(' / ')})` : '';
+    const dia = refs.map(r => { const tr = totRef(r); return `<div class="nu-mdia"><span aria-hidden="true">${emoRef(r.nome)}</span><div><b>${r.hora ? esc(r.hora) + ' · ' : ''}${esc(r.nome)}</b> <span class="small muted num">${Math.round(tr.k)} kcal</span><div class="small muted">${r.itens.map(i => (i.rec ? '' : emo(i.nome) + ' ') + esc(i.nome)).join(' · ')}</div></div></div>`; }).join('');
+    return `<div class="nu-mod2"><div class="nu-capa" style="background:linear-gradient(135deg,${cp.c[0]},${cp.c[1]})" aria-hidden="true"><span>${cp.e}</span></div>
+      <div class="row spread" style="gap:10px;align-items:flex-start"><div><b>${esc(m.nome)}</b><div class="small muted">${esc(m.desc || '')}</div><div class="small num">${Math.round(t.k)} kcal · P ${Math.round(t.p)} · C ${Math.round(t.c)} · G ${Math.round(t.f)}${pl}</div></div>
+      <div class="row" style="gap:6px;flex:none"><button class="btn sm primary" data-act="nu-modelo-usar" data-id="${a.id}" data-mid="${esc(m.id)}">Usar</button>${m.padrao ? '' : `<button class="btn sm ghost danger" data-act="nu-modelo-del" data-id="${a.id}" data-mid="${esc(m.id)}" aria-label="Excluir modelo">✕</button>`}</div></div>
+      <details class="dbx-det"><summary class="small">Ver o dia (refeições e alimentos)</summary>${dia}</details></div>`; };
   openDialog(`<div class="row spread"><h2>Modelos de plano alimentar</h2><button class="btn ghost" data-act="close">Fechar</button></div>
     <p class="muted small" style="margin:0">Escolha um ponto de partida e ajuste depois (alimentos, quantidades, horários). ${(nutri(a).refeicoes.length ? '<b>Atenção: substitui o plano alimentar atual de ' + esc(a.nome.split(' ')[0]) + '.</b>' : '')}</p>
     <div class="nu-mods">${lista.length ? lista.map(card).join('') : '<div class="muted">Ainda não há modelos.</div>'}</div>
-    <p class="small muted" style="margin:0">Os modelos usam alimentos comuns no Brasil e servem como orientação geral. ${NOTA_ORIENTACAO}</p>`);
+    <p class="small muted" style="margin:0">As imagens dos modelos são ilustrações (emojis), não fotos reais. Os modelos usam alimentos comuns no Brasil e servem como orientação geral. ${NOTA_ORIENTACAO}</p>`);
 }
 function abreMontar(a) {
   const P = planoSel(a), jaTem = nome => P.refeicoes.find(r => norm(r.nome) === norm(nome));
@@ -2289,7 +2509,7 @@ function aplicaMontar(f) {
   P.refeicoes = novas; save(); closeDialog(); rerender();
 }
 function planoComoModelo(a, nome) {
-  const n = nutri(a), planos = [n].concat(n.extras || []).map(P => ({ nome: nomePlano(n, P), dias: P === n ? [] : (P.dias || []).slice(), refeicoes: P.refeicoes.map(r => ({ nome: r.nome, hora: r.hora || '', nota: r.nota || '', itens: r.itens.map(i => [i.nome, i.g, i.sub || '']) })) }));
+  const n = nutri(a), planos = [n].concat(n.extras || []).map(P => ({ nome: nomePlano(n, P), dias: P === n ? [] : (P.dias || []).slice(), refeicoes: P.refeicoes.map(r => ({ nome: r.nome, hora: r.hora || '', nota: r.nota || '', itens: r.itens.map(i => i.rec ? { nome: i.nome, g: i.g, k: i.k, p: i.p, c: i.c, f: i.f, sub: i.sub || '', rec: JSON.parse(JSON.stringify(i.rec)) } : [i.nome, i.g, i.sub || '']) })) }));
   return { id: 'nm-' + uid(), nome, desc: 'Guardado por si', metas: { kcal: n.metas.kcal, p: n.metas.p, c: n.metas.c, f: n.metas.f, agua: n.metas.agua || 8 }, planos };
 }
 
@@ -2359,7 +2579,7 @@ function viewDefinicoes() {
     <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>`;
 }
 /* ================= COMUNIDADE (feed) E FOTO DE PERFIL ================= */
-const comu = { itens: [], fim: false, carregando: false, erro: '', abertos: {}, coment: {}, rasc: {}, fotoCache: {}, perfil: null, pend: null, novos: 0, ultimo: '', ult: 0, pollT: 0, obs: null };
+const comu = { itens: [], fim: false, carregando: false, erro: '', abertos: {}, coment: {}, rasc: {}, fotoCache: {}, perfil: null, pend: null, fix: [], novos: 0, ultimo: '', ult: 0, pollT: 0, obs: null };
 async function comuCarregaImg(caminho) {
   const k = 'p:' + caminho; if (comu.fotoCache[k] !== undefined) return; comu.fotoCache[k] = null;
   try {
@@ -2446,20 +2666,21 @@ function comunidadePainel(modo) {
   if (!comuAtiva()) return `<div class="panel empty"><h2>Comunidade</h2><p>A comunidade fica disponível quando a app está ligada à nuvem.</p></div>`;
   return `<div id="comu-box" data-modo="${modo}"><form id="comu-form" class="cp-novo"><div id="comu-eu">${avatarHtml(sbS.uid, comuNomeProprio(), comu.perfil ? comu.perfil.foto_v : 0, 40, comuEquipe())}</div>
     <div style="flex:1;min-width:0;display:grid;gap:8px"><div id="comu-prev">${comuPrevHtml()}</div><textarea id="comu-txt" rows="2" maxlength="1000" placeholder="${comuEquipe() ? 'Escreva uma legenda ou uma mensagem para as alunas…' : 'Escreva uma legenda: uma conquista, uma dúvida ou um incentivo…'}">${esc(comu.rasc.main || '')}</textarea>
-    <div class="row spread" style="margin:0;align-items:center;gap:8px;flex-wrap:wrap"><label class="btn sm" style="cursor:pointer;flex:none">📷 Foto<input type="file" accept="image/*" id="comu-foto" hidden></label><button class="btn primary sm" style="flex:none">Publicar</button></div>
+    <div class="row spread" style="margin:0;align-items:center;gap:8px;flex-wrap:wrap"><label class="btn sm" style="cursor:pointer;flex:none">📷 Foto<input type="file" accept="image/*" id="comu-foto" hidden></label><button class="btn primary sm" style="flex:none">Publicar</button>${comuEquipe() ? '<label class="small" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="comu-fixar"> 📌 Fixar no topo</label>' : ''}</div>
     <span class="small muted">${COMU_NOTA}</span></div></form>
     <div class="${modo === 'inner' ? 'comu-scroll' : ''}" id="comu-scroll"><div id="comu-lista"></div></div></div>`;
 }
 function menuPost(p) {
   const meu = sbS && p.autor_id === sbS.uid, eq = comuEquipe(), it = [];
-  if (meu) it.push(['editar', 'Editar']);
+  if (meu || (eq && p.equipe)) it.push(['editar', 'Editar']);
+  if (eq && p.equipe && !p.pai_id && p.fixado !== undefined) it.push([p.fixado ? 'soltar' : 'fixar', p.fixado ? 'Soltar do topo' : '📌 Fixar no topo']);
   if (!meu) it.push(['denunciar', 'Denunciar']);
   if (eq) it.push([p.oculto ? 'mostrar' : 'ocultar', p.oculto ? 'Mostrar de novo' : 'Ocultar']);
   return it.length ? `<details class="mais cp-mais"><summary class="btn sm ghost" aria-label="Mais ações">⋯</summary><div class="mais-menu">${it.map(([a, t]) => `<button data-cact="${a}" data-pid="${p.id}">${t}</button>`).join('')}</div></details>` : '';
 }
 function postHtml(p, filho) {
   const eq = comuEquipe(), ab = !filho && comu.abertos[p.id], cs = comu.coment[p.id];
-  const quem = `<div class="cp-quem"><div class="row" style="gap:6px;flex-wrap:wrap;margin:0;align-items:center"><b>${esc(p.nome)}</b>${p.equipe ? '<span class="chip accent">Equipe Squad</span>' : ''}${p.oculto ? '<span class="chip">Oculta</span>' : ''}${eq && p.denuncias ? `<span class="chip" style="color:var(--danger)">${p.denuncias} denúncia${p.denuncias > 1 ? 's' : ''}</span>` : ''}</div><div class="small muted">${tempoRel(p.created_at)}${p.editado ? ' · editado' : ''}</div></div>`;
+  const quem = `<div class="cp-quem"><div class="row" style="gap:6px;flex-wrap:wrap;margin:0;align-items:center"><b>${esc(p.nome)}</b>${p.equipe ? '<span class="chip accent">Equipe Squad</span>' : ''}${p.fixado ? '<span class="chip">📌 Fixada</span>' : ''}${p.oculto ? '<span class="chip">Oculta</span>' : ''}${eq && p.denuncias ? `<span class="chip" style="color:var(--danger)">${p.denuncias} denúncia${p.denuncias > 1 ? 's' : ''}</span>` : ''}</div><div class="small muted">${tempoRel(p.created_at)}${p.editado ? ' · editado' : ''}</div></div>`;
   const cab = `<div class="cp-top">${avatarHtml(p.autor_id, p.nome, p.foto_v, filho ? 32 : 42, p.equipe)}${quem}${menuPost(p)}</div>`;
   if (filho) return `<div class="cp-c ${p.oculto ? 'oculto' : ''}" data-pid="${p.id}">${cab}<div class="cp-txt">${esc(p.texto)}</div></div>`;
   let img = '';
@@ -2479,9 +2700,11 @@ function comuLista(forca) {
     : comu.erro ? `<div class="panel empty">${comu.erro === 'sql' ? 'A comunidade ainda não está ligada. Rode o ficheiro comunidade.sql no Supabase (veja o guia).' : 'Não consegui carregar. Verifique a internet e tente de novo.'}<div class="row" style="justify-content:center"><button class="btn sm" data-cact="recarregar">Tentar de novo</button></div></div>`
     : comu.fim ? (comu.itens.length ? '<div class="small muted" style="text-align:center;padding:14px">Chegou ao início da comunidade 💛</div>' : '<div class="panel empty"><h2>Ainda não há publicações</h2><p>Seja a primeira a escrever. Uma conquista, uma dúvida ou um incentivo. 💛</p></div>')
     : '<div id="comu-sent" style="height:40px"></div>';
-  el.innerHTML = comu.itens.map(p => postHtml(p)).join('') + rod;
+  const fx = comu.fix.length ? `<div class="cp-fix"><div class="eyebrow">📌 Fixado pela equipe</div>${comu.fix.map(p => postHtml(p)).join('')}</div>` : '';
+  el.innerHTML = fx + comu.itens.filter(p => !p.fixado).map(p => postHtml(p)).join('') + rod;
   const s = document.getElementById('comu-sent'); if (s && comu.obs) comu.obs.observe(s);
 }
+async function comuFix() { const r = await comuRpc('pt_fixados', {}); comu.fix = r.ok && Array.isArray(r.j) ? r.j : []; comuLista(true); }
 async function comuMais() {
   if (comu.carregando || comu.fim) return;
   comu.carregando = true; comu.erro = ''; comuLista(true);
@@ -2500,14 +2723,14 @@ async function comuAtualiza(forca) {
   const ids = new Set(r.j.map(x => x.id)), antigos = comu.itens.filter(x => !ids.has(x.id));
   let resto = antigos;
   if (r.j.length < 15) { resto = []; comu.fim = true; } else { const corte = r.j[r.j.length - 1].created_at; resto = antigos.filter(x => x.created_at < corte); }
-  comu.itens = r.j.concat(resto); comuLista(false);
+  comu.itens = r.j.concat(resto); comuLista(false); comuFix();
 }
 function comuInicia(box) {
   box.dataset.on = '1'; comu.visto = Date.now(); try { localStorage.setItem('pt-comu-visto', new Date().toISOString()); } catch (e) {} comu.novos = 0;
   const sc = box.dataset.modo === 'inner' ? document.getElementById('comu-scroll') : null;
   if (comu.obs) comu.obs.disconnect();
   comu.obs = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) comuMais(); }, { root: sc, rootMargin: '300px' });
-  comuLista(true); comuPerfil();
+  comuLista(true); comuPerfil(); comuFix();
   if (!comu.itens.length) comuMais(); else comuAtualiza(false);
 }
 new MutationObserver(() => { const b = document.getElementById('comu-box'); if (b && !b.dataset.on) comuInicia(b); }).observe(document.body, { childList: true, subtree: true });
@@ -2521,7 +2744,7 @@ async function comuTick() {
   comu.novos = r.j[0].n || 0; comu.ultimo = r.j[0].ultimo || ''; verificaNotifs();
 }
 setInterval(comuTick, 45000);
-const comuAcha = pid => comu.itens.find(x => x.id === pid) || [].concat(...Object.values(comu.coment).map(c => c.itens)).find(x => x.id === pid);
+const comuAcha = pid => comu.itens.find(x => x.id === pid) || comu.fix.find(x => x.id === pid) || [].concat(...Object.values(comu.coment).map(c => c.itens)).find(x => x.id === pid);
 document.addEventListener('click', async ev => {
   const b = ev.target.closest('[data-cact]'); if (!b) return;
   const act = b.dataset.cact, pid = b.dataset.pid, p = pid && comuAcha(pid);
@@ -2541,6 +2764,7 @@ document.addEventListener('click', async ev => {
     return;
   }
   if (act === 'editar' && p) { openDialog(`<form id="f-comu-editar" class="dlg" style="padding:0" data-pid="${pid}"><div><h2>Editar publicação</h2></div><textarea id="ce-txt" rows="5" maxlength="1000">${esc(p.texto)}</textarea><div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); return; }
+  if ((act === 'fixar' || act === 'soltar') && p) { const r = await comuRpc('pt_fixar', { p_post: pid, p_fixado: act === 'fixar' }); if (!r.ok) { toast(comuErro(r)); return; } comu.itens.forEach(x => { if (x.id === pid) x.fixado = act === 'fixar'; }); await comuFix(); toast(act === 'fixar' ? 'Fixada no topo: todas as alunas veem primeiro' : 'Solta do topo'); return; }
   if (act === 'denunciar' && p) { confirmar('Denunciar esta publicação?', 'Denunciar', async () => { const r = await comuRpc('pt_denunciar', { p_post: pid }); toast(r.ok ? 'Obrigada. A equipe vai analisar.' : comuErro(r)); }); return; }
   if ((act === 'ocultar' || act === 'mostrar') && p) { const r = await comuRpc('pt_ocultar', { p_post: pid, p_oculto: act === 'ocultar' }); if (!r.ok) { toast(comuErro(r)); return; } p.oculto = act === 'ocultar'; comuLista(true); toast(p.oculto ? 'Publicação oculta para as alunas' : 'Publicação visível de novo'); }
 });
@@ -2567,6 +2791,7 @@ document.addEventListener('submit', async ev => {
     const r = await comuRpc('pt_publicar', { p_texto: v, p_pai: null, p_foto: caminho }); bt.disabled = false;
     if (!r.ok) { toast(comuErro(r)); return; }
     t.value = ''; comu.rasc.main = ''; if (comu.pend) { URL.revokeObjectURL(comu.pend.url); comu.pend = null; const pv = document.getElementById('comu-prev'); if (pv) pv.innerHTML = ''; }
+    if (r.j && $('#comu-fixar') && $('#comu-fixar').checked) { const fr = await comuRpc('pt_fixar', { p_post: r.j, p_fixado: true }); if (!fr.ok) toast(comuErro(fr)); }
     comu.ult = 0; await comuAtualiza(true); return;
   }
   if (f.dataset && f.dataset.cform) {
@@ -2578,7 +2803,7 @@ document.addEventListener('submit', async ev => {
   if (f.id === 'f-comu-editar') {
     ev.preventDefault(); const pid = f.dataset.pid, v = $('#ce-txt').value.trim(); const pe = comuAcha(pid); if (!v && !(pe && pe.foto)) return;
     const r = await comuRpc('pt_editar', { p_post: pid, p_texto: v }); if (!r.ok) { toast(comuErro(r)); return; }
-    const p = comuAcha(pid); if (p) { p.texto = v; p.editado = true; } closeDialog(); comuLista(true); return;
+    [].concat(comu.itens, comu.fix).forEach(x => { if (x.id === pid) { x.texto = v; x.editado = true; } }); closeDialog(); comuLista(true); return;
   }
 });
 document.addEventListener('change', ev => {
