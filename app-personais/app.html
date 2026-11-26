@@ -2865,11 +2865,48 @@ function dbxlDesenha() {
   const l = dbxl.itens.filter(d => !dbxl.cat || d.categoria === dbxl.cat);
   el.innerHTML = chips + (l.length ? `<div class="dl-grid">${l.map(d => dbxlCard(d, eq)).join('')}</div>` : `<div class="panel empty"><p>${eq ? 'Ainda não há refeições aqui. Crie a primeira em “+ Nova refeição”.' : 'Em breve a equipe publica ideias de refeições aqui. 💛'}</p></div>`);
 }
+/* 5 exemplos de refeições para o Dietbox (fotos geradas por IA, macros calculadas com a tabela da app) */
+const CDN_EX = 'https://d8j0ntlcm91z4.cloudfront.net/user_3MT6Caqjj0JC70CsMVVsMBLP7Ot/hf_20261126_';
+const EXEMPLOS_DIETBOX = [
+  { nome: 'Bowl de frango com abacate', emoji: '🥙', categoria: 'almoco', tempo: 25, kcal: 450, prot: 46.9, carb: 33.9, gord: 13.9, img: CDN_EX + '105938_b1cb3cad-3379-463b-8514-bb1f26a55ed7.png',
+    ingredientes: 'Peito de frango grelhado: 130 g (1 filé médio)\nArroz integral cozido: 100 g (cerca de 1 colher de servir cheia)\nAbacate: 50 g (2 fatias grossas)\nTomate-cereja ou tomate picado: 80 g (4 a 5 unidades)\nBrócolis cozido: 60 g (2 ramos)\nAzeite de oliva: 5 g (1 colher de chá)\nSal, limão e pimenta a gosto',
+    preparo: 'Tempere o frango com sal, alho, limão e pimenta e deixe 10 minutos.\nAqueça uma frigideira antiaderente e grelhe o frango 4 a 5 minutos de cada lado, até dourar e cozinhar por dentro.\nEnquanto isso, cozinhe o brócolis no vapor por 4 minutos (deve ficar verde e firme).\nAqueça o arroz integral já cozido (micro-ondas, 1 minuto).\nCorte o frango em fatias, o abacate em fatias e os tomates ao meio.\nMonte o bowl: arroz no fundo, frango de um lado, depois o brócolis, o tomate e o abacate.\nFinalize com o azeite, limão e uma pitada de sal.\nDica: cozinhe o frango e o arroz em dobro e guarde na geladeira por até 3 dias para montar o bowl em 5 minutos.' },
+  { nome: 'Omelete cremosa de espinafre e queijo', emoji: '🍳', categoria: 'cafe', tempo: 10, kcal: 465, prot: 31.7, carb: 29.1, gord: 25.3, img: CDN_EX + '105947_e5a36cd1-8c76-48e7-8c6d-8ea97f55520b.png',
+    ingredientes: 'Ovos: 150 g (3 ovos médios)\nEspinafre cozido ou refogado: 60 g (2 colheres de sopa cheias)\nQueijo minas frescal: 30 g (1 fatia grossa)\nAzeite de oliva: 3 g (meia colher de chá)\nPão integral de forma: 50 g (2 fatias)\nSal e pimenta a gosto',
+    preparo: 'Bata os ovos com uma pitada de sal e pimenta.\nAqueça uma frigideira antiaderente em fogo médio com o azeite.\nRefogue o espinafre por 1 minuto e retire para um prato.\nNa mesma frigideira, despeje os ovos e deixe firmar por cerca de 1 minuto sem mexer.\nColoque o espinafre e o queijo em cubinhos sobre metade da omelete.\nDobre ao meio, tampe e deixe 2 minutos em fogo baixo, até o queijo derreter.\nSirva com o pão integral torrado.\nDica: para ficar mais cremosa, retire do fogo antes de secar por completo; o calor do prato termina o cozimento.' },
+  { nome: 'Salmão grelhado com purê de batata-doce', emoji: '🐟', categoria: 'jantar', tempo: 30, kcal: 498, prot: 32.1, carb: 41.2, gord: 22.5, img: CDN_EX + '105952_cc3eb2bb-7dd9-4261-b094-3beb239c6a8a.png',
+    ingredientes: 'Salmão (filé): 120 g (1 posta pequena)\nBatata-doce cozida: 200 g (1 unidade média)\nBrócolis cozido: 100 g (3 ramos)\nAzeite de oliva: 5 g (1 colher de chá)\nLimão, sal, alho e salsinha a gosto',
+    preparo: 'Descasque a batata-doce, corte em pedaços e cozinhe em água com sal por 15 a 20 minutos, até ficar bem macia.\nEscorra e amasse com um garfo, juntando um fio do azeite e uma pitada de sal. Mantenha tampado para não esfriar.\nTempere o salmão com limão, sal e alho e deixe 10 minutos.\nAqueça uma frigideira antiaderente e coloque o salmão com a pele para baixo. Grelhe 4 minutos, vire e grelhe mais 3 minutos.\nCozinhe o brócolis no vapor por 4 minutos.\nMonte o prato com o purê, o salmão e o brócolis. Finalize com salsinha e um pouco de limão.\nDica: o salmão está pronto quando se desfaz em lascas com o garfo, mas ainda está úmido por dentro.' },
+  { nome: 'Panqueca de banana e aveia com morango', emoji: '🥞', categoria: 'cafe', tempo: 10, kcal: 407, prot: 19.5, carb: 57.8, gord: 12.4, img: CDN_EX + '105947_1bfce150-33dd-4811-9f85-64fac1b2997c.png',
+    ingredientes: 'Banana prata madura: 100 g (1 unidade média)\nOvos: 100 g (2 ovos pequenos)\nAveia em flocos: 30 g (2 colheres de sopa cheias)\nMorango: 80 g (4 a 5 unidades)\nMel: 7 g (1 colher de chá)\nCanela em pó a gosto',
+    preparo: 'Amasse bem a banana com um garfo, até virar um purê.\nJunte os ovos e a aveia e misture até formar uma massa mole. Se quiser, acrescente uma pitada de canela.\nAqueça uma frigideira antiaderente pequena em fogo médio-baixo (sem óleo ou com uma gota de azeite).\nDespeje uma concha da massa e deixe cozinhar 2 minutos, até formar bolhas na superfície.\nVire com cuidado e cozinhe mais 1 a 2 minutos. Repita com o resto da massa.\nEmpilhe as panquecas, cubra com os morangos fatiados e um fio de mel.\nDica: use banana bem madura para adoçar naturalmente e dispensar o açúcar.' },
+  { nome: 'Overnight de aveia com iogurte e chia', emoji: '🥣', categoria: 'lanche', tempo: 5, kcal: 337, prot: 25.1, carb: 43.8, gord: 7.5, img: CDN_EX + '105949_b3879030-e5a1-4fe9-aba7-7c09c85d1567.png',
+    ingredientes: 'Aveia em flocos: 40 g (3 colheres de sopa)\nIogurte grego natural 0%: 170 g (1 pote)\nMorango: 100 g (5 a 6 unidades)\nChia: 10 g (1 colher de sopa rasa)\nCanela ou essência de baunilha a gosto',
+    preparo: 'Num pote de vidro, misture a aveia, a chia e o iogurte grego até ficar homogêneo.\nSe preferir mais líquido, acrescente 2 a 3 colheres de sopa de água ou leite.\nTampe e leve à geladeira por pelo menos 4 horas (o ideal é de um dia para o outro).\nNa hora de comer, corte os morangos e distribua por cima.\nFinalize com canela ou baunilha, se quiser.\nDica: prepare 3 potes de uma vez para os lanches da semana. Dura até 3 dias na geladeira.' }
+];
+async function dbxlCarregaExemplos() {
+  const ja = new Set(dbxl.itens.map(d => norm(d.nome))); let n = 0;
+  for (const e of EXEMPLOS_DIETBOX) {
+    if (ja.has(norm(e.nome))) continue;
+    toast('A criar exemplo ' + (n + 1) + '…'); let foto = '';
+    try {
+      const rs = await fetch(e.img); if (!rs.ok) throw new Error('img');
+      const blob = await comuReduzPost(await rs.blob());
+      if (sbS.expires_at && sbS.expires_at - 30 < Date.now() / 1000 && sbS.refresh_token) await SB.refresca();
+      foto = sbS.uid + '/' + String(uid() + uid()).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24) + '.jpg';
+      const up = await fetch(SBC.url + '/storage/v1/object/dietbox-fotos/' + foto, { method: 'POST', headers: { apikey: SBC.anonKey, Authorization: 'Bearer ' + sbS.access_token, 'Content-Type': 'image/jpeg' }, body: blob });
+      if (!up.ok) throw new Error('up');
+    } catch (err) { foto = ''; toast('Não consegui enviar a foto de “' + e.nome + '”; guardei sem foto.'); }
+    const r = await comuRpc('pt_db_guardar', { p_id: null, p_nome: e.nome, p_emoji: e.emoji, p_cat: e.categoria, p_tempo: e.tempo, p_kcal: e.kcal, p_prot: e.prot, p_carb: e.carb, p_gord: e.gord, p_ing: e.ingredientes, p_prep: e.preparo, p_foto: foto || null, p_pub: false });
+    if (!r.ok) { toast(comuErro(r)); break; } n++;
+  }
+  dbxl.ok = false; await dbxlCarrega(true); toast(n ? n + ' exemplos criados como rascunho. Abra, confira e clique em Publicar.' : 'Os exemplos já existem');
+}
 function dbxlIniciar() { dbxlDesenha(); dbxlCarrega(true); }
 function dietboxPainel() {
   if (!comuAtiva()) return '';
   setTimeout(dbxlIniciar, 0);
-  return `<div class="panel"><div class="row spread" style="flex-wrap:wrap;gap:10px"><div><h3>Refeições soltas para as alunas</h3><div class="small muted">Crie refeições com foto do prato e modo de preparo. Só aparecem para as alunas as que estiverem publicadas.</div></div><button class="btn primary" data-act="dbxl-novo">+ Nova refeição</button></div></div><div id="dbxl-lista"></div>`;
+  return `<div class="panel"><div class="row spread" style="flex-wrap:wrap;gap:10px"><div><h3>Refeições soltas para as alunas</h3><div class="small muted">Crie refeições com foto do prato e modo de preparo. Só aparecem para as alunas as que estiverem publicadas.</div></div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" data-act="dbxl-exemplos">Criar 5 exemplos</button><button class="btn primary" data-act="dbxl-novo">+ Nova refeição</button></div></div></div><div id="dbxl-lista"></div>`;
 }
 function vDietbox(a) {
   setTimeout(dbxlIniciar, 0);
@@ -2899,6 +2936,7 @@ document.addEventListener('click', async ev => {
   if (act === 'dbxl-cat') { dbxl.cat = b.dataset.k; dbxlDesenha(); return; }
   if (act === 'dbxl-recarregar') { dbxl.erro = ''; dbxlCarrega(true); return; }
   if (act === 'dbxl-novo') { abreDbxlForm(); return; }
+  if (act === 'dbxl-exemplos') { confirmar('Criar 5 refeições de exemplo (com foto, macros e modo de preparo) como rascunho? As alunas só veem depois de você publicar.', 'Criar exemplos', dbxlCarregaExemplos); return; }
   if (act === 'dbxl-edit' && d) { abreDbxlForm(d); return; }
   if (act === 'dbxl-pub' && d) { const r = await comuRpc('pt_db_publicar', { p_id: d.id, p_pub: !d.publicado }); if (!r.ok) { toast(comuErro(r)); return; } d.publicado = !d.publicado; dbxlDesenha(); toast(d.publicado ? 'Publicada: as alunas já veem' : 'Retirada das alunas'); return; }
   if (act === 'dbxl-del' && d) { confirmar('Excluir “' + d.nome + '”? As alunas deixam de ver.', 'Excluir refeição', async () => { const r = await comuRpc('pt_db_apagar', { p_id: d.id }); if (!r.ok) { toast(comuErro(r)); return; } dbxl.itens = dbxl.itens.filter(x => x.id !== d.id); dbxlDesenha(); }); return; }
