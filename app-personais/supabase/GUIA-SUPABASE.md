@@ -50,7 +50,9 @@ O Claude coloca o URL e a chave no ficheiro `config.js`. Depois faça duplo cliq
 ## Comunidade (feed) e foto de perfil
 1. No Supabase: **SQL Editor** → **New query** → cole o conteúdo de `supabase/comunidade.sql` → **Run**. (Só uma vez; é seguro repetir. Já cria também o espaço das fotos, chamado "avatares".)
 2. Faça `publicar.bat`.
-3. As alunas veem o separador **Grupo** no celular. A equipe vê a **Comunidade** no fim da Central e escreve ali também.
+3. As alunas veem o separador **Feed** no celular. A equipe vê o **Feed da comunidade** no fim da Central e escreve ali também.
 - Nada é apagado: a equipe só pode **ocultar** (e mostrar de novo) uma publicação. Com 3 denúncias de pessoas diferentes, a publicação fica oculta até a equipe rever.
 - Aparece só o primeiro nome e a foto (ou as iniciais). Nunca telefone nem dados de saúde.
 - Fotos de perfil: reduzidas para 256 px no aparelho (cerca de 15 KB), guardadas num espaço privado; só quem é da mesma comunidade as vê. A equipe escolhe a foto e o nome em **Definições**.
+
+**Fotos nas publicações (feed estilo Instagram):** volte a correr o `comunidade.sql` atualizado (é seguro repetir). Cada publicação pode ter uma foto (reduzida para 1080 px, cerca de 200 KB) e legenda. Duplo clique na foto curte.
