@@ -308,6 +308,14 @@ body.papel-aluno .hoje-card, body.modo-aluno .hoje-card { padding: 16px; gap: 4p
 .pz-dot { width: 10px; height: 10px; border-radius: 50%; display: block; } .pz-bg-p { background: #d9627f; } .pz-bg-c { background: #e8a838; } .pz-bg-f { background: #4a9bd1; }
 .pz-mini { display: inline-flex; align-items: center; gap: 8px; } .pz-txt { color: var(--muted); }
 .nu-dia .pz-wrap { margin-bottom: 6px; }
+.fq-p { padding: 14px 16px !important; } .fq { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; } fieldset.fq legend { padding: 0; margin-bottom: 8px; }
+.fq-t { font-weight: 700; font-size: .9rem; white-space: pre-line; line-height: 1.4; } .fq-req { color: var(--danger); }
+.fq-op { display: flex; align-items: center; gap: 10px; min-height: 40px; font-weight: 500; color: var(--fg); font-size: .92rem; } .fq-op input { width: 20px; height: 20px; flex: none; margin: 0; }
+.fq-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; } @media (max-width: 360px) { .fq-grade { grid-template-columns: 1fr; } }
+.fq.erro { outline: 2px solid var(--danger); outline-offset: 6px; border-radius: 8px; } .fq-err { color: var(--danger); font-weight: 600; text-align: center; }
+.ficha { display: grid; gap: 10px; } .ficha-pend { border-color: var(--accent); }
+.fq-fotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; } .fq-foto { display: grid; gap: 6px; align-content: start; text-align: center; } .fq-foto-t { font-weight: 700; font-size: .85rem; } .fq-foto img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 10px; } .fq-vazio { aspect-ratio: 3/4; border: 2px dashed var(--line); border-radius: 10px; display: grid; place-items: center; cursor: pointer; color: var(--muted); font-weight: 600; font-size: .85rem; }
+.fp { display: grid; gap: 10px; } .fp-q { font-size: .78rem; color: var(--muted); font-weight: 700; } .fp-r { white-space: pre-wrap; overflow-wrap: anywhere; }
 .avatar-ini.av-eq { background: var(--accent); color: #fff; }
 .cp-novo { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
 .cp-novo textarea { width: 100%; resize: vertical; min-height: 56px; }
@@ -1039,6 +1047,7 @@ function viewAluno(a) {
   </div>
   ${a.notas ? `<div class="panel" style="padding:12px 16px"><div class="eyebrow">Observações</div><div>${esc(a.notas)}</div></div>` : ''}
   ${a.anamnese ? `<div class="panel" style="padding:12px 16px"><div class="eyebrow">Ficha inicial da aluna</div><div class="small" style="display:grid;gap:3px"><span><b>Objetivo:</b> ${esc(a.anamnese.objetivo)} · ${esc(a.anamnese.dias)} · ${esc(a.anamnese.local)}</span>${a.anamnese.rotina ? `<span><b>Rotina:</b> ${esc(a.anamnese.rotina)}</span>` : ''}${a.anamnese.lesoes ? `<span><b>Lesões/restrições:</b> ${esc(a.anamnese.lesoes)}</span>` : ''}${a.anamnese.comida ? `<span><b>Alimentação:</b> ${esc(a.anamnese.comida)}</span>` : ''}</div></div>` : ''}
+  ${fichaPainelPersonal(a)}
   ${comentariosPanel(a)}
   <div class="tabs" role="tablist">${t('plano', 'Plano de treino')}${t('sessoes', `Sessões (${a.sessoes.length})`)}${t('evolucao', 'Evolução')}${t('nutri', 'Nutrição')}</div>
   ${tab === 'plano' ? tabPlano(a) : tab === 'sessoes' ? tabSessoes(a) : tab === 'nutri' ? tabNutri(a) : tabEvolucao(a)}`;
@@ -1921,11 +1930,11 @@ function mergeRemoto(local, remote) {
   const par = (lista, a) => lista.find(x => x.id === a.id) || lista.find(x => norm(x.nome) === norm(a.nome));
   if (meuPapel() === 'aluno') { // a aluna só acrescenta sessões e medidas; o resto vem do personal
     const out = JSON.parse(JSON.stringify(remote));
-    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniaoSess(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); ra.nutriReg = uniaoTS(ra.nutriReg, la.nutriReg); ra.agua = uniaoTS(ra.agua, la.agua); ra.fotos = uniaoFotos(ra.fotos, la.fotos); if (la.anamnese) ra.anamnese = la.anamnese; } });
+    local.alunos.forEach(la => { const ra = par(out.alunos, la); if (ra) { ra.sessoes = uniaoSess(ra.sessoes, la.sessoes); ra.medidas = uniao(ra.medidas, la.medidas); ra.comentarios = uniaoCom(ra.comentarios, la.comentarios); ra.nutriReg = uniaoTS(ra.nutriReg, la.nutriReg); ra.agua = uniaoTS(ra.agua, la.agua); ra.fotos = uniaoFotos(ra.fotos, la.fotos); if (la.anamnese) ra.anamnese = la.anamnese; if (la.ficha && (!ra.ficha || (la.ficha.ts || 0) >= (ra.ficha.ts || 0))) ra.ficha = la.ficha; } });
     out.alunoAtivo = local.alunoAtivo; return out;
   }
   const out = JSON.parse(JSON.stringify(local)); // o personal manda no plano; recebe as sessões e medidas da aluna
-  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniaoSess(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); la.nutriReg = uniaoTS(la.nutriReg, ra.nutriReg); la.agua = uniaoTS(la.agua, ra.agua); la.fotos = uniaoFotos(la.fotos, ra.fotos); if (ra.anamnese && !la.anamnese) la.anamnese = ra.anamnese; } });
+  out.alunos.forEach(la => { const ra = par(remote.alunos, la); if (ra) { la.sessoes = uniaoSess(la.sessoes, ra.sessoes); la.medidas = uniao(la.medidas, ra.medidas); la.comentarios = uniaoCom(la.comentarios, ra.comentarios); la.nutriReg = uniaoTS(la.nutriReg, ra.nutriReg); la.agua = uniaoTS(la.agua, ra.agua); la.fotos = uniaoFotos(la.fotos, ra.fotos); if (ra.anamnese && !la.anamnese) la.anamnese = ra.anamnese; if (ra.ficha && (!la.ficha || (ra.ficha.ts || 0) > (la.ficha.ts || 0))) la.ficha = ra.ficha; } });
   return out;
 }
 function rerenderSeguro() {
@@ -3327,9 +3336,9 @@ function vInicio(a) {
   : prox ? `<a class="hoje-card" href="#meu-treino-${prox.id}" data-sact="iniciar" data-treino="${prox.id}"><div class="eyebrow">Seu treino de hoje</div><h2>${esc(treinoLabel(a, prox))}</h2>
      <div class="small num">${prox.itens.length} exercícios · cerca de ${duracaoEstimada(prox)} min</div><span class="btn primary">Começar agora →</span></a>`
   : `<div class="panel empty">Sua equipe ainda está montando o seu plano.</div>`}
+  ${fichaPainelAluno(a)}
   <div class="panel sem-wrap">${semanaHtml(a)}${semanaCard(a)}</div>
   ${marca().afirmacao ? `<div class="afirma"><div class="eyebrow">Afirmação da semana</div><q>${esc(marca().afirmacao)}</q></div>` : ''}
-  ${a.anamnese ? '' : `<div class="panel" style="padding:12px 16px"><div class="row spread"><div><b>Conte um pouco sobre você</b><div class="small muted">2 minutos pra montarmos treino e dieta pra SUA rotina.</div></div><button class="btn primary sm" data-sact="anamnese">Preencher</button></div></div>`}
   ${dicaInstalar()}
   ${marca().boasVindas ? `<div class="panel" style="padding:12px 16px"><div class="small">${esc(marca().boasVindas)}</div></div>` : ''}
   <div class="mini-stats num">
@@ -3410,12 +3419,80 @@ function vEvolucao(a) {
   <div class="evo-aluno">${limitaSessoes(tabSessoes(a).replace(/<div class="panel"><div class="row spread"><h2>Registrar sessão[\s\S]*?<\/div><\/div>\n?/, ''))}</div>`, 'evolucao');
 }
 
+
+const FICHA_INTRO = ['Seja bem-vinda!', 'Se você tem acesso a este questionário, significa que confias em nosso trabalho e estamos começando uma jornada de confiança, amizade e respeito.\nNossa anamnese tem o intuito de entrar na sua rotina, avaliar como treinas, qual seu padrão alimentar, preferências, dificuldades, necessidades e hábitos.\n\nLogo, se faz de suma importância que sejas o mais sincera possível, para que assim nosso planejamento se encaixe perfeitamente em sua rotina e não o contrário.'];
+/* s = resposta curta · p = parágrafo · r = escolha única · c = várias opções · f = fotos */
+const FICHA_QS = [
+  ['p', 'NOME COMPLETO:', 1], ['p', 'IDADE:', 1], ['p', 'DATA DE NASCIMENTO:', 1], ['s', 'CIDADE/UF:', 1], ['p', 'PROFISSÃO:', 1], ['s', 'QUAL OBJETIVO ATUALMENTE?', 1], ['p', 'PESO:', 1], ['p', 'ALTURA:', 1],
+  ['p', 'JÁ FEZ USO DE CANETAS EMAGRECEDORAS? E TERMOGÊNICOS? QUAIS E QUAL DOSAGEM?'], ['p', 'TEM PLANO DE SAÚDE? TEM ACESSO A MANIPULADOS?'],
+  ['p', 'TEM EXAMES DE SANGUE RECENTE DOS ÚLTIMOS 6 MESES? SE SIM, PODE NOS ENVIAR. SE NÃO, PODE NOS ENVIAR SEMPRE QUE REALIZÁ-LOS.'],
+  ['p', 'ALGUM MEDICAMENTO DE USO CONTÍNUO? SE SIM, QUAL? (INCLUINDO ANTICONCEPCIONAL)'], ['p', 'JÁ FEZ ALGUMA CIRURGIA?'],
+  ['p', 'TEM ALGUMA DOENÇA DIAGNOSTICADA? (DIABETES, HIPERTENSÃO, COLESTEROL ALTO, TIREOIDITE DE HASHIMOTO..)'],
+  ['p', 'TEM ALGUMA RESTRIÇÃO? (INTOLERÂNCIA A LACTOSE, SENSIBILIDADE AO GLÚTEN, VEGETARIANA, SINDROME DO INTESTINO IRRITÁVEL..)'],
+  ['r', 'INTESTINO:', 0, ['Regular (diariamente)', 'Preguiçoso (intervalo de dois ou mais dias)']],
+  ['s', 'SOBRE TREINO:\n\nTREINAS ATUALMENTE?'], ['s', 'VOCÊ GOSTARIA DO TREINO PRA CASA OU ACADEMIA?', 1],
+  ['p', 'DIVISÃO DO TREINO ATUAL? (ex.: segunda inferiores, terça superiores, quarta só cardio,..)'],
+  ['p', 'HÁ QUANTO TEMPO TREINAS? CONTÍNUO OU COM INTERVALOS (vai 1 mês e para no próximo)?'],
+  ['p', 'PRATICA ALGUM ESPORTE? (exemplo: corrida, Beach tênis, tênis, taekwondo, ballet, Crossfit, vôlei,..). COSTUMA PARTICIPAR DE CAMPEONATOS?'],
+  ['p', 'TENS DIFICULDADE EM ALGUM EXERCÍCIO?'], ['p', 'TEM ALGUMA LESÃO? (inclui-se condromalácia/contropatia, hérnia de disco, dor no joelho,..)'],
+  ['p', 'QUAL HORÁRIO DO DIA PODES TREINAR?'], ['p', 'PODE FAZER AERÓBICO? SE SIM, QUAL HORÁRIO:'], ['p', 'QUANTAS VEZES NA SEMANA PODE TREINAR?'],
+  ['s', 'SOBRE A DIETA:\n\nGERALMENTE QUEM PREPARA SUA ALIMENTAÇÃO?'], ['s', 'TEM BALANCINHA DE COZINHA PARA PESAR OS ALIMENTOS?', 1],
+  ['p', 'ALIMENTOS QUE NÃO QUEIRA COLOCAR NA DIETA E/OU ALERGIA:'], ['p', 'ALIMENTOS QUE GOSTA/ TEM FACILIDADE EM COMER:'],
+  ['p', 'O QUE GERALMENTE GOSTA DE COMER NA SUA "REFEIÇÃO OFF" DA SEMANA? (exemplo: pizza sabado a noite, hambúrguer na sexta com amigos, bebo álcool em festa..)'],
+  ['p', 'CONSOME BEBIDA ALCOÓLICA? COM QUE FREQUÊNCIA?'],
+  ['p', 'USA ALGUM SUPLEMENTO? (inclui-se whey, creatina, omega 3, vitamina D, B12, multivitamínico,..)\nQUAL MARCA E QUANTIDADE? (exemplo: 5g creatina growth, 7000Ui vitamina D manipulada, 2 capsulas omega 3)', 1],
+  ['p', 'A partir daqui vamos analisar 1 dia da sua alimentação atualmente para entendermos melhor suas preferências, rotina e de que ponto estamos partindo. Se você não fizer alguma dessas refeições, apenas complete com "nada".\n\nCAFÉ DA MANHÃ:\n*o que você come? onde essa refeição é realizada? e qual horário?', 1],
+  ['p', 'ALGUM LANCHE NA MANHÃ?', 1], ['p', 'ALMOÇO:\n*o que você come? onde essa refeição é realizada? e qual horário?', 1],
+  ['p', 'LANCHE DA TARDE:\n*o que você come? onde essa refeição é realizada? e qual horário?', 1], ['p', 'JANTAR:\n*o que você come? onde essa refeição é realizada? e qual horário?', 1], ['p', 'ALGUMA CEIA?', 1],
+  ['p', 'QUANTO AO LANCHE DA TARDE, VOCÊ TEM PREFERÊNCIA POR MAIS DOCE OU SALGADO? O QUE MAIS APETECE?\n(exemplos: bolos, panquecas doces, brownie, receita com iogurte OU sanduíche, tapioca, crepioca, pão com ovo, "pizza saudável"...)', 1],
+  ['p', 'QUANTO AO JANTAR, TEM PREFERÊNCIA POR JANTAR COMIDA (igual o almoço) OU LANCHE (saladona com proteína, tapioca, pizza saudável, hamburguer,..)', 1],
+  ['p', 'QUAIS HORÁRIOS TEM MAIS FOME?'], ['p', 'COMO É O SEU FINAL DE SEMANA? CONSEGUE SEGUIR DIETA? TREINA? MUDA A ROTINA? SAI À NOITE?'],
+  ['p', 'AGORA VAMOS FINALIZAR CONHECENDO A SUA ROTINA. ME INFORME SEUS HORÁRIOS, AFAZERES, SE LEVA COMIDA PARA O TRABALHO OU COMPROMISSO. QUANTO MAIS DETALHADO MELHOR.\n(exemplo.: 6h acordo, 7h tomo café da manhã, 8h treino, 9h vou pro trabalho, fico no trabalho das 9h até as 17h então levo meu almoço e lanche da tarde para serem feitos por la, lancho em torno de 16h, saio do trabalho as 17 e vou pra casa, chego em torno de 18h, janto 20h e durmo 22h)\nDESCREVA A SUA ROTINA:', 1],
+  ['c', 'SELECIONE OS ALIMENTOS ABAIXO QUE PODEMOS USAR EM QUALQUER REFEIÇÃO, SEJA PORQUE PODE COMPRAR OU PORQUE GOSTA DE COMER.', 1, ['PEITO FRANGO', 'CARNE VERMELHA', 'PORCO', 'ATUM', 'OVO', 'CLARA DE OVO', 'TILÁPIA', 'SALMÃO', 'WHEY', 'ALBUMINA', 'PEITO DE PERU', 'PRESUNTO', 'PROTEÍNA DE SOJA', 'PAO BRANCO', 'PAO INTEGRAL', 'TORRADAS INTEGRAIS', 'CUSCUZ', 'TAPIOCA', 'AVEIA', 'BOLACHA DE ARROZ', 'GRANOLA', 'ARROZ INTEGRAL', 'ARROZ BRANCO', 'MACARRÃO', 'AIPIM', 'BATATA INGLESA', 'BATATA DOCE', 'LEITE', 'IOGURTE NATURAL E/OU ZERO', 'BANANA', 'MAMÃO', 'MORANGO', 'MELÃO', 'ABACAXI', 'KIWI', 'MAÇÃ', 'ABACATE', 'MELANCIA', 'AMEIXA', 'LARANJA', 'PASTA DE AMENDOIM', 'SUCRILHOS', 'DOCE DE LEITE', 'LEITE CONDENSADO', 'CHOCOLATE', 'MEL', 'MAGIC TOAST', 'ACAÍ', 'PAÇOCA', 'LEITE EM PÓ', 'REQUEIJÃO', 'RICOTA', 'QUEIJOS', 'LEGUMES E VEGETAIS NO GERAL', 'CASTANHA', 'AZEITE DE OLIVA', 'GELATINA', 'CANELA', 'CACAU', 'GELEIA', 'FEIJÃO', 'GRÃO DE BICO', 'LENTILHA', 'TOFU']],
+  ['f', 'FOTOS NECESSÁRIAS PARA AVALIAÇÃO: FRENTE, LADO E COSTAS, TODAS COM BRAÇOS ESTICADOS À FRENTE DO CORPO NA ALTURA DOS OMBROS.']
+];
+const FICHA_POS = [['frente', 'Frente'], ['lado', 'Lado'], ['costas', 'Costas']];
+const fichaPend = a => !(a.ficha && a.ficha.feito);
+const fichaResp = (a, i) => ((a.ficha || {}).resp || {})[i];
+function fichaCampo(a, q, i) {
+  const [tp, tit, req, ops] = q, v = fichaResp(a, i), id = 'fq-' + i, lab = `<div class="fq-t">${esc(tit)}${req ? ' <span class="fq-req" aria-hidden="true">*</span>' : ''}</div>`;
+  if (tp === 's') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><input type="text" id="${id}" data-fq="${i}" value="${esc(v || '')}" autocomplete="off"></div>`;
+  if (tp === 'p') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><textarea id="${id}" data-fq="${i}" rows="3">${esc(v || '')}</textarea></div>`;
+  if (tp === 'r') return `<fieldset class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><legend>${lab}</legend>${ops.map(o => `<label class="fq-op"><input type="radio" name="${id}" data-fq="${i}" value="${esc(o)}" ${v === o ? 'checked' : ''}> <span>${esc(o)}</span></label>`).join('')}</fieldset>`;
+  if (tp === 'c') return `<fieldset class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><legend>${lab}</legend><div class="fq-grade">${ops.map(o => `<label class="fq-op"><input type="checkbox" data-fqc="${i}" value="${esc(o)}" ${(v || []).includes(o) ? 'checked' : ''}> <span>${esc(o)}</span></label>`).join('')}</div></fieldset>`;
+  const fs = ((a.ficha || {}).fotos || []);
+  return `<div class="fq" data-qi="${i}" data-req="0">${lab}<div class="fq-fotos">${FICHA_POS.map(([k, nome]) => { const f = fs.find(x => x.pos === k); return `<div class="fq-foto"><div class="fq-foto-t">${nome}</div>${f ? `<img src="${f.img}" alt="Foto ${nome}" data-act="ficha-foto-ver" data-fid="${f.id}"><button type="button" class="btn ghost sm" data-sact="ficha-foto-del" data-fid="${f.id}">Trocar</button>` : `<label class="fq-vazio"><span>+ Foto</span><input type="file" accept="image/*" class="ficha-foto" data-pos="${k}" hidden></label>`}</div>`; }).join('')}</div><div class="small muted">Braços esticados à frente do corpo, na altura dos ombros. Só a equipe vê.</div></div>`;
+}
+function vFicha(a) {
+  const nResp = FICHA_QS.filter((q, i) => { const v = fichaResp(a, i); return q[2] && (Array.isArray(v) ? v.length : String(v || '').trim()); }).length, nReq = FICHA_QS.filter(q => q[2]).length;
+  return shell(`<div class="ola"><div class="eyebrow">Formulário inicial</div><h1>${esc(FICHA_INTRO[0])}</h1></div>
+  <div class="panel"><p class="small" style="margin:0;white-space:pre-line">${esc(FICHA_INTRO[1])}</p><div class="small muted">Campos com <b>*</b> são obrigatórios. O que você escreve fica guardado automaticamente.</div>${a.ficha && a.ficha.feito ? '<span class="chip ok" style="justify-self:start">Já enviado. Pode editar e reenviar.</span>' : ''}</div>
+  <form id="f-ficha" class="ficha" novalidate>${FICHA_QS.map((q, i) => `<div class="panel fq-p">${fichaCampo(a, q, i)}</div>`).join('')}
+    <div class="fq-err small" id="fq-err" role="alert" hidden></div>
+    <button class="btn primary" type="submit" style="justify-content:center">${a.ficha && a.ficha.feito ? 'Reenviar formulário' : 'Enviar formulário'}</button></form>`, 'inicio');
+}
+function fichaPainelAluno(a) {
+  if (!fichaPend(a)) return '';
+  const feitas = Object.keys((a.ficha || {}).resp || {}).length;
+  return `<a class="panel ficha-pend" href="#meu-formulario" style="display:block;text-decoration:none;color:inherit"><div class="row spread" style="gap:10px"><div><span class="chip accent">Pendente</span><h3 style="margin-top:6px">Formulário inicial</h3><div class="small muted">${feitas ? 'Você já começou. Falta terminar e enviar.' : 'Conte sobre sua rotina, alimentação e treino, e envie suas fotos.'}</div></div><span class="btn primary sm">${feitas ? 'Continuar' : 'Preencher'}</span></div></a>`;
+}
+function fichaPainelPersonal(a) {
+  const f = a.ficha;
+  if (!f || !f.feito) return `<div class="panel" style="padding:12px 16px"><div class="row spread"><div><div class="eyebrow">Formulário inicial</div><div class="small muted">A aluna ainda não enviou${f && Object.keys(f.resp || {}).length ? ' (começou a preencher)' : ''}.</div></div><span class="chip">Pendente</span></div></div>`;
+  const linhas = FICHA_QS.map((q, i) => { const v = (f.resp || {})[i]; if (q[0] === 'f') return ''; const t = Array.isArray(v) ? v.join(', ') : String(v || '').trim(); const tit = q[1].split('\n').filter(x => x.trim()).pop().replace(/^\*/, '');
+    return `<div class="fp-l"><div class="fp-q">${esc(q[1].split('\n').filter(x => x.trim() && !x.startsWith('*') && !x.startsWith('(')).pop() || tit)}</div><div class="fp-r ${t ? '' : 'muted'}">${t ? esc(t) : 'sem resposta'}</div></div>`; }).join('');
+  const fs = f.fotos || [];
+  return `<details class="panel" style="padding:12px 16px"><summary style="cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center"><span><span class="eyebrow">Formulário inicial</span><br><b>Respostas e fotos da aluna</b> <span class="small muted">· enviado em ${fmtData(new Date(f.ts || Date.now()).toISOString().slice(0, 10))}</span></span><span class="chip ok">Enviado</span></summary>
+    ${fs.length ? `<div class="foto-lista" style="margin-top:10px">${fs.map(x => `<span class="foto-mini"><img src="${x.img}" alt="Foto ${esc(x.pos || '')}" data-act="ficha-foto-ver" data-fid="${x.id}"><span class="small muted" style="display:block;text-align:center;text-transform:capitalize">${esc(x.pos || '')}</span></span>`).join('')}</div>` : '<div class="small muted" style="margin-top:8px">Sem fotos enviadas.</div>'}
+    <div class="fp" style="margin-top:10px">${linhas}</div></details>`;
+}
 function vPerfil(a) {
   const nEx = a.treinos.reduce((t, x) => t + x.itens.length, 0);
   return shell(`<div class="perfil-top">${comuAtiva() ? avatarHtml(sbS.uid, a.nome, comu.perfil ? comu.perfil.foto_v : 0, 56, false) : `<span class="avatar-ini" style="width:56px;height:56px;font-size:1.4rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>`}
     <div><h1 style="font-size:1.5rem">${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
   <div class="panel"><div class="row spread"><div><div class="eyebrow">Meu plano</div><div class="num small">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} feitos</div></div><a class="btn sm" href="#meus-treinos">Ver treinos</a></div></div>
   <div class="panel"><div class="eyebrow">Atalhos</div><div class="dois"><button class="btn" data-sact="comentar">💬 Deixar comentário</button><button class="btn" data-act="nova-medida" data-id="${a.id}">+ Peso e medidas</button></div></div>
+  <div class="panel"><div class="row spread" style="gap:10px"><div><b>Formulário inicial</b><div class="small muted">${fichaPend(a) ? 'Ainda pendente.' : 'Enviado. Você pode editar.'}</div></div><a class="btn sm" href="#meu-formulario">${fichaPend(a) ? 'Preencher' : 'Ver / editar'}</a></div></div>
   ${painelFoto()}
   <div class="panel"><div class="row spread" style="gap:10px"><div><b>Equipe ${esc(marca().nome)}</b><div class="small muted">Dúvidas? Fale com a equipe.</div></div>${suporteBtn(a)}</div></div>
   ${atalhoInstalar()}
@@ -3428,7 +3505,7 @@ function renderAluno(h) {
   const a = alunoAtivo(); const app = $('#app');
   if (!a) { app.innerHTML = `<div class="panel empty">Cadastre um aluno primeiro.</div>`; return; }
   if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); if (t) pedeWake(); return; }
-  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-nutricao' ? vNutri(a) : h === 'minha-comunidade' ? vComunidade(a) : h === 'minha-dietbox' ? vDietbox(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
+  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-nutricao' ? vNutri(a) : h === 'minha-comunidade' ? vComunidade(a) : h === 'minha-dietbox' ? vDietbox(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : h === 'meu-formulario' ? vFicha(a) : vInicio(a);
 }
 
 /* descanso cronometrado */
@@ -3563,6 +3640,32 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('input', ev => {
   const el = ev.target; if (el.dataset && el.dataset.nedit !== undefined && wk && wk.itens[el.dataset.nedit]) { wk.itens[el.dataset.nedit].nota = el.value; saveWk(); }
+});
+
+/* formulário inicial: guardar enquanto escreve, fotos, enviar */
+let fichaT = null;
+function fichaGrava(a) { a.ficha.ts = Date.now(); clearTimeout(fichaT); fichaT = setTimeout(() => save(), 400); }
+function fichaLim(a) { a.ficha = a.ficha || { resp: {}, fotos: [], feito: false, ts: 0 }; a.ficha.resp = a.ficha.resp || {}; a.ficha.fotos = a.ficha.fotos || []; return a.ficha; }
+document.addEventListener('input', ev => { const t = ev.target; if (t.dataset && t.dataset.fq !== undefined && t.type !== 'radio') { const a = alunoAtivo(); if (!a) return; fichaLim(a).resp[t.dataset.fq] = t.value; fichaGrava(a); } });
+document.addEventListener('change', ev => {
+  const t = ev.target, a = alunoAtivo(); if (!a || !t.dataset) return;
+  if (t.dataset.fq !== undefined && t.type === 'radio') { fichaLim(a).resp[t.dataset.fq] = t.value; fichaGrava(a); return; }
+  if (t.dataset.fqc !== undefined) { const f = fichaLim(a), k = t.dataset.fqc, l = new Set(f.resp[k] || []); if (t.checked) l.add(t.value); else l.delete(t.value); f.resp[k] = [...l]; fichaGrava(a); return; }
+  if (t.classList.contains('ficha-foto') && t.files.length) {
+    const f = fichaLim(a), pos = t.dataset.pos, file = t.files[0];
+    const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 900 / Math.max(im.width, im.height, 1)), cv = document.createElement('canvas'); cv.width = Math.round(im.width * k); cv.height = Math.round(im.height * k); cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height); f.fotos = f.fotos.filter(x => x.pos !== pos); f.fotos.push({ id: uid(), pos, img: cv.toDataURL('image/jpeg', 0.7) }); f.ts = Date.now(); save(); const y = window.scrollY; rerender(); window.scrollTo(0, y); }; im.onerror = () => toast('Não consegui abrir essa imagem'); im.src = rd.result; }; rd.readAsDataURL(file);
+  }
+});
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-sact="ficha-foto-del"]'); if (b) { const a = alunoAtivo(); if (!a) return; const f = fichaLim(a); f.fotos = f.fotos.filter(x => x.id !== b.dataset.fid); f.ts = Date.now(); save(); const y = window.scrollY; rerender(); window.scrollTo(0, y); return; }
+  const v = ev.target.closest('[data-act="ficha-foto-ver"]'); if (v) { const a = alunoAtivo() || db.alunos.find(x => (x.ficha || {}).fotos && x.ficha.fotos.some(q => q.id === v.dataset.fid)); const fo = a && ((a.ficha || {}).fotos || []).find(q => q.id === v.dataset.fid); if (fo) openDialog(`<div class="row spread"><h2>Foto</h2><button class="btn ghost" data-act="close">Fechar</button></div><img src="${fo.img}" alt="Foto da aluna" style="width:100%;border-radius:12px">`); }
+});
+document.addEventListener('submit', ev => {
+  if (ev.target.id !== 'f-ficha') return; ev.preventDefault(); const a = alunoAtivo(); if (!a) return; const f = fichaLim(a);
+  const falta = FICHA_QS.map((q, i) => [q, i]).filter(([q, i]) => { if (!q[2]) return false; const v = f.resp[i]; return Array.isArray(v) ? !v.length : !String(v || '').trim(); });
+  document.querySelectorAll('.fq.erro').forEach(e => e.classList.remove('erro')); const er = document.getElementById('fq-err');
+  if (falta.length) { falta.forEach(([q, i]) => { const e = document.querySelector('.fq[data-qi="' + i + '"]'); if (e) e.classList.add('erro'); }); er.hidden = false; er.textContent = falta.length === 1 ? 'Falta responder 1 pergunta obrigatória.' : 'Faltam ' + falta.length + ' perguntas obrigatórias.'; const e0 = document.querySelector('.fq[data-qi="' + falta[0][1] + '"]'); if (e0) e0.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  f.feito = true; f.ts = Date.now(); if (!a.objetivo || a.objetivo === 'Condicionamento') a.objetivo = String(f.resp[5] || '').slice(0, 60) || a.objetivo; save(); toast('Formulário enviado. Obrigada!'); location.hash = 'meu-inicio';
 });
 document.addEventListener('submit', ev => {
   if (ev.target.id === 'f-anamnese') {
