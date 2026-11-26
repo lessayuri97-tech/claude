@@ -3423,7 +3423,7 @@ function vEvolucao(a) {
 const FICHA_INTRO = ['Seja bem-vinda!', 'Se você tem acesso a este questionário, significa que confias em nosso trabalho e estamos começando uma jornada de confiança, amizade e respeito.\nNossa anamnese tem o intuito de entrar na sua rotina, avaliar como treinas, qual seu padrão alimentar, preferências, dificuldades, necessidades e hábitos.\n\nLogo, se faz de suma importância que sejas o mais sincera possível, para que assim nosso planejamento se encaixe perfeitamente em sua rotina e não o contrário.'];
 /* s = resposta curta · p = parágrafo · r = escolha única · c = várias opções · f = fotos */
 const FICHA_QS = [
-  ['p', 'NOME COMPLETO:', 1], ['p', 'IDADE:', 1], ['p', 'DATA DE NASCIMENTO:', 1], ['s', 'CIDADE/UF:', 1], ['p', 'PROFISSÃO:', 1], ['s', 'QUAL OBJETIVO ATUALMENTE?', 1], ['p', 'PESO:', 1], ['p', 'ALTURA:', 1],
+  ['p', 'NOME COMPLETO:', 1], ['n', 'IDADE:', 1], ['d', 'DATA DE NASCIMENTO:', 1], ['s', 'CIDADE/UF:', 1], ['p', 'PROFISSÃO:', 1], ['s', 'QUAL OBJETIVO ATUALMENTE?', 1], ['p', 'PESO:', 1], ['p', 'ALTURA:', 1],
   ['p', 'JÁ FEZ USO DE CANETAS EMAGRECEDORAS? E TERMOGÊNICOS? QUAIS E QUAL DOSAGEM?'], ['p', 'TEM PLANO DE SAÚDE? TEM ACESSO A MANIPULADOS?'],
   ['p', 'TEM EXAMES DE SANGUE RECENTE DOS ÚLTIMOS 6 MESES? SE SIM, PODE NOS ENVIAR. SE NÃO, PODE NOS ENVIAR SEMPRE QUE REALIZÁ-LOS.'],
   ['p', 'ALGUM MEDICAMENTO DE USO CONTÍNUO? SE SIM, QUAL? (INCLUINDO ANTICONCEPCIONAL)'], ['p', 'JÁ FEZ ALGUMA CIRURGIA?'],
@@ -3452,11 +3452,21 @@ const FICHA_QS = [
   ['f', 'FOTOS NECESSÁRIAS PARA AVALIAÇÃO: FRENTE, LADO E COSTAS, TODAS COM BRAÇOS ESTICADOS À FRENTE DO CORPO NA ALTURA DOS OMBROS.']
 ];
 const FICHA_POS = [['frente', 'Frente'], ['lado', 'Lado'], ['costas', 'Costas']];
+function dataValida(t) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t || ''); if (!m) return 'Use o formato dd/mm/aaaa.';
+  const d = +m[1], mo = +m[2], y = +m[3], dt = new Date(y, mo - 1, d);
+  if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return 'Essa data não existe.';
+  if (y < 1900) return 'Confira o ano.'; if (dt > new Date()) return 'A data não pode ser no futuro.';
+  return '';
+}
+const idadeDe = t => { const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t), h = new Date(); let i = h.getFullYear() - +m[3]; if (h.getMonth() + 1 < +m[2] || (h.getMonth() + 1 === +m[2] && h.getDate() < +m[1])) i--; return i; };
 const fichaPend = a => !(a.ficha && a.ficha.feito);
 const fichaResp = (a, i) => ((a.ficha || {}).resp || {})[i];
 function fichaCampo(a, q, i) {
   const [tp, tit, req, ops] = q, v = fichaResp(a, i), id = 'fq-' + i, lab = `<div class="fq-t">${esc(tit)}${req ? ' <span class="fq-req" aria-hidden="true">*</span>' : ''}</div>`;
   if (tp === 's') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><input type="text" id="${id}" data-fq="${i}" value="${esc(v || '')}" autocomplete="off"></div>`;
+  if (tp === 'd') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><input type="text" id="${id}" data-fq="${i}" data-mask="data" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" autocomplete="bday" value="${esc(v || '')}" aria-describedby="${id}-e"><div class="small fq-err" id="${id}-e" role="alert" hidden></div></div>`;
+  if (tp === 'n') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><input type="text" id="${id}" data-fq="${i}" inputmode="numeric" maxlength="3" placeholder="Ex.: 28" style="max-width:120px" value="${esc(v || '')}"></div>`;
   if (tp === 'p') return `<div class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><label for="${id}">${lab}</label><textarea id="${id}" data-fq="${i}" rows="3">${esc(v || '')}</textarea></div>`;
   if (tp === 'r') return `<fieldset class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><legend>${lab}</legend>${ops.map(o => `<label class="fq-op"><input type="radio" name="${id}" data-fq="${i}" value="${esc(o)}" ${v === o ? 'checked' : ''}> <span>${esc(o)}</span></label>`).join('')}</fieldset>`;
   if (tp === 'c') return `<fieldset class="fq" data-qi="${i}" data-req="${req ? 1 : 0}"><legend>${lab}</legend><div class="fq-grade">${ops.map(o => `<label class="fq-op"><input type="checkbox" data-fqc="${i}" value="${esc(o)}" ${(v || []).includes(o) ? 'checked' : ''}> <span>${esc(o)}</span></label>`).join('')}</div></fieldset>`;
@@ -3647,7 +3657,11 @@ document.addEventListener('input', ev => {
 let fichaT = null;
 function fichaGrava(a) { a.ficha.ts = Date.now(); clearTimeout(fichaT); fichaT = setTimeout(() => save(), 400); }
 function fichaLim(a) { a.ficha = a.ficha || { resp: {}, fotos: [], feito: false, ts: 0 }; a.ficha.resp = a.ficha.resp || {}; a.ficha.fotos = a.ficha.fotos || []; return a.ficha; }
-document.addEventListener('input', ev => { const t = ev.target; if (t.dataset && t.dataset.fq !== undefined && t.type !== 'radio') { const a = alunoAtivo(); if (!a) return; fichaLim(a).resp[t.dataset.fq] = t.value; fichaGrava(a); } });
+document.addEventListener('input', ev => { const t = ev.target; if (t.dataset && t.dataset.fq !== undefined && t.type !== 'radio') { const a = alunoAtivo(); if (!a) return;
+  if (t.dataset.mask === 'data') { const dg = t.value.replace(/\D/g, '').slice(0, 8); t.value = dg.length > 4 ? dg.slice(0, 2) + '/' + dg.slice(2, 4) + '/' + dg.slice(4) : dg.length > 2 ? dg.slice(0, 2) + '/' + dg.slice(2) : dg; const e = document.getElementById(t.id + '-e'); const er = t.value.length === 10 ? dataValida(t.value) : ''; if (e) { e.hidden = !er; e.textContent = er; } t.setAttribute('aria-invalid', er ? 'true' : 'false');
+    if (t.value.length === 10 && !er) { const f = fichaLim(a), ci = document.getElementById('fq-1'); if (ci && !String(f.resp[1] || '').trim()) { f.resp[1] = String(idadeDe(t.value)); ci.value = f.resp[1]; } } }
+  else if (t.inputMode === 'numeric' && t.maxLength === 3) t.value = t.value.replace(/\D/g, '').slice(0, 3);
+  fichaLim(a).resp[t.dataset.fq] = t.value; fichaGrava(a); } });
 document.addEventListener('change', ev => {
   const t = ev.target, a = alunoAtivo(); if (!a || !t.dataset) return;
   if (t.dataset.fq !== undefined && t.type === 'radio') { fichaLim(a).resp[t.dataset.fq] = t.value; fichaGrava(a); return; }
@@ -3664,9 +3678,9 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('submit', ev => {
   if (ev.target.id !== 'f-ficha') return; ev.preventDefault(); const a = alunoAtivo(); if (!a) return; const f = fichaLim(a);
-  const falta = FICHA_QS.map((q, i) => [q, i]).filter(([q, i]) => { if (!q[2]) return false; const v = f.resp[i]; return Array.isArray(v) ? !v.length : !String(v || '').trim(); });
+  const falta = FICHA_QS.map((q, i) => [q, i]).filter(([q, i]) => { const v = f.resp[i]; if (q[0] === 'd' && String(v || '').trim() && dataValida(v)) return true; if (!q[2]) return false; return Array.isArray(v) ? !v.length : !String(v || '').trim(); });
   document.querySelectorAll('.fq.erro').forEach(e => e.classList.remove('erro')); const er = document.getElementById('fq-err');
-  if (falta.length) { falta.forEach(([q, i]) => { const e = document.querySelector('.fq[data-qi="' + i + '"]'); if (e) e.classList.add('erro'); }); er.hidden = false; er.textContent = falta.length === 1 ? 'Falta responder 1 pergunta obrigatória.' : 'Faltam ' + falta.length + ' perguntas obrigatórias.'; const e0 = document.querySelector('.fq[data-qi="' + falta[0][1] + '"]'); if (e0) e0.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  if (falta.length) { falta.forEach(([q, i]) => { const e = document.querySelector('.fq[data-qi="' + i + '"]'); if (e) e.classList.add('erro'); }); er.hidden = false; const ed = FICHA_QS.findIndex(q => q[0] === 'd'); if (falta.some(([q]) => q[0] === 'd') && String(f.resp[ed] || '').trim() && dataValida(f.resp[ed])) { const ee = document.getElementById('fq-' + ed + '-e'); if (ee) { ee.hidden = false; ee.textContent = dataValida(f.resp[ed]); } } er.textContent = falta.length === 1 ? 'Falta responder 1 pergunta obrigatória.' : 'Faltam ' + falta.length + ' perguntas obrigatórias.'; const e0 = document.querySelector('.fq[data-qi="' + falta[0][1] + '"]'); if (e0) e0.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
   f.feito = true; f.ts = Date.now(); if (!a.objetivo || a.objetivo === 'Condicionamento') a.objetivo = String(f.resp[5] || '').slice(0, 60) || a.objetivo; save(); toast('Formulário enviado. Obrigada!'); location.hash = 'meu-inicio';
 });
 document.addEventListener('submit', ev => {
