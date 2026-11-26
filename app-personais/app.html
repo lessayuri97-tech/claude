@@ -2582,7 +2582,7 @@ function aplicaMarca() {
   const ok = /^#[0-9a-f]{6}$/i.test(m.cor);
   if (ok && m.cor.toLowerCase() !== MARCA_PADRAO.cor) { r.setProperty('--accent', m.cor); r.setProperty('--accent-ink', inkPara(m.cor)); r.setProperty('--accent-soft', `color-mix(in srgb, ${m.cor} 14%, var(--surface))`); }
   else { r.removeProperty('--accent'); r.removeProperty('--accent-ink'); r.removeProperty('--accent-soft'); }
-  const t = document.getElementById('brand-top'); if (t) t.innerHTML = marcaMark(40) + '<span class="brand-txt"><b>SQUAD</b> | CONSULTORIA FITNESS</span>';
+  const t = document.getElementById('brand-top'); if (t) t.innerHTML = marcaMark(40) + '<span class="brand-txt">| CONSULTORIA FITNESS</span>';
   document.title = m.nome;
   try { localStorage.setItem(MKEY, JSON.stringify({ nome: m.nome, sigla: m.sigla, cor: m.cor, logo: m.logo, sub: m.sub })); } catch (e) {}
 }
