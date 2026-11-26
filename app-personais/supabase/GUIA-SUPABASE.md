@@ -46,3 +46,11 @@ O Claude coloca o URL e a chave no ficheiro `config.js`. Depois faça duplo cliq
 **O que não pode:** gerar convites para outros supervisores. As alunas continuam a ver só o seu próprio registo.
 
 **Remover o acesso:** em **Definições → Equipe e supervisão**, toque em **Remover acesso** ao lado do e-mail. O acesso termina logo. (Opcional: apagar também a conta em Supabase → Authentication → Users.)
+
+## Comunidade (feed) e foto de perfil
+1. No Supabase: **SQL Editor** → **New query** → cole o conteúdo de `supabase/comunidade.sql` → **Run**. (Só uma vez; é seguro repetir. Já cria também o espaço das fotos, chamado "avatares".)
+2. Faça `publicar.bat`.
+3. As alunas veem o separador **Grupo** no celular. A equipe vê a **Comunidade** no fim da Central e escreve ali também.
+- Nada é apagado: a equipe só pode **ocultar** (e mostrar de novo) uma publicação. Com 3 denúncias de pessoas diferentes, a publicação fica oculta até a equipe rever.
+- Aparece só o primeiro nome e a foto (ou as iniciais). Nunca telefone nem dados de saúde.
+- Fotos de perfil: reduzidas para 256 px no aparelho (cerca de 15 KB), guardadas num espaço privado; só quem é da mesma comunidade as vê. A equipe escolhe a foto e o nome em **Definições**.

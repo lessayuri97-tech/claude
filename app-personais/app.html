@@ -253,6 +253,25 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .nu-check[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
 .nu-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; } .nu-lista li { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); } .nu-lista li:last-child { border-bottom: 0; }
 .agua { display: grid; gap: 10px; }
+.tabbar-aluno a { font-size: .66rem; }
+.avatar-ini.av-foto { overflow: hidden; padding: 0; } .avatar-ini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-ini.av-eq { background: var(--accent); color: #fff; }
+.cp-novo { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+.cp-novo textarea { width: 100%; resize: vertical; min-height: 56px; }
+.comu-scroll { max-height: 72vh; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.cp { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: grid; gap: 10px; }
+.cp.cp-eq { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.cp.oculto, .cp-c.oculto { opacity: .55; }
+.cp-top { display: flex; gap: 10px; align-items: center; } .cp-quem { flex: 1; min-width: 0; }
+.cp-txt { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.cp-acoes { display: flex; gap: 8px; }
+.cp-b { min-height: 40px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.cp-b.on { color: #c0392b; border-color: #c0392b; }
+.cp-cs { display: grid; gap: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+.cp-c { background: var(--surface-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 6px; }
+.cp-resp { display: flex; gap: 8px; } .cp-resp input { flex: 1; min-width: 0; }
+.cp-mais summary { min-height: 34px; }
+
 .lead-det { font-size: .9rem; } .lead-det summary { cursor: pointer; color: var(--muted); }
 .lead-dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 8px 0 0; } .lead-dl dt { color: var(--muted); font-size: .8rem; } .lead-dl dd { margin: 0; }
 .nu-chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -407,7 +426,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
 .tabbar-aluno { display: none; }
 body.modo-aluno .topbar .nav, body.modo-aluno .tabbar { display: none !important; }
 body.modo-aluno main.wrap { max-width: 600px; padding-block: 12px calc(100px + env(safe-area-inset-bottom, 0px)); gap: 14px; }
-body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+body.modo-aluno .tabbar-aluno { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
   padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
 .tabbar-aluno a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; max-width: 140px; width: 100%; margin: 0 auto; }
 .tabbar-aluno svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -1242,6 +1261,7 @@ function notifs() {
   const out = [], lim = Date.now() - 14 * 864e5;
   db.alunos.forEach(a => a.sessoes.filter(s => s.peloAluno && new Date(s.data + 'T12:00').getTime() > lim).forEach(s => out.push({ id: 's:' + s.id, t: s.data, titulo: `${a.nome.split(' ')[0]} finalizou ${s.treinoNome || 'um treino'}`, sub: s.rpe ? 'Esforço ' + s.rpe + '/10' : 'Toque para rever', href: '#rever' })));
   todosLeads().filter(l => l.estado === 'novo').forEach(l => out.push({ id: 'l:' + l.id, t: l.data, titulo: `${leadQuente(l.respostas) ? 'Novo lead quente' : 'Novo lead'}: ${l.nome}`, sub: (l.respostas || {}).objetivo || 'Fez o diagnóstico', href: '#leads' }));
+  if (typeof comu !== 'undefined' && comu.novos > 0 && comu.ultimo && comuEquipe()) out.push({ id: 'c:' + comu.ultimo, t: comu.ultimo, titulo: comu.novos === 1 ? 'Nova publicação na comunidade' : comu.novos + ' novas publicações na comunidade', sub: 'Veja e responda na Central', href: '#central' });
   const lidas = new Set(db.notifLidas || []);
   return out.map(x => Object.assign(x, { lida: lidas.has(x.id) })).sort((a, b) => b.t.localeCompare(a.t));
 }
@@ -1359,7 +1379,8 @@ function viewCentral() {
   ${atencao}
   ${nomes}
   ${festa}
-  ${calma}`;
+  ${calma}
+  ${comuAtiva() ? '<h2 class="cc-sec">Comunidade</h2>' + comunidadePainel('inner') : ''}`;
 }
 function viewRever() {
   const todos = [];
@@ -2326,11 +2347,202 @@ function viewDefinicoes() {
       <label class="field wide">Afirmação da semana (aparece no topo da tela da aluna)<textarea data-marca="afirmacao" maxlength="160" placeholder="Ex.: Eu não preciso de perfeição, preciso de constância.">${esc(m.afirmacao || '')}</textarea></label>
       <label class="field wide">Mensagem de boas-vindas para as alunas (aparece no convite e no início)<textarea data-marca="boasVindas" placeholder="Ex.: Bem-vinda à Squad! Qualquer dúvida, chama a equipe. Vamos juntas!">${esc(m.boasVindas)}</textarea></label>
     </div></div>
-  ${typeof SB !== 'undefined' && SB.ativo() ? painelEquipe() : ''}
+  ${typeof SB !== 'undefined' && SB.ativo() ? painelFoto() + painelEquipe() : ''}
   <div class="panel"><h3>Avisos (notificações)</h3><p class="muted small" style="margin:0">O sino no topo acende quando uma aluna finaliza um treino ou alguém faz o diagnóstico no site.</p>
     <div class="small" style="display:grid;gap:4px"><span><b>Estado dos avisos do navegador:</b> ${'Notification' in window ? ({ granted: 'ativos', denied: 'bloqueados (desbloqueie nas definições do navegador)', default: 'desligados' })[Notification.permission] : 'este navegador não suporta'}</span></div>
     ${'Notification' in window && Notification.permission === 'default' ? '<div class="row"><button class="btn primary" data-act="avisos-ativar">Ativar avisos no navegador</button></div>' : ''}
     <ul class="small muted" style="margin:0;padding-left:18px;display:grid;gap:3px"><li>O sino e o número funcionam sempre, quando abre a app.</li><li>O aviso do navegador aparece enquanto a app estiver aberta (mesmo noutra aba ou em segundo plano).</li><li>No iPhone, primeiro adicione a app à tela de início e abra por lá (iOS 16.4 ou mais recente).</li><li>Os treinos das alunas e os leads só chegam em tempo real com o Supabase ligado.</li><li>Com a app fechada não há aviso: isso exige um servidor de notificações, que fica para uma próxima fase.</li></ul></div>`;
+}
+/* ================= COMUNIDADE (feed) E FOTO DE PERFIL ================= */
+const comu = { itens: [], fim: false, carregando: false, erro: '', abertos: {}, coment: {}, rasc: {}, fotoCache: {}, perfil: null, novos: 0, ultimo: '', ult: 0, pollT: 0, obs: null };
+const COMU_NOTA = 'Sem conselhos médicos e com respeito sempre. Aqui a equipe e as alunas Squad se apoiam. 💛';
+const comuAtiva = () => typeof SB !== 'undefined' && SB.ativo();
+const comuEquipe = () => comuAtiva() && sbS && sbS.papel === 'personal';
+const comuRpc = (nome, body) => SB.req('/rest/v1/rpc/' + nome, { method: 'POST', body: body || {} });
+const comuErro = r => (r && r.j && (r.j.message || r.j.msg)) || 'Não consegui agora. Tente de novo.';
+function tempoRel(iso) {
+  const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  return s < 60 ? 'agora' : s < 3600 ? `há ${Math.floor(s / 60)} min` : s < 86400 ? `há ${Math.floor(s / 3600)} h` : s < 7 * 86400 ? `há ${Math.floor(s / 86400)} d` : fmtData(String(iso).slice(0, 10));
+}
+/* avatar: foto (guardada no Supabase Storage) ou iniciais */
+function avatarHtml(uid, nome, fv, px, equipe) {
+  const st = `width:${px}px;height:${px}px;font-size:${Math.round(px * .4)}px`, k = uid + ':' + fv;
+  if (uid && fv > 0) {
+    const u = comu.fotoCache[k];
+    if (u) return `<span class="avatar-ini av-foto" style="${st}"><img src="${u}" alt=""></span>`;
+    if (u === undefined) comuCarregaFoto(uid, fv);
+    return `<span class="avatar-ini ${equipe ? 'av-eq' : ''}" data-av="${k}" style="${st}" aria-hidden="true">${esc(iniciais(nome || '?'))}</span>`;
+  }
+  return `<span class="avatar-ini ${equipe ? 'av-eq' : ''}" style="${st}" aria-hidden="true">${esc(iniciais(nome || '?'))}</span>`;
+}
+async function comuCarregaFoto(uid, fv) {
+  const k = uid + ':' + fv; comu.fotoCache[k] = null;
+  try {
+    if (sbS.expires_at && sbS.expires_at - 30 < Date.now() / 1000 && sbS.refresh_token) await SB.refresca();
+    const r = await fetch(SBC.url + '/storage/v1/object/authenticated/avatares/' + uid + '/foto.jpg', { headers: { apikey: SBC.anonKey, Authorization: 'Bearer ' + sbS.access_token } });
+    if (!r.ok) return;
+    const u = URL.createObjectURL(await r.blob()); comu.fotoCache[k] = u;
+    document.querySelectorAll('[data-av="' + k + '"]').forEach(el => { el.classList.add('av-foto'); el.removeAttribute('data-av'); el.innerHTML = `<img src="${u}" alt="">`; });
+  } catch (e) {}
+}
+async function comuPerfil() {
+  if (!comuAtiva()) return;
+  const r = await comuRpc('pt_meu_perfil'); if (!r.ok) return;
+  const p = r.j[0] || { nome: '', foto_v: 0 }, mudou = !comu.perfil || comu.perfil.foto_v !== p.foto_v;
+  comu.perfil = p;
+  if (mudou) { const el = document.getElementById('foto-av'); if (el) el.innerHTML = avatarHtml(sbS.uid, comuNomeProprio(), p.foto_v, 72, comuEquipe()); const c = document.getElementById('comu-eu'); if (c) c.innerHTML = avatarHtml(sbS.uid, comuNomeProprio(), p.foto_v, 40, comuEquipe()); }
+}
+const comuNomeProprio = () => (comu.perfil && comu.perfil.nome) || (comuEquipe() ? 'Equipe' : ((alunoAtivo && alunoAtivo()) ? alunoAtivo().nome : 'Eu'));
+function painelFoto() {
+  if (!comuAtiva()) return '';
+  setTimeout(comuPerfil, 0);
+  const fv = comu.perfil ? comu.perfil.foto_v : 0, eq = comuEquipe();
+  return `<div class="panel"><div class="row" style="gap:14px;align-items:center"><div id="foto-av">${avatarHtml(sbS.uid, comuNomeProprio(), fv, 72, eq)}</div>
+    <div style="flex:1;min-width:0"><b>Foto de perfil</b><div class="small muted">Aparece na comunidade e nos comentários. A imagem é reduzida no seu aparelho antes de ser guardada.</div>
+    <div class="row" style="flex-wrap:wrap;gap:8px"><label class="btn sm primary" style="cursor:pointer">Escolher foto<input type="file" accept="image/*" id="foto-file" hidden></label><button class="btn sm ghost" data-cact="foto-tirar">Remover foto</button></div></div></div>
+    ${eq ? `<label class="field" style="margin-top:10px">Nome na comunidade<input type="text" id="comu-nome" maxlength="30" value="${esc((comu.perfil && comu.perfil.nome) || '')}" placeholder="Ex.: Ana · Equipe Squad"></label>` : ''}</div>`;
+}
+async function comuEnviaFoto(file) {
+  try {
+    const img = await new Promise((ok, no) => { const rd = new FileReader(); rd.onload = () => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = rd.result; }; rd.onerror = no; rd.readAsDataURL(file); });
+    const L = Math.min(img.width, img.height), cv = document.createElement('canvas'); cv.width = cv.height = 256;
+    cv.getContext('2d').drawImage(img, (img.width - L) / 2, (img.height - L) / 2, L, L, 0, 0, 256, 256);
+    const blob = await new Promise(ok => cv.toBlob(ok, 'image/jpeg', .82));
+    if (sbS.expires_at && sbS.expires_at - 30 < Date.now() / 1000 && sbS.refresh_token) await SB.refresca();
+    const r = await fetch(SBC.url + '/storage/v1/object/avatares/' + sbS.uid + '/foto.jpg', { method: 'POST', headers: { apikey: SBC.anonKey, Authorization: 'Bearer ' + sbS.access_token, 'Content-Type': 'image/jpeg', 'x-upsert': 'true' }, body: blob });
+    if (!r.ok) throw new Error('upload');
+    const g = await comuRpc('pt_guardar_perfil', { p_nome: null, p_foto: 1 }); if (!g.ok) throw new Error('perfil');
+    comu.perfil = Object.assign(comu.perfil || {}, { foto_v: g.j }); comu.fotoCache = {};
+    const el = document.getElementById('foto-av'); if (el) el.innerHTML = avatarHtml(sbS.uid, comuNomeProprio(), g.j, 72, comuEquipe());
+    const c = document.getElementById('comu-eu'); if (c) c.innerHTML = avatarHtml(sbS.uid, comuNomeProprio(), g.j, 40, comuEquipe());
+    comu.itens.forEach(p => { if (p.autor_id === sbS.uid) p.foto_v = g.j; }); comuLista(true);
+    toast('Foto guardada');
+  } catch (e) { toast('Não consegui guardar a foto. Rode o ficheiro comunidade.sql no Supabase e tente de novo.'); }
+}
+/* painel */
+function comunidadePainel(modo) {
+  if (!comuAtiva()) return `<div class="panel empty"><h2>Comunidade</h2><p>A comunidade fica disponível quando a app está ligada à nuvem.</p></div>`;
+  return `<div id="comu-box" data-modo="${modo}"><form id="comu-form" class="cp-novo"><div id="comu-eu">${avatarHtml(sbS.uid, comuNomeProprio(), comu.perfil ? comu.perfil.foto_v : 0, 40, comuEquipe())}</div>
+    <div style="flex:1;min-width:0;display:grid;gap:8px"><textarea id="comu-txt" rows="2" maxlength="1000" placeholder="${comuEquipe() ? 'Escreva uma mensagem para as alunas…' : 'Compartilhe uma conquista, uma dúvida ou um incentivo…'}">${esc(comu.rasc.main || '')}</textarea>
+    <div class="row spread" style="margin:0;align-items:center"><span class="small muted">${COMU_NOTA}</span><button class="btn primary sm" style="flex:none">Publicar</button></div></div></form>
+    <div class="${modo === 'inner' ? 'comu-scroll' : ''}" id="comu-scroll"><div id="comu-lista"></div></div></div>`;
+}
+function menuPost(p) {
+  const meu = sbS && p.autor_id === sbS.uid, eq = comuEquipe(), it = [];
+  if (meu) it.push(['editar', 'Editar']);
+  if (!meu) it.push(['denunciar', 'Denunciar']);
+  if (eq) it.push([p.oculto ? 'mostrar' : 'ocultar', p.oculto ? 'Mostrar de novo' : 'Ocultar']);
+  return it.length ? `<details class="mais cp-mais"><summary class="btn sm ghost" aria-label="Mais ações">⋯</summary><div class="mais-menu">${it.map(([a, t]) => `<button data-cact="${a}" data-pid="${p.id}">${t}</button>`).join('')}</div></details>` : '';
+}
+function postHtml(p, filho) {
+  const eq = comuEquipe(), ab = !filho && comu.abertos[p.id], cs = comu.coment[p.id];
+  const cab = `<div class="cp-top">${avatarHtml(p.autor_id, p.nome, p.foto_v, filho ? 32 : 42, p.equipe)}<div class="cp-quem"><div class="row" style="gap:6px;flex-wrap:wrap;margin:0;align-items:center"><b>${esc(p.nome)}</b>${p.equipe ? '<span class="chip accent">Equipe Squad</span>' : ''}${p.oculto ? '<span class="chip">Oculta</span>' : ''}${eq && p.denuncias ? `<span class="chip" style="color:var(--danger)">${p.denuncias} denúncia${p.denuncias > 1 ? 's' : ''}</span>` : ''}</div><div class="small muted">${tempoRel(p.created_at)}${p.editado ? ' · editado' : ''}</div></div>${menuPost(p)}</div><div class="cp-txt">${esc(p.texto)}</div>`;
+  if (filho) return `<div class="cp-c ${p.oculto ? 'oculto' : ''}" data-pid="${p.id}">${cab}</div>`;
+  return `<article class="cp ${p.oculto ? 'oculto' : ''} ${p.equipe ? 'cp-eq' : ''}" data-pid="${p.id}">${cab}
+    <div class="cp-acoes"><button class="cp-b ${p.eu_curti ? 'on' : ''}" data-cact="curtir" data-pid="${p.id}" aria-pressed="${!!p.eu_curti}" aria-label="Curtir">${p.eu_curti ? '♥' : '♡'} <span class="num">${p.curtidas || ''}</span></button>
+    <button class="cp-b" data-cact="comentarios" data-pid="${p.id}" aria-expanded="${!!ab}">💬 <span class="num">${p.comentarios || ''}</span> ${ab ? '' : '<span class="small">Comentar</span>'}</button></div>
+    ${ab ? `<div class="cp-cs">${cs ? (cs.itens.map(c => postHtml(c, true)).join('') || '') : '<div class="small muted">A carregar…</div>'}
+      <form class="cp-resp" data-cform="${p.id}"><input type="text" maxlength="1000" placeholder="Escreva um comentário…" value="${esc(comu.rasc['c' + p.id] || '')}" data-rasc="c${p.id}" aria-label="Comentário"><button class="btn sm primary" style="flex:none">Enviar</button></form></div>` : ''}</article>`;
+}
+function comuLista(forca) {
+  const el = document.getElementById('comu-lista'); if (!el) return;
+  const foco = document.activeElement; if (!forca && foco && el.contains(foco) && /INPUT|TEXTAREA/.test(foco.tagName)) return;
+  const rod = comu.carregando ? '<div class="small muted" style="text-align:center;padding:14px">A carregar…</div>'
+    : comu.erro ? `<div class="panel empty">${comu.erro === 'sql' ? 'A comunidade ainda não está ligada. Rode o ficheiro comunidade.sql no Supabase (veja o guia).' : 'Não consegui carregar. Verifique a internet e tente de novo.'}<div class="row" style="justify-content:center"><button class="btn sm" data-cact="recarregar">Tentar de novo</button></div></div>`
+    : comu.fim ? (comu.itens.length ? '<div class="small muted" style="text-align:center;padding:14px">Chegou ao início da comunidade 💛</div>' : '<div class="panel empty"><h2>Ainda não há publicações</h2><p>Seja a primeira a escrever. Uma conquista, uma dúvida ou um incentivo. 💛</p></div>')
+    : '<div id="comu-sent" style="height:40px"></div>';
+  el.innerHTML = comu.itens.map(p => postHtml(p)).join('') + rod;
+  const s = document.getElementById('comu-sent'); if (s && comu.obs) comu.obs.observe(s);
+}
+async function comuMais() {
+  if (comu.carregando || comu.fim) return;
+  comu.carregando = true; comu.erro = ''; comuLista(true);
+  const antes = comu.itens.length ? comu.itens[comu.itens.length - 1].created_at : null;
+  const r = await comuRpc('pt_feed', { p_antes: antes, p_limite: 15 });
+  comu.carregando = false;
+  if (!r.ok) { comu.erro = r.status === 404 ? 'sql' : 'rede'; comuLista(true); return; }
+  const novos = r.j.filter(x => !comu.itens.some(y => y.id === x.id)); comu.itens.push(...novos);
+  if (r.j.length < 15) comu.fim = true; comuLista(true);
+}
+async function comuAtualiza(forca) {
+  if (comu.carregando) return; if (!forca && Date.now() - comu.ult < 20000) return; comu.ult = Date.now();
+  const r = await comuRpc('pt_feed', { p_antes: null, p_limite: 15 });
+  if (!r.ok) { if (!comu.itens.length) { comu.erro = r.status === 404 ? 'sql' : 'rede'; comuLista(true); } return; }
+  comu.erro = '';
+  const ids = new Set(r.j.map(x => x.id)), antigos = comu.itens.filter(x => !ids.has(x.id));
+  let resto = antigos;
+  if (r.j.length < 15) { resto = []; comu.fim = true; } else { const corte = r.j[r.j.length - 1].created_at; resto = antigos.filter(x => x.created_at < corte); }
+  comu.itens = r.j.concat(resto); comuLista(false);
+}
+function comuInicia(box) {
+  box.dataset.on = '1'; comu.visto = Date.now(); try { localStorage.setItem('pt-comu-visto', new Date().toISOString()); } catch (e) {} comu.novos = 0;
+  const sc = box.dataset.modo === 'inner' ? document.getElementById('comu-scroll') : null;
+  if (comu.obs) comu.obs.disconnect();
+  comu.obs = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) comuMais(); }, { root: sc, rootMargin: '300px' });
+  comuLista(true); comuPerfil();
+  if (!comu.itens.length) comuMais(); else comuAtualiza(false);
+}
+new MutationObserver(() => { const b = document.getElementById('comu-box'); if (b && !b.dataset.on) comuInicia(b); }).observe(document.body, { childList: true, subtree: true });
+async function comuTick() {
+  if (document.hidden || !comuAtiva() || !getSessao()) return;
+  if (document.getElementById('comu-box')) { comuAtualiza(false); return; }
+  if (!comuEquipe() || Date.now() - comu.pollT < 110000) return; comu.pollT = Date.now();
+  let desde = ''; try { desde = localStorage.getItem('pt-comu-visto') || ''; } catch (e) {}
+  if (!desde) { desde = new Date().toISOString(); try { localStorage.setItem('pt-comu-visto', desde); } catch (e) {} return; }
+  const r = await comuRpc('pt_novos', { p_desde: desde }); if (!r.ok || !r.j[0]) return;
+  comu.novos = r.j[0].n || 0; comu.ultimo = r.j[0].ultimo || ''; verificaNotifs();
+}
+setInterval(comuTick, 45000);
+const comuAcha = pid => comu.itens.find(x => x.id === pid) || [].concat(...Object.values(comu.coment).map(c => c.itens)).find(x => x.id === pid);
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-cact]'); if (!b) return;
+  const act = b.dataset.cact, pid = b.dataset.pid, p = pid && comuAcha(pid);
+  if (act === 'recarregar') { comu.erro = ''; comu.fim = false; comuMais(); return; }
+  if (act === 'foto-tirar') {
+    const r = await comuRpc('pt_guardar_perfil', { p_nome: null, p_foto: 0 }); if (!r.ok) { toast(comuErro(r)); return; }
+    try { await fetch(SBC.url + '/storage/v1/object/avatares/' + sbS.uid + '/foto.jpg', { method: 'DELETE', headers: { apikey: SBC.anonKey, Authorization: 'Bearer ' + sbS.access_token } }); } catch (e) {}
+    comu.perfil = Object.assign(comu.perfil || {}, { foto_v: 0 }); comu.itens.forEach(x => { if (x.autor_id === sbS.uid) x.foto_v = 0; });
+    const el = document.getElementById('foto-av'); if (el) el.innerHTML = avatarHtml(sbS.uid, comuNomeProprio(), 0, 72, comuEquipe()); comuLista(true); toast('Foto removida'); return;
+  }
+  if (act === 'curtir' && p) { const r = await comuRpc('pt_curtir', { p_post: pid }); if (!r.ok) { toast(comuErro(r)); return; } p.eu_curti = r.j; p.curtidas = Math.max(0, (p.curtidas || 0) + (r.j ? 1 : -1)); comuLista(true); return; }
+  if (act === 'comentarios' && p) {
+    comu.abertos[pid] = !comu.abertos[pid]; comuLista(true);
+    if (comu.abertos[pid] && !comu.coment[pid]) { const r = await comuRpc('pt_comentarios', { p_post: pid }); comu.coment[pid] = { itens: r.ok ? r.j : [] }; comuLista(true); }
+    return;
+  }
+  if (act === 'editar' && p) { openDialog(`<form id="f-comu-editar" class="dlg" style="padding:0" data-pid="${pid}"><div><h2>Editar publicação</h2></div><textarea id="ce-txt" rows="5" maxlength="1000" required>${esc(p.texto)}</textarea><div class="row" style="justify-content:end"><button type="button" class="btn ghost" data-act="close">Cancelar</button><button class="btn primary">Guardar</button></div></form>`); return; }
+  if (act === 'denunciar' && p) { confirmar('Denunciar esta publicação?', 'Denunciar', async () => { const r = await comuRpc('pt_denunciar', { p_post: pid }); toast(r.ok ? 'Obrigada. A equipe vai analisar.' : comuErro(r)); }); return; }
+  if ((act === 'ocultar' || act === 'mostrar') && p) { const r = await comuRpc('pt_ocultar', { p_post: pid, p_oculto: act === 'ocultar' }); if (!r.ok) { toast(comuErro(r)); return; } p.oculto = act === 'ocultar'; comuLista(true); toast(p.oculto ? 'Publicação oculta para as alunas' : 'Publicação visível de novo'); }
+});
+document.addEventListener('input', ev => {
+  const t = ev.target; if (t.id === 'comu-txt') comu.rasc.main = t.value; else if (t.dataset && t.dataset.rasc) comu.rasc[t.dataset.rasc] = t.value;
+});
+document.addEventListener('submit', async ev => {
+  const f = ev.target;
+  if (f.id === 'comu-form') {
+    ev.preventDefault(); const t = $('#comu-txt'), v = t.value.trim(), bt = f.querySelector('button'); if (!v) return; bt.disabled = true;
+    const r = await comuRpc('pt_publicar', { p_texto: v, p_pai: null }); bt.disabled = false;
+    if (!r.ok) { toast(comuErro(r)); return; } t.value = ''; comu.rasc.main = ''; comu.ult = 0; await comuAtualiza(true); return;
+  }
+  if (f.dataset && f.dataset.cform) {
+    ev.preventDefault(); const pid = f.dataset.cform, i = f.querySelector('input'), v = i.value.trim(); if (!v) return;
+    const r = await comuRpc('pt_publicar', { p_texto: v, p_pai: pid }); if (!r.ok) { toast(comuErro(r)); return; }
+    comu.rasc['c' + pid] = ''; const c = await comuRpc('pt_comentarios', { p_post: pid }); comu.coment[pid] = { itens: c.ok ? c.j : [] };
+    const p = comu.itens.find(x => x.id === pid); if (p) p.comentarios = comu.coment[pid].itens.length; comuLista(true); return;
+  }
+  if (f.id === 'f-comu-editar') {
+    ev.preventDefault(); const pid = f.dataset.pid, v = $('#ce-txt').value.trim(); if (!v) return;
+    const r = await comuRpc('pt_editar', { p_post: pid, p_texto: v }); if (!r.ok) { toast(comuErro(r)); return; }
+    const p = comuAcha(pid); if (p) { p.texto = v; p.editado = true; } closeDialog(); comuLista(true); return;
+  }
+});
+document.addEventListener('change', ev => {
+  const t = ev.target;
+  if (t.id === 'foto-file' && t.files[0]) { comuEnviaFoto(t.files[0]); t.value = ''; return; }
+  if (t.id === 'comu-nome') { comuRpc('pt_guardar_perfil', { p_nome: t.value, p_foto: null }).then(r => { if (r.ok) { comu.perfil = Object.assign(comu.perfil || {}, { nome: t.value.trim() }); toast('Nome guardado'); } else toast(comuErro(r)); }); }
+});
+function vComunidade(a) {
+  return shell(`<div class="ola"><div class="eyebrow">Squad</div><h1>Comunidade</h1></div>${comunidadePainel('page')}`, 'comunidade');
 }
 function painelEquipe() {
   if (SB.supervisor()) return `<div class="panel"><h3>Equipe</h3><p class="muted small" style="margin:0">Você tem acesso de supervisão: vê e edita as mesmas alunas, leads, treinos, nutrição e Central do dono da conta.</p></div>`;
@@ -2501,6 +2713,7 @@ function shell(content, aba) {
     ${t('treinar', 'meus-treinos', 'Treinar', '<svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>')}
     ${t('nutri', 'minha-nutricao', 'Comida', '<svg viewBox="0 0 24 24"><path d="M6 3v7a3 3 0 0 0 3 3v8M9 3v7M12 3v7a3 3 0 0 1-3 3"/><path d="M17 3c-2 1.5-3 4-3 7 0 2 1 3 3 3v8"/></svg>')}
     ${t('evolucao', 'minha-evolucao', 'Evolução', '<svg viewBox="0 0 24 24"><path d="M3 19h18"/><path d="M5 15l4-4 4 3 6-7"/><path d="M15 7h4v4"/></svg>')}
+    ${t('comunidade', 'minha-comunidade', 'Grupo', '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>')}
     ${t('perfil', 'meu-perfil', 'Perfil', '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>')}
   </nav>`;
 }
@@ -2696,7 +2909,7 @@ function vEvolucao(a) {
 
 function vPerfil(a) {
   const nEx = a.treinos.reduce((s, t) => s + t.itens.length, 0);
-  return shell(`<div class="perfil-top"><span class="avatar-ini" style="width:72px;height:72px;font-size:1.8rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>
+  return shell(`<div class="perfil-top">${comuAtiva() ? avatarHtml(sbS.uid, a.nome, comu.perfil ? comu.perfil.foto_v : 0, 72, false) : `<span class="avatar-ini" style="width:72px;height:72px;font-size:1.8rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>`}
     <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Aluna desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
   <div class="panel"><div class="eyebrow">Equipe Squad</div>
     <div class="row" style="gap:12px">${marcaMark(44)}
@@ -2704,6 +2917,7 @@ function vPerfil(a) {
     <div class="small muted">Dúvidas sobre o treino? Fale com a equipe Squad.</div>
     ${suporteBtn(a)}</div>
   ${atalhoInstalar()}
+  ${painelFoto()}
   <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
     <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
   <div class="panel"><div class="eyebrow">Comentários</div><p style="margin:0" class="small muted">Dor, dúvida ou recado? O personal vê na sua ficha.</p>
@@ -2720,7 +2934,7 @@ function renderAluno(h) {
   const a = alunoAtivo(); const app = $('#app');
   if (!a) { app.innerHTML = `<div class="panel empty">Cadastre um aluno primeiro.</div>`; return; }
   if (h.startsWith('meu-treino-')) { const t = a.treinos.find(x => x.id === h.slice(11)); app.innerHTML = t ? vTreino(a, t) : vTreinos(a); if (t) pedeWake(); return; }
-  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-nutricao' ? vNutri(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
+  app.innerHTML = h === 'meus-treinos' ? vTreinos(a) : h === 'minha-nutricao' ? vNutri(a) : h === 'minha-comunidade' ? vComunidade(a) : h === 'minha-evolucao' ? vEvolucao(a) : h === 'meu-perfil' ? vPerfil(a) : vInicio(a);
 }
 
 /* descanso cronometrado */
