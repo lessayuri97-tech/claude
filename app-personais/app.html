@@ -282,6 +282,20 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 .dl-img.dl-emo { display: grid; place-items: center; font-size: 3.4rem; }
 .dl-b { padding: 12px 14px 14px; display: grid; gap: 8px; }
 .dl-prev { aspect-ratio: 4 / 3; max-height: 200px; border-radius: 12px; background: var(--surface-2); overflow: hidden; display: grid; place-items: center; } .dl-prev img { width: 100%; height: 100%; object-fit: cover; }
+.dl-sel { position: absolute; top: 8px; left: 8px; z-index: 2; background: var(--surface); border-radius: 8px; padding: 6px; display: grid; place-items: center; box-shadow: 0 1px 4px rgba(0,0,0,.2); } .dl-sel input { width: 20px; height: 20px; margin: 0; }
+.dl-barra { display: grid; gap: 8px; padding: 12px 14px; margin-bottom: 10px; }
+.dl-bulk { position: sticky; top: 56px; z-index: 5; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 12px; padding: 8px 12px; margin-bottom: 10px; } .dl-bulk[hidden] { display: none; }
+.dois { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .dois > * { justify-content: center; min-width: 0; text-align: center; } .dois:has(> :only-child) { grid-template-columns: 1fr; }
+.sem-wrap { padding: 12px !important; gap: 10px !important; } .sem-wrap .semana { margin: 0; }
+.mais-sess { display: grid; gap: 8px; } .mais-sess > summary { cursor: pointer; justify-content: center; list-style: none; } .mais-sess > summary::-webkit-details-marker { display: none; }
+body.papel-aluno .ola h1, body.modo-aluno .ola h1 { font-size: 1.75rem; }
+body.papel-aluno .ola .incentivo, body.modo-aluno .ola .incentivo { font-size: .95rem; margin: 2px 0 0; }
+body.papel-aluno .hoje-card, body.modo-aluno .hoje-card { padding: 16px; gap: 4px; } body.papel-aluno .hoje-card h2, body.modo-aluno .hoje-card h2 { font-size: 1.45rem; }
+.nu-lista li > span:last-child { white-space: nowrap; }
+.nu-card .btn.ghost.sm { min-height: 36px; padding: 0 10px; }
+.nu-card { padding: 12px 14px; gap: 8px; }
+.nu-m { gap: 2px; }
+.plano-card { padding: 14px; gap: 10px; }
 .avatar-ini.av-eq { background: var(--accent); color: #fff; }
 .cp-novo { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
 .cp-novo textarea { width: 100%; resize: vertical; min-height: 56px; }
@@ -415,7 +429,7 @@ textarea.share { min-height: 260px; font-family: ui-monospace, Menlo, Consolas, 
   .topbar .nav { display: none; }
   .topbar .wrap { padding-block: 8px; }
   main.wrap { padding-block: 16px calc(96px + env(safe-area-inset-bottom, 0px)); gap: 16px; }
-  .tabbar { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+  .tabbar { display: grid; grid-template-columns: repeat(6, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
     padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
   .tabbar a { display: grid; justify-items: center; gap: 2px; padding: 6px 0; text-decoration: none; color: var(--muted); font-size: .72rem; font-weight: 600; border-radius: 10px; }
   .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -624,6 +638,7 @@ body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
       <a href="#alunos" data-nav="alunos">Alunas</a>
       <a href="#rever" data-nav="rever">Rever <span class="nav-badge" id="badge-rever" hidden></span></a>
       <a href="#leads" data-nav="leads">Leads <span class="nav-badge" id="badge-leads" hidden></span></a>
+      <a href="#dietbox" data-nav="dietbox">Dietbox</a>
       <a href="#exercicios" data-nav="exercicios">Exercícios</a>
       <a href="#definicoes" data-nav="definicoes">Definições</a>
     </nav>
@@ -637,6 +652,7 @@ body.modo-aluno .btn, body.papel-aluno .btn { min-height: 48px; }
   <a href="#central" data-nav="central"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg><span>Central</span></a>
   <a href="#alunos" data-nav="alunos"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18 14.8c1.9.6 3.1 2.4 3.5 5.2"/></svg><span>Alunas</span></a>
   <a href="#rever" data-nav="rever"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.8"/></svg><span>Rever <span class="nav-badge" id="badge-rever2" hidden></span></span></a>
+  <a href="#dietbox" data-nav="dietbox"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-2 2-2 2-4M13 7c0-2 2-2 2-4"/></svg><span>Dietbox</span></a>
   <a href="#exercicios" data-nav="exercicios"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M10 9.2v5.6l4.8-2.8z"/></svg><span>Exercícios</span></a>
   <a href="#definicoes" data-nav="definicoes"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Definições</span></a>
 </nav>
@@ -929,6 +945,7 @@ function route() {
   if (view === 'leads') app.innerHTML = viewLeads();
   else if (view === 'definicoes') app.innerHTML = viewDefinicoes();
   else if (view === 'central') app.innerHTML = viewCentral();
+  else if (view === 'dietbox') app.innerHTML = viewDietbox();
   else if (view === 'rever') app.innerHTML = viewRever();
   else if (view === 'exercicios') app.innerHTML = viewExercicios();
   else if (view === 'backup') app.innerHTML = viewBackup();
@@ -2204,15 +2221,14 @@ function textoNutri(a) {
 /* aluna */
 function vNutri(a) {
   const n = nutri(a), dia = hoje(), m = n.metas, P = planoDoDia(n, dia), refs = P.refeicoes;
-  if (!todasRefeicoes(n).length) return shell(`<div class="ola"><div class="eyebrow">Hoje</div><h1>Alimentação</h1><a class="btn primary sm" href="#minha-dietbox" style="margin-top:6px">🥗 Abrir o Dietbox</a></div><div class="panel empty"><h2>Ainda sem plano alimentar</h2><p>Quando a sua equipe Squad montar o plano, as refeições aparecem aqui.</p>
+  if (!todasRefeicoes(n).length) return shell(`<div class="ola"><div class="eyebrow">Hoje</div><div class="row spread" style="align-items:flex-end;gap:8px"><h1>Comida</h1><a class="btn sm" href="#minha-dietbox">🥗 Dietbox</a></div></div><div class="panel empty"><h2>Ainda sem plano alimentar</h2><p>Quando a sua equipe Squad montar o plano, as refeições aparecem aqui.</p>
     <button class="btn" data-sact="comentar">💬 Perguntar à equipe</button></div>`, 'nutri');
-  if (!refs.length) return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Alimentação</h1><a class="btn primary sm" href="#minha-dietbox" style="margin-top:6px">🥗 Abrir o Dietbox</a></div><div class="panel empty"><h2>Hoje é dia livre 💛</h2><p>Sem refeições planejadas para hoje. Mantenha a água em dia e escute o seu corpo.</p></div>`, 'nutri');
+  if (!refs.length) return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><div class="row spread" style="align-items:flex-end;gap:8px"><h1>Comida</h1><a class="btn sm" href="#minha-dietbox">🥗 Dietbox</a></div></div><div class="panel empty"><h2>Hoje é dia livre 💛</h2><p>Sem refeições planejadas para hoje. Mantenha a água em dia e escute o seu corpo.</p></div>`, 'nutri');
   const feitas = refs.filter(r => refFeita(a, dia, r.id)).length, tot = totDia(P, true, a, dia), copos = aguaDe(a, dia), alvoA = +m.agua || 8;
-  return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Alimentação</h1><a class="btn primary sm" href="#minha-dietbox" style="margin-top:6px">🥗 Abrir o Dietbox</a>${n.extras.length ? `<p class="incentivo">Hoje: <b>${esc(nomePlano(n, P))}</b></p>` : ''}</div>
+  return shell(`<div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><div class="row spread" style="align-items:flex-end;gap:8px"><h1>Comida</h1><a class="btn sm" href="#minha-dietbox">🥗 Dietbox</a></div>${n.extras.length ? `<p class="incentivo">Hoje: <b>${esc(nomePlano(n, P))}</b></p>` : ''}</div>
   <div class="panel"><div class="row spread"><b>${feitas} de ${refs.length} refeições feitas</b><span class="chip ${feitas === refs.length ? 'ok' : 'accent'} num">${Math.round(feitas / refs.length * 100)}%</span></div>
     ${barra(feitas, refs.length, 'grande')}${m.kcal ? resumoDia(n, tot) : ''}</div>
-  <div class="panel agua"><div class="row spread"><b>💧 Água</b><span class="num small"><b>${copos}</b> de ${alvoA} copos</span></div>${barra(copos, alvoA)}
-    <div class="row" style="justify-content:center;gap:12px"><button class="btn" data-sact="agua" data-d="-1" aria-label="Menos um copo" style="min-width:56px;justify-content:center">−</button><button class="btn primary" data-sact="agua" data-d="1" style="min-width:140px;justify-content:center">+ 1 copo</button></div></div>
+  <div class="panel agua" style="padding:12px 16px"><div class="row spread" style="gap:10px;flex-wrap:nowrap"><b>💧 Água <span class="num small muted">${copos}/${alvoA}</span></b><div class="row" style="gap:8px;flex:none"><button class="btn sm" data-sact="agua" data-d="-1" aria-label="Menos um copo">−</button><button class="btn sm primary" data-sact="agua" data-d="1">+ 1 copo</button></div></div>${barra(copos, alvoA)}</div>
   ${refs.map(r => { const t = totRef(r), f = refFeita(a, dia, r.id);
     return `<article class="nu-card ${f ? 'feita' : ''}"><div class="row spread"><div><b>${emoRef(r.nome)} ${esc(r.nome)}</b><div class="small muted num">${r.hora ? esc(r.hora) + ' · ' : ''}${Math.round(t.k)} kcal</div></div>
       <button class="nu-check" data-sact="refeicao" data-ref="${r.id}" aria-pressed="${f}" aria-label="${f ? 'Desmarcar' : 'Marcar'} ${esc(r.nome)} como feita">${f ? '✓ Feita' : 'Marcar feita'}</button></div>
@@ -2832,7 +2848,7 @@ document.addEventListener('change', ev => {
 });
 /* ================= DIETBOX (refeições soltas publicadas pela equipe) ================= */
 const DBXL_CATS = [['', 'Todas'], ['cafe', 'Café da manhã'], ['lanche', 'Lanches'], ['almoco', 'Almoço'], ['jantar', 'Jantar'], ['doce', 'Doces fit'], ['outro', 'Outras']];
-const dbxl = { itens: [], ok: false, carregando: false, erro: '', fotos: {}, pend: null, cat: '', aberto: {} };
+const dbxl = { itens: [], ok: false, carregando: false, erro: '', fotos: {}, pend: null, cat: '', est: '', q: '', sel: new Set(), aberto: {} };
 const linhasTxt = t => String(t || '').split('\n').map(x => x.trim()).filter(Boolean);
 async function dbxlCarrega(forca) {
   if (!comuAtiva() || dbxl.carregando || (dbxl.ok && !forca)) return;
@@ -2857,18 +2873,28 @@ function dbxlCard(d, eq) {
   else img = `<div class="dl-img dl-emo" aria-hidden="true">${esc(d.emoji || '🍽️')}</div>`;
   const cat = (DBXL_CATS.find(c => c[0] === d.categoria) || [0, 'Outra'])[1], ing = linhasTxt(d.ingredientes), prep = linhasTxt(d.preparo);
   const mac = d.kcal != null ? `<div class="small num"><b>${d.kcal} kcal</b>${d.prot != null ? ` · P ${+d.prot} · C ${+d.carb} · G ${+d.gord}` : ''}</div>` : '';
-  return `<article class="dl-card ${d.publicado ? '' : 'rasc'}">${img}<div class="dl-b"><div class="row spread" style="gap:8px;align-items:flex-start"><div><b>${esc(d.nome)}</b><div class="small muted">${esc(cat)}${d.tempo ? ' · ' + d.tempo + ' min' : ''}${eq && !d.publicado ? ' · <span class="chip">Rascunho (as alunas não veem)</span>' : ''}</div></div></div>${mac}
+  const chk = eq ? `<label class="dl-sel" title="Selecionar"><input type="checkbox" data-dsel="${d.id}" ${dbxl.sel.has(d.id) ? 'checked' : ''} aria-label="Selecionar ${esc(d.nome)}"></label>` : '';
+  return `<article class="dl-card ${d.publicado ? '' : 'rasc'}" style="position:relative">${chk}${img}<div class="dl-b"><div class="row spread" style="gap:8px;align-items:flex-start"><div><b>${esc(d.nome)}</b><div class="small muted">${esc(cat)}${d.tempo ? ' · ' + d.tempo + ' min' : ''}${eq && !d.publicado ? ' · <span class="chip">Rascunho (as alunas não veem)</span>' : ''}</div></div></div>${mac}
     <details class="dbx-det"><summary class="small"><b>Como fazer</b></summary>${ing.length ? `<div class="eyebrow" style="margin-top:6px">Ingredientes</div><ul class="dbx-ul">${ing.map(x => `<li>• ${esc(x)}</li>`).join('')}</ul>` : ''}${prep.length ? `<div class="eyebrow" style="margin-top:6px">Modo de preparo</div><ol class="dbx-prep">${prep.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}${!ing.length && !prep.length ? '<div class="small muted">Sem detalhes.</div>' : ''}</details>
     ${eq ? `<div class="row" style="flex-wrap:wrap;gap:6px"><button class="btn sm" data-act="dbxl-edit" data-did="${d.id}">Editar</button><button class="btn sm ${d.publicado ? 'ghost' : 'primary'}" data-act="dbxl-pub" data-did="${d.id}">${d.publicado ? 'Tirar das alunas' : 'Publicar para as alunas'}</button><button class="btn sm ghost danger" data-act="dbxl-del" data-did="${d.id}">Excluir</button></div>` : ''}</div></article>`;
 }
+function dbxlFiltrados(eq) { const q = norm(dbxl.q || '').trim(); return dbxl.itens.filter(d => (!dbxl.cat || d.categoria === dbxl.cat) && (!eq || !dbxl.est || (dbxl.est === 'pub') === !!d.publicado) && (!q || norm(d.nome + ' ' + (d.ingredientes || '')).includes(q))); }
+function dbxlBulkBar() { const el = document.getElementById('dbxl-bulk'); if (!el) return; const n = dbxl.sel.size; el.hidden = !n; el.innerHTML = n ? `<b class="small">${n} selecionada${n > 1 ? 's' : ''}</b><button class="btn sm primary" data-act="dbxl-bulk" data-v="pub">Publicar</button><button class="btn sm" data-act="dbxl-bulk" data-v="des">Tirar das alunas</button><button class="btn sm ghost danger" data-act="dbxl-bulk" data-v="del">Excluir</button><button class="btn sm ghost" data-act="dbxl-bulk" data-v="nada">Limpar</button>` : ''; }
 function dbxlDesenha() {
-  const el = document.getElementById('dbxl-lista'); if (!el) return; const eq = comuEquipe();
+  const el = document.getElementById('dbxl-lista'); if (!el) return; const eq = comuEquipe(), pagina = el.dataset.modo === 'equipe';
   if (!comuAtiva()) { el.innerHTML = '<div class="panel empty"><p>O Dietbox fica disponível quando a app está ligada à nuvem.</p></div>'; return; }
   if (dbxl.erro) { el.innerHTML = `<div class="panel empty">${dbxl.erro === 'sql' ? 'O Dietbox ainda não está ligado. A equipe precisa rodar o ficheiro dietbox.sql no Supabase.' : 'Não consegui carregar. Verifique a internet.'}<div class="row" style="justify-content:center"><button class="btn sm" data-act="dbxl-recarregar">Tentar de novo</button></div></div>`; return; }
   if (!dbxl.ok) { el.innerHTML = '<div class="small muted" style="padding:14px;text-align:center">A carregar…</div>'; return; }
-  const chips = `<div class="nu-chips" style="margin-bottom:12px">${DBXL_CATS.map(([k, t]) => `<button class="nu-chip sm ${dbxl.cat === k ? 'on' : ''}" data-act="dbxl-cat" data-k="${k}">${t}</button>`).join('')}</div>`;
-  const l = dbxl.itens.filter(d => !dbxl.cat || d.categoria === dbxl.cat);
-  el.innerHTML = chips + (l.length ? `<div class="dl-grid">${l.map(d => dbxlCard(d, eq)).join('')}</div>` : `<div class="panel empty"><p>${eq ? 'Ainda não há refeições aqui. Crie a primeira em “+ Nova refeição”.' : 'Em breve a equipe publica ideias de refeições aqui. 💛'}</p></div>`);
+  const chipsTipo = DBXL_CATS.map(([k, t]) => `<button class="nu-chip sm ${dbxl.cat === k ? 'on' : ''}" data-act="dbxl-cat" data-k="${k}">${t}</button>`).join('');
+  const l = dbxlFiltrados(pagina);
+  if (pagina) {
+    const np = dbxl.itens.filter(d => d.publicado).length, nr = dbxl.itens.length - np;
+    const ce = document.getElementById('dbxl-chips'); if (ce) ce.innerHTML = `<div class="nu-chips">${chipsTipo}</div><div class="nu-chips" style="margin-top:6px">${[['', 'Todas (' + dbxl.itens.length + ')'], ['pub', 'Publicadas (' + np + ')'], ['rasc', 'Rascunhos (' + nr + ')']].map(([k, t]) => `<button class="nu-chip sm ${dbxl.est === k ? 'on' : ''}" data-act="dbxl-est" data-k="${k}">${t}</button>`).join('')}${l.length ? '<button class="nu-chip sm novo" data-act="dbxl-sel-todas">Selecionar as ' + l.length + ' da lista</button>' : ''}</div>`;
+    dbxlBulkBar();
+    el.innerHTML = l.length ? `<div class="dl-grid">${l.map(d => dbxlCard(d, true)).join('')}</div>` : `<div class="panel empty"><p>${dbxl.itens.length ? 'Nenhuma refeição com estes filtros.' : 'Ainda não há refeições. Crie a primeira em “+ Nova refeição” ou use “Criar 5 exemplos”.'}</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="nu-chips" style="margin-bottom:12px">${chipsTipo}</div>` + (l.length ? `<div class="dl-grid">${l.map(d => dbxlCard(d, eq)).join('')}</div>` : `<div class="panel empty"><p>${eq ? 'Ainda não há refeições aqui.' : 'Em breve a equipe publica ideias de refeições aqui. 💛'}</p></div>`);
 }
 /* 5 exemplos de refeições para o Dietbox (fotos geradas por IA, macros calculadas com a tabela da app) */
 const CDN_EX = 'https://d8j0ntlcm91z4.cloudfront.net/user_3MT6Caqjj0JC70CsMVVsMBLP7Ot/hf_20261126_';
@@ -2910,8 +2936,16 @@ async function dbxlCarregaExemplos() {
 function dbxlIniciar() { dbxlDesenha(); dbxlCarrega(true); }
 function dietboxPainel() {
   if (!comuAtiva()) return '';
+  return `<a class="panel" href="#dietbox" style="display:block;text-decoration:none;color:inherit"><div class="row spread"><div><h3>🥗 Dietbox</h3><div class="small muted">Refeições soltas com foto e modo de preparo para as alunas. Abra para criar, filtrar e publicar várias de uma vez.</div></div><span class="btn sm primary">Abrir Dietbox</span></div></a>`;
+}
+function viewDietbox() {
+  if (!comuAtiva()) return `<div class="panel empty"><h2>Dietbox</h2><p>O Dietbox fica disponível quando a app está ligada à nuvem.</p></div>`;
   setTimeout(dbxlIniciar, 0);
-  return `<div class="panel"><div class="row spread" style="flex-wrap:wrap;gap:10px"><div><h3>Refeições soltas para as alunas</h3><div class="small muted">Crie refeições com foto do prato e modo de preparo. Só aparecem para as alunas as que estiverem publicadas.</div></div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" data-act="dbxl-exemplos">Criar 5 exemplos</button><button class="btn primary" data-act="dbxl-novo">+ Nova refeição</button></div></div></div><div id="dbxl-lista"></div>`;
+  return `<div class="row spread" style="flex-wrap:wrap;gap:10px;margin-bottom:10px"><div><h1 style="margin:0">Dietbox</h1><div class="small muted">Refeições soltas para as alunas fazerem fora do plano. Só aparecem para elas as publicadas.</div></div>
+    <div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn" data-act="dbxl-exemplos">Criar 5 exemplos</button><button class="btn primary" data-act="dbxl-novo">+ Nova refeição</button></div></div>
+    <div class="panel dl-barra"><input type="search" id="dbxl-q" placeholder="Buscar por nome ou ingrediente" value="${esc(dbxl.q)}" autocomplete="off" aria-label="Buscar"><div id="dbxl-chips"></div></div>
+    <div id="dbxl-bulk" class="dl-bulk" hidden></div>
+    <div id="dbxl-lista" data-modo="equipe"></div>`;
 }
 function vDietbox(a) {
   setTimeout(dbxlIniciar, 0);
@@ -2941,12 +2975,21 @@ document.addEventListener('click', async ev => {
   if (act === 'dbxl-cat') { dbxl.cat = b.dataset.k; dbxlDesenha(); return; }
   if (act === 'dbxl-recarregar') { dbxl.erro = ''; dbxlCarrega(true); return; }
   if (act === 'dbxl-novo') { abreDbxlForm(); return; }
+  if (act === 'dbxl-est') { dbxl.est = b.dataset.k; dbxlDesenha(); return; }
+  if (act === 'dbxl-sel-todas') { dbxlFiltrados(true).forEach(x => dbxl.sel.add(x.id)); dbxlDesenha(); return; }
+  if (act === 'dbxl-bulk') {
+    const v = b.dataset.v, ids = [...dbxl.sel].filter(id => dbxl.itens.some(x => x.id === id)); if (v === 'nada') { dbxl.sel.clear(); dbxlDesenha(); return; } if (!ids.length) return;
+    const fim = async () => { let ok = 0; for (const id of ids) { const r = v === 'del' ? await comuRpc('pt_db_apagar', { p_id: id }) : await comuRpc('pt_db_publicar', { p_id: id, p_pub: v === 'pub' }); if (r.ok) ok++; } dbxl.sel.clear(); dbxl.ok = false; await dbxlCarrega(true); toast(ok + ' refeições ' + (v === 'pub' ? 'publicadas' : v === 'des' ? 'retiradas das alunas' : 'excluídas')); };
+    if (v === 'del') confirmar('Excluir ' + ids.length + ' refeições? Não dá para desfazer.', 'Excluir', fim); else fim(); return;
+  }
   if (act === 'dbxl-exemplos') { confirmar('Criar 5 refeições de exemplo (com foto, macros e modo de preparo) como rascunho? As alunas só veem depois de você publicar.', 'Criar exemplos', dbxlCarregaExemplos); return; }
   if (act === 'dbxl-edit' && d) { abreDbxlForm(d); return; }
   if (act === 'dbxl-pub' && d) { const r = await comuRpc('pt_db_publicar', { p_id: d.id, p_pub: !d.publicado }); if (!r.ok) { toast(comuErro(r)); return; } d.publicado = !d.publicado; dbxlDesenha(); toast(d.publicado ? 'Publicada: as alunas já veem' : 'Retirada das alunas'); return; }
   if (act === 'dbxl-del' && d) { confirmar('Excluir “' + d.nome + '”? As alunas deixam de ver.', 'Excluir refeição', async () => { const r = await comuRpc('pt_db_apagar', { p_id: d.id }); if (!r.ok) { toast(comuErro(r)); return; } dbxl.itens = dbxl.itens.filter(x => x.id !== d.id); dbxlDesenha(); }); return; }
 });
+document.addEventListener('input', ev => { if (ev.target.id === 'dbxl-q') { dbxl.q = ev.target.value; dbxlDesenha(); } });
 document.addEventListener('change', ev => {
+  const t0 = ev.target; if (t0.dataset && t0.dataset.dsel) { if (t0.checked) dbxl.sel.add(t0.dataset.dsel); else dbxl.sel.delete(t0.dataset.dsel); dbxlBulkBar(); return; }
   const t = ev.target; if (t.id !== 'dbxl-foto' || !t.files[0]) return; const f = t.files[0]; t.value = '';
   comuReduzPost(f).then(blob => { if (!blob) throw new Error('x'); if (dbxl.pend) URL.revokeObjectURL(dbxl.pend.url); dbxl.pend = { blob, url: URL.createObjectURL(blob) }; const pv = document.getElementById('dbxl-prev'); if (pv) pv.innerHTML = `<img src="${dbxl.pend.url}" alt="Foto escolhida">`; }).catch(() => toast('Não consegui abrir essa imagem'));
 });
@@ -3155,7 +3198,7 @@ function semanaHtml(a) {
 function suporteBtn(a) {
   const tel = String(marca().tel).replace(/\D/g, ''); if (tel.length < 9) return '';
   const msg = `Oi! Aqui é ${a.nome.split(' ')[0]}. Preciso de ajuda com meu treino/dieta.`;
-  return `<a class="btn primary" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" style="justify-content:center">Suporte no WhatsApp</a>`;
+  return `<a class="btn primary" target="_blank" rel="noopener" href="https://wa.me/${tel}?text=${encodeURIComponent(msg)}" style="justify-content:center">💬 WhatsApp da equipe</a>`;
 }
 /* ---------- Instalar a app (tutorial para iPhone e Android) ---------- */
 let pwaPrompt = null;
@@ -3248,13 +3291,12 @@ function vInicio(a) {
   const ultimas = a.sessoes.slice().sort((x, y) => y.data.localeCompare(x.data)).slice(0, 3);
   return shell(`
   <div class="ola"><div class="eyebrow">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</div><h1>Olá, ${esc(a.nome.split(' ')[0])}</h1><p class="incentivo">${incentivo(a)}</p></div>
-  ${semanaHtml(a)}
-  ${semanaCard(a)}
   ${emCurso ? `<a class="hoje-card" href="#meu-treino-${emCurso.id}"><div class="eyebrow">Treino em andamento</div><h2>${esc(treinoLabel(a, emCurso))}</h2>
      <div class="small">${wk.itens.filter(i => i.sets.every(s => s.done)).length} de ${wk.itens.length} exercícios feitos</div><span class="btn primary">Continuar treino</span></a>`
   : prox ? `<a class="hoje-card" href="#meu-treino-${prox.id}" data-sact="iniciar" data-treino="${prox.id}"><div class="eyebrow">Seu treino de hoje</div><h2>${esc(treinoLabel(a, prox))}</h2>
      <div class="small num">${prox.itens.length} exercícios · cerca de ${duracaoEstimada(prox)} min</div><span class="btn primary">Começar agora →</span></a>`
   : `<div class="panel empty">Sua equipe ainda está montando o seu plano.</div>`}
+  <div class="panel sem-wrap">${semanaHtml(a)}${semanaCard(a)}</div>
   ${marca().afirmacao ? `<div class="afirma"><div class="eyebrow">Afirmação da semana</div><q>${esc(marca().afirmacao)}</q></div>` : ''}
   ${a.anamnese ? '' : `<div class="panel" style="padding:12px 16px"><div class="row spread"><div><b>Conte um pouco sobre você</b><div class="small muted">2 minutos pra montarmos treino e dieta pra SUA rotina.</div></div><button class="btn primary sm" data-sact="anamnese">Preencher</button></div></div>`}
   ${dicaInstalar()}
@@ -3265,8 +3307,7 @@ function vInicio(a) {
     <div><b>${meds.length ? fmtNum(meds[meds.length - 1].peso) : '—'}</b><span>peso atual (kg)</span></div>
   </div>
   ${(a.nutri && refeicoesDoDia(a.nutri, hoje()).length) ? `<a class="panel" href="#minha-nutricao" style="display:block;text-decoration:none;color:inherit"><div class="row spread"><h3>🥗 Comida de hoje</h3><span class="chip num">${refeicoesDoDia(a.nutri, hoje()).filter(r => refFeita(a, hoje(), r.id)).length} de ${refeicoesDoDia(a.nutri, hoje()).length} refeições</span></div><div class="small muted">Toque para ver o que comer e marcar o que já comeu.</div></a>` : ''}
-  ${suporteBtn(a)}
-  <button class="btn" data-sact="comentar" style="justify-content:center">💬 Deixar um recado pra equipe</button>
+  <div class="dois">${suporteBtn(a)}<button class="btn" data-sact="comentar">💬 Recado pra equipe</button></div>
   ${ultimas.length ? `<div class="panel"><div class="row spread"><h3>Seus últimos treinos</h3><a class="small" href="#minha-evolucao">Ver evolução</a></div>
     ${ultimas.map(s => `<div class="hist-row"><div><b>${esc(s.treinoNome || 'Treino')}</b><div class="small muted num">${fmtData(s.data)}${s.rpe ? ' · esforço ' + esc(s.rpe) + '/10' : ''}</div></div>
       <div class="num small" style="text-align:right"><b>${fmtNum(volume(s))} kg</b><div class="muted">volume</div></div></div>`).join('')}</div>` : ''}`, 'inicio');
@@ -3327,33 +3368,28 @@ function vTreino(a, t) {
   <button class="btn ghost" data-sact="cancelar" style="justify-self:center">Cancelar treino</button>`, 'treinar');
 }
 
+function limitaSessoes(html) {
+  let n = 0; html = html.replace(/<article class="sessao">/g, m => (++n === 4 ? '<details class="mais-sess"><summary class="btn ghost">Ver treinos anteriores</summary>' : '') + m);
+  return n > 3 ? html.replace(/<\/article>(?![\s\S]*<\/article>)/, '</article></details>') : html;
+}
 function vEvolucao(a) {
   return shell(`<div class="ola"><div class="eyebrow">Seus resultados</div><h1>Evolução</h1></div>
   <div class="evo-aluno">${tabEvolucao(a)}</div>
   <h2 style="margin-top:8px">Histórico de treinos</h2>
-  <div class="evo-aluno">${tabSessoes(a).replace(/<div class="panel"><div class="row spread"><h2>Registrar sessão[\s\S]*?<\/div><\/div>\n?/, '')}</div>`, 'evolucao');
+  <div class="evo-aluno">${limitaSessoes(tabSessoes(a).replace(/<div class="panel"><div class="row spread"><h2>Registrar sessão[\s\S]*?<\/div><\/div>\n?/, ''))}</div>`, 'evolucao');
 }
 
 function vPerfil(a) {
-  const nEx = a.treinos.reduce((s, t) => s + t.itens.length, 0);
-  return shell(`<div class="perfil-top">${comuAtiva() ? avatarHtml(sbS.uid, a.nome, comu.perfil ? comu.perfil.foto_v : 0, 72, false) : `<span class="avatar-ini" style="width:72px;height:72px;font-size:1.8rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>`}
-    <div><h1>${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Aluna desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
-  <div class="panel"><div class="eyebrow">Equipe Squad</div>
-    <div class="row" style="gap:12px">${marcaMark(44)}
-    <div><b>${esc(marca().nome)}</b><div class="small muted">${esc(marca().sub)}</div></div></div>
-    <div class="small muted">Dúvidas sobre o treino? Fale com a equipe Squad.</div>
-    ${suporteBtn(a)}</div>
-  ${atalhoInstalar()}
+  const nEx = a.treinos.reduce((t, x) => t + x.itens.length, 0);
+  return shell(`<div class="perfil-top">${comuAtiva() ? avatarHtml(sbS.uid, a.nome, comu.perfil ? comu.perfil.foto_v : 0, 56, false) : `<span class="avatar-ini" style="width:56px;height:56px;font-size:1.4rem" aria-hidden="true">${esc(iniciais(a.nome))}</span>`}
+    <div><h1 style="font-size:1.5rem">${esc(a.nome)}</h1><div class="row small muted" style="gap:8px">${a.objetivo ? `<span class="chip accent">${esc(a.objetivo)}</span>` : ''}${a.inicio ? `<span>Desde ${fmtData(a.inicio)}</span>` : ''}</div></div></div>
+  <div class="panel"><div class="row spread"><div><div class="eyebrow">Meu plano</div><div class="num small">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} feitos</div></div><a class="btn sm" href="#meus-treinos">Ver treinos</a></div></div>
+  <div class="panel"><div class="eyebrow">Atalhos</div><div class="dois"><button class="btn" data-sact="comentar">💬 Deixar comentário</button><button class="btn" data-act="nova-medida" data-id="${a.id}">+ Peso e medidas</button></div></div>
   ${painelFoto()}
-  <div class="panel"><div class="eyebrow">Meu plano</div><div class="num">${a.treinos.length} ${a.treinos.length === 1 ? 'treino' : 'treinos'} · ${nEx} exercícios · ${a.sessoes.length} treinos feitos</div>
-    <a class="btn" href="#meus-treinos">Ver meus treinos</a></div>
-  <div class="panel"><div class="eyebrow">Comentários</div><p style="margin:0" class="small muted">Dor, dúvida ou recado? O personal vê na sua ficha.</p>
-    <button class="btn" data-sact="comentar">💬 Deixar comentário</button></div>
-  <div class="panel"><div class="eyebrow">Medidas</div><p style="margin:0" class="small muted">Registre seu peso para acompanhar a evolução.</p>
-    <button class="btn" data-act="nova-medida" data-id="${a.id}">+ Registrar peso e medidas</button></div>
+  <div class="panel"><div class="row spread" style="gap:10px"><div><b>Equipe ${esc(marca().nome)}</b><div class="small muted">Dúvidas? Fale com a equipe.</div></div>${suporteBtn(a)}</div></div>
+  ${atalhoInstalar()}
   <div class="small muted sync-status" style="text-align:center"></div>
-  <button class="btn" data-sact="logout" style="justify-content:center">Sair da conta</button>
-  <div class="panel"><div class="eyebrow">Instalar no celular</div><p style="margin:0" class="small">No Android: menu ⋮ do navegador, <b>Instalar app</b>. No iPhone: botão Compartilhar, <b>Adicionar à Tela de Início</b>.</p></div>`, 'perfil');
+  <button class="btn" data-sact="logout" style="justify-content:center">Sair da conta</button>`, 'perfil');
 }
 
 function renderAluno(h) {
